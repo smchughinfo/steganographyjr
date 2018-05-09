@@ -7,11 +7,15 @@ using Xamarin.Forms;
 
 namespace SteganographyJr
 {
-	public partial class MainPage : ContentPage
+	public partial class MainPage : CarouselPage
 	{
 		public MainPage()
 		{
-			InitializeComponent();
-		}
+         var steganographyJrContentPage = new XAML.SteganographyJr();
+         var aboutContentPage = new XAML.About();
+
+         Children.Add(steganographyJrContentPage);
+         Children.Add(aboutContentPage);
+      }
 	}
 }
