@@ -3,10 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SteganographyJr.XAML.SteganographyJr">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="SteganographyJr"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
-    </ContentPage.Content>
+
+      <Grid RowSpacing="5" ColumnSpacing="5">
+         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+         </Grid.RowDefinitions>
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+         </Grid.ColumnDefinitions>
+
+         <Entry Placeholder="hello world" Grid.Row="0" Grid.Column="0"/>
+
+         <Button x:Name="PressMeButton"
+            Text="Press Me!"
+            Grid.Row="0" Grid.Column="1"
+            HorizontalOptions="End"/>
+
+         <Label Text="Encrypt Decrypt" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+
+      </Grid>
+
+   </ContentPage.Content>
 </ContentPage>
