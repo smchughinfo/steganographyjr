@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace SteganographyJr.XAML
+namespace SteganographyJr.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class SteganographyJr : ContentPage

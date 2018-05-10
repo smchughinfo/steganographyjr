@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="SteganographyJr.Views.SteganographyJr">
+    <ContentPage.Content>
+
+      <TableView Intent="Form">
+         <TableRoot>
+            <TableSection Title="Image">
+               <ViewCell>
+                  <Grid RowSpacing="5" ColumnSpacing="5">
+
+                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                     </Grid.RowDefinitions>
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                     </Grid.ColumnDefinitions>
+
+                     <Entry Placeholder="c:\path_to_carrier_image\img.png" Grid.Row="0" Grid.Column="0"/>
+
+                     <Button x:Name="PressMeButton"
+                        Text="Press Me!"
+                        Grid.Row="0" Grid.Column="1"
+                        HorizontalOptions="End"/>
+
+                  </Grid>
+               </ViewCell>
+            </TableSection>
+            <TableSection Title="Mode">
+               <SwitchCell Text="Encrypt" On="true" />
+            </TableSection>
+         </TableRoot>
+      </TableView>
+
+   </ContentPage.Content>
+</ContentPage>

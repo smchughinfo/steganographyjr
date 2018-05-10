@@ -2,5 +2,11 @@
 
 <CarouselPage xmlns="http://xamarin.com/schemas/2014/forms"
 			  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-			  x:Class="CarouselPageNavigation.MainPage">
+           xmlns:local="clr-namespace:SteganographyJr"
+           xmlns:Views="clr-namespace:SteganographyJr.Views"
+			  x:Class="SteganographyJr.MainPage">
+
+   <Views:SteganographyJr/>
+   <Views:About/>
+   
 </CarouselPage>

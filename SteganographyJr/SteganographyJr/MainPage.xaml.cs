@@ -11,11 +11,7 @@ namespace SteganographyJr
 	{
 		public MainPage()
 		{
-         var steganographyJrContentPage = new XAML.SteganographyJr();
-         var aboutContentPage = new XAML.About();
-
-         Children.Add(steganographyJrContentPage);
-         Children.Add(aboutContentPage);
+         InitializeComponent();
       }
 	}
 }
