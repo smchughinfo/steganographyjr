@@ -31,6 +31,23 @@
             <TableSection Title="Mode">
                <SwitchCell Text="Encrypt" On="true" />
             </TableSection>
+            <TableSection Title="Terminating String">
+               <ViewCell>
+                  <Grid RowSpacing="5" ColumnSpacing="5">
+
+                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                     </Grid.RowDefinitions>
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                     </Grid.ColumnDefinitions>
+
+                     <Entry Placeholder="my-guid-12387" Grid.Row="0" Grid.Column="0"/>
+                     <Switch Grid.Row="0" Grid.Column="1"  />
+                  </Grid>
+               </ViewCell>
+            </TableSection>
          </TableRoot>
       </TableView>
 
