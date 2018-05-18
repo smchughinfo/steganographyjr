@@ -4,51 +4,73 @@
              x:Class="SteganographyJr.Views.SteganographyJr">
     <ContentPage.Content>
 
-      <TableView Intent="Form">
+      <TableView Intent="Form" Margin="10,10,10,10">
          <TableRoot>
             <TableSection Title="Image">
                <ViewCell>
-                  <Grid RowSpacing="5" ColumnSpacing="5">
+                   
+                        <StackLayout>
+                            <Image x:Name="carrierImage" />
+                            <Button Text="Change Image" HorizontalOptions="FillAndExpand"/>
+                        </StackLayout>
 
-                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                     </Grid.RowDefinitions>
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                     </Grid.ColumnDefinitions>
-
-                     <Entry Placeholder="c:\path_to_carrier_image\img.png" Grid.Row="0" Grid.Column="0"/>
-
-                     <Button x:Name="PressMeButton"
-                        Text="Press Me!"
-                        Grid.Row="0" Grid.Column="1"
-                        HorizontalOptions="End"/>
-
-                  </Grid>
                </ViewCell>
             </TableSection>
-            <TableSection Title="Mode">
-               <SwitchCell Text="Encrypt" On="true" />
-            </TableSection>
-            <TableSection Title="Terminating String">
-               <ViewCell>
-                  <Grid RowSpacing="5" ColumnSpacing="5">
+                <TableSection Title="Mode">
+                    <ViewCell>
+                        <Picker x:Name="modePicker">
+                            <Picker.ItemsSource>
+                                <x:Array Type="{x:Type x:String}">
+                                    <x:String>Encode</x:String>
+                                    <x:String>Decode</x:String>
+                                </x:Array>
+                            </Picker.ItemsSource>
+                            <Picker.SelectedIndex>0</Picker.SelectedIndex>
+                        </Picker>
+                    </ViewCell>
+                </TableSection>
+          
+                <TableSection Title="Encryption">
+                    <ViewCell>
 
-                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                     </Grid.RowDefinitions>
-                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                     </Grid.ColumnDefinitions>
+                        <Grid RowSpacing="5" ColumnSpacing="5">
 
-                     <Entry Placeholder="my-guid-12387" Grid.Row="0" Grid.Column="0"/>
-                     <Switch Grid.Row="0" Grid.Column="1"  />
-                  </Grid>
-               </ViewCell>
-            </TableSection>
-         </TableRoot>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Switch IsToggled="False" Grid.Row="0" Grid.Column="0"/>
+                            <Entry                    Grid.Row="0" Grid.Column="1"/>
+                        </Grid>
+                        
+                    </ViewCell>
+                </TableSection>
+
+                <TableSection Title="Terminating String">
+                    <ViewCell>
+
+                        <Grid RowSpacing="5" ColumnSpacing="5">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Switch IsToggled="False" Grid.Row="0" Grid.Column="0"/>
+                            <Entry                    Grid.Row="0" Grid.Column="1"/>
+                        </Grid>
+
+                    </ViewCell>
+                </TableSection>
+             
+            </TableRoot>
       </TableView>
 
    </ContentPage.Content>
