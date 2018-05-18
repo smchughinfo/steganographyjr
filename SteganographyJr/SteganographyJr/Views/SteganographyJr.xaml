@@ -10,7 +10,7 @@
                <ViewCell>
                    
                         <StackLayout>
-                            <Image x:Name="carrierImage" />
+                            <Image x:Name="carrierImage" HeightRequest="200"/>
                             <Button Text="Change Image" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
 
@@ -69,7 +69,46 @@
 
                     </ViewCell>
                 </TableSection>
-             
+
+                <TableSection Title="Message">
+                    <ViewCell>
+                        <StackLayout>
+                            <Picker x:Name="messagePicker">
+                                <Picker.ItemsSource>
+                                    <x:Array Type="{x:Type x:String}">
+                                        <x:String>Text</x:String>
+                                        <x:String>File</x:String>
+                                    </x:Array>
+                                </Picker.ItemsSource>
+                                <Picker.SelectedIndex>0</Picker.SelectedIndex>
+                            </Picker>
+                            <Editor HeightRequest="100"/>
+                        </StackLayout>
+                    </ViewCell>
+                </TableSection>
+
+
+
+                <TableSection>
+                    <ViewCell>
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Text="Execute" Grid.Row="0" Grid.Column="0"/>
+                            <ProgressBar Progress="40" Grid.Row="0" Grid.Column="1"/>
+                        </Grid>
+                    </ViewCell>
+                </TableSection>
+
+
+
             </TableRoot>
       </TableView>
 
