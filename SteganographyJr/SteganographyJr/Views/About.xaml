@@ -7,7 +7,7 @@
             <Label Text="About"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
-            <Label Text="Photo by rawpixel.com from Pexels"/>
+            <Label Text="Photo by Art by Lønfeldt from Pexels"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

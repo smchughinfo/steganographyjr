@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\default-carrier-image.jpg" />
     <None Remove="pic.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="CustomControls\abstractarmsart.jpg" />
-    <EmbeddedResource Include="Images\pic.jpg" />
+    <EmbeddedResource Include="Images\default-carrier-image.jpg" />
   </ItemGroup>
 
   <ItemGroup>

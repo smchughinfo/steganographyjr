@@ -11,7 +11,7 @@
                    
                         <StackLayout>
                             <Image x:Name="carrierImage" HeightRequest="200"/>
-                            <Button Text="Change Image" HorizontalOptions="FillAndExpand"/>
+                            <Button x:Name="chooseImageBtn" Text="Change Image" HorizontalOptions="FillAndExpand"/>
                         </StackLayout>
 
                </ViewCell>
@@ -101,7 +101,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Button Text="Execute" Grid.Row="0" Grid.Column="0"/>
+                            <Button x:Name="executeBtn" Text="Execute" Grid.Row="0" Grid.Column="0"/>
                             <ProgressBar Progress="40" Grid.Row="0" Grid.Column="1"/>
                         </Grid>
                     </ViewCell>
