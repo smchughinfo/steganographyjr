@@ -15,6 +15,9 @@ namespace SteganographyJr.ViewModels
         bool useEncryption;
         string encryptionString;
 
+        bool useCustomTerminatingString;
+        string customTerminatingString;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public SteganographyJr()
@@ -29,7 +32,8 @@ namespace SteganographyJr.ViewModels
             UseEncryption = false;
             EncryptionString = "";
 
-
+            UseCustomTerminatingString = false;
+            CustomTerminatingString = "";
         }
 
         public List<Mode> Modes
@@ -81,6 +85,40 @@ namespace SteganographyJr.ViewModels
             {
                 encryptionString = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EncryptionString"));
+            }
+        }
+
+        public bool UseCustomTerminatingString
+        {
+            get
+            {
+                return useCustomTerminatingString;
+            }
+            set
+            {
+                useCustomTerminatingString = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseCustomTerminatingString"));
+            }
+        }
+
+        public string CustomTerminatingString
+        {
+            get
+            {
+                return customTerminatingString;
+            }
+            set
+            {
+                customTerminatingString = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CustomTerminatingString"));
+            }
+        }
+
+        public string TerminatingString
+        {
+            get
+            {
+                return useCustomTerminatingString ? customTerminatingString : StaticVariables.defaultTerminatingString;
             }
         }
     }

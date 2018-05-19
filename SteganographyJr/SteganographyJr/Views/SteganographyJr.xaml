@@ -67,8 +67,13 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Switch IsToggled="False" Grid.Row="0" Grid.Column="0"/>
-                            <Entry                    Grid.Row="0" Grid.Column="1"/>
+                            <Switch 
+                                IsToggled="{Binding UseCustomTerminatingString}" 
+                                Grid.Row="0" Grid.Column="0"/>
+                            <Entry
+                                IsEnabled="{Binding UseCustomTerminatingString}"
+                                Text="{Binding CustomTerminatingString}"
+                                Grid.Row="0" Grid.Column="1"/>
                         </Grid>
 
                     </ViewCell>
