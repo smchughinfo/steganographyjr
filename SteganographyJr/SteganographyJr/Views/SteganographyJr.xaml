@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ViewModels="clr-namespace:SteganographyJr.ViewModels"
              x:Class="SteganographyJr.Views.SteganographyJr">
+    <ContentPage.BindingContext>
+        <ViewModels:SteganographyJr />
+    </ContentPage.BindingContext>
     <ContentPage.Content>
 
       <TableView Intent="Form" Margin="10,10,10,10">
@@ -18,15 +22,10 @@
             </TableSection>
                 <TableSection Title="Mode">
                     <ViewCell>
-                        <Picker x:Name="modePicker">
-                            <Picker.ItemsSource>
-                                <x:Array Type="{x:Type x:String}">
-                                    <x:String>Encode</x:String>
-                                    <x:String>Decode</x:String>
-                                </x:Array>
-                            </Picker.ItemsSource>
-                            <Picker.SelectedIndex>0</Picker.SelectedIndex>
-                        </Picker>
+                        <Picker x:Name="modePicker" 
+                                ItemsSource="{Binding Modes}"
+                                ItemDisplayBinding="{Binding Value}"
+                                SelectedItem="{Binding SelectedMode}"/>
                     </ViewCell>
                 </TableSection>
           
