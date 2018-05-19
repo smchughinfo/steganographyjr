@@ -42,8 +42,13 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Switch IsToggled="False" Grid.Row="0" Grid.Column="0"/>
-                            <Entry                    Grid.Row="0" Grid.Column="1"/>
+                            <Switch 
+                                IsToggled="{Binding UseEncryption}" 
+                                Grid.Row="0" Grid.Column="0"/>
+                            <Entry
+                                IsEnabled="{Binding UseEncryption}"
+                                Text="{Binding EncryptionString}"
+                                Grid.Row="0" Grid.Column="1"/>
                         </Grid>
                         
                     </ViewCell>
