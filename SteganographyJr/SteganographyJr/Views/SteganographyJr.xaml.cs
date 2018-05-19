@@ -1,5 +1,6 @@
 ﻿
 using SteganographyJr.DependencyService;
+using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,8 +24,9 @@ namespace SteganographyJr.Views
             carrierImage.Source = ImageSource.FromResource("SteganographyJr.Images.default-carrier-image.jpg", assembly);
 
             chooseImageBtn.Clicked += ExecuteBtn_Clicked;
+            chooseFileBtn.Clicked += ChooseFileBtn_Clicked;
         }
-        
+
         private async void ExecuteBtn_Clicked(object sender, EventArgs e)
         {
             chooseImageBtn.IsEnabled = false;
@@ -36,6 +38,19 @@ namespace SteganographyJr.Views
                 carrierImage.Source = ImageSource.FromStream(() => stream);
             }
             chooseImageBtn.IsEnabled = true;
+        }
+
+        private async void ChooseFileBtn_Clicked(object sender, EventArgs e)
+        {
+  //          chooseFileBtn.IsEnabled = false;
+
+            StreamWithPath streamWithPath = await Xamarin.Forms.DependencyService.Get<IFilePicker>().GetSteamWithPathAsync();
+
+/*            if(streamWithPath.Stream != null)
+            {
+                chooseFileEntry.Text = streamWithPath.Path;
+            }
+            chooseFileBtn.IsEnabled = true;*/
         }
     }
 }

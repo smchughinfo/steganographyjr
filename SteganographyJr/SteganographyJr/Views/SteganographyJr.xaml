@@ -101,8 +101,8 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Entry x:Name="selectFileEntry" Grid.Row="0" Grid.Column="0" />
-                                <Button x:Name="selectFileBtn" Text="Select File" Grid.Row="0" Grid.Column="1"/>
+                                <Entry x:Name="chooseFileEntry" Grid.Row="0" Grid.Column="0" />
+                                <Button x:Name="chooseFileBtn" Text="Select File" Grid.Row="0" Grid.Column="1"/>
                             </Grid>
                             
                         </StackLayout>
