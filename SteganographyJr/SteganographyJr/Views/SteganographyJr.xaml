@@ -82,16 +82,29 @@
                 <TableSection Title="Message">
                     <ViewCell>
                         <StackLayout>
-                            <Picker x:Name="messagePicker">
-                                <Picker.ItemsSource>
-                                    <x:Array Type="{x:Type x:String}">
-                                        <x:String>Text</x:String>
-                                        <x:String>File</x:String>
-                                    </x:Array>
-                                </Picker.ItemsSource>
-                                <Picker.SelectedIndex>0</Picker.SelectedIndex>
-                            </Picker>
-                            <Editor HeightRequest="100"/>
+                            <Picker x:Name="messagePicker"
+                                    ItemsSource="{Binding Messages}"
+                                    ItemDisplayBinding="{Binding Value}"
+                                    SelectedItem="{Binding SelectedMessage}" />
+                            <Editor 
+                                HeightRequest="100"
+                                Text="Write your message here."
+                                IsVisible="{Binding UsingTextMessage}"/>
+
+                            <Grid IsVisible="{Binding UsingFileMessage}">
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Entry x:Name="selectFileEntry" Grid.Row="0" Grid.Column="0" />
+                                <Button x:Name="selectFileBtn" Text="Select File" Grid.Row="0" Grid.Column="1"/>
+                            </Grid>
+                            
                         </StackLayout>
                     </ViewCell>
                 </TableSection>

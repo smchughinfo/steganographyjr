@@ -18,22 +18,32 @@ namespace SteganographyJr.ViewModels
         bool useCustomTerminatingString;
         string customTerminatingString;
 
+        List<Message> messages;
+        Message selectedMessage;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public SteganographyJr()
         {
             Modes = new List<Mode>()
             {
-                new Mode() { Key=StaticVariables.Modes.Encode, Value="Encode"},
-                new Mode() { Key=StaticVariables.Modes.Decode, Value="Decode"}
+                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode"},
+                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode"}
             };
-            SelectedMode = Modes.Single(m => m.Key == StaticVariables.Modes.Encode);
+            SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
 
             UseEncryption = false;
             EncryptionString = "";
 
             UseCustomTerminatingString = false;
             CustomTerminatingString = "";
+
+            Messages = new List<Message>()
+            {
+                new Message() { Key=StaticVariables.Message.Text, Value="Text"},
+                new Message() { Key=StaticVariables.Message.File, Value="File"}
+            };
+            SelectedMessage = Messages.Single(m => m.Key == StaticVariables.Message.Text);
         }
 
         public List<Mode> Modes
@@ -119,6 +129,50 @@ namespace SteganographyJr.ViewModels
             get
             {
                 return useCustomTerminatingString ? customTerminatingString : StaticVariables.defaultTerminatingString;
+            }
+        }
+
+        public List<Message> Messages
+        {
+            get
+            {
+                return messages;
+            }
+            set
+            {
+                messages = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Messages"));
+            }
+        }
+
+        public Message SelectedMessage
+        {
+            get
+            {
+                return selectedMessage;
+            }
+            set
+            {
+                selectedMessage = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedMessage"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingTextMessage"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingFileMessage"));
+            }
+        }
+
+        public bool UsingTextMessage
+        {
+            get
+            {
+                return SelectedMessage.Key == StaticVariables.Message.Text;
+            }
+        }
+
+        public bool UsingFileMessage
+        {
+            get
+            {
+                return SelectedMessage.Key == StaticVariables.Message.File;
             }
         }
     }
