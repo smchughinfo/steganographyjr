@@ -66,7 +66,7 @@ namespace SteganographyJr.ViewModels
                     changingCarrierImage = true;
                     ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
 
-                    var source = await Xamarin.Forms.DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
+                    var source = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
                     CarrierImageSource = ImageSource.FromStream(() => source);
 
                     changingCarrierImage = false;

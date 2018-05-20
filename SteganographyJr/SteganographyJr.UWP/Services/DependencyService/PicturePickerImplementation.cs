@@ -1,5 +1,5 @@
 ﻿using SteganographyJr.Services.DependencyService;
-using SteganographyJr.UWP.DependencyService;
+using SteganographyJr.UWP.Services.DependencyService;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +13,7 @@ using Windows.Storage.Streams;
 
 [assembly: Xamarin.Forms.Dependency(typeof(PicturePickerImplementation))]
 
-namespace SteganographyJr.UWP.DependencyService
+namespace SteganographyJr.UWP.Services.DependencyService
 {
     public class PicturePickerImplementation : IPicturePicker
     {
