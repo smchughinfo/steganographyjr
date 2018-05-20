@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SteganographyJr.DependencyService
+namespace SteganographyJr.Services.DependencyService
 {
     public interface IFilePicker
     {

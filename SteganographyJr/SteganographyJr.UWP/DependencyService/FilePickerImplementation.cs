@@ -1,4 +1,4 @@
-﻿using SteganographyJr.DependencyService;
+﻿using SteganographyJr.Services.DependencyService;
 using SteganographyJr.Models;
 using SteganographyJr.UWP.DependencyService;
 using System;

@@ -1,4 +1,4 @@
-﻿using SteganographyJr.DependencyService;
+﻿using SteganographyJr.Services.DependencyService;
 using SteganographyJr.DTOs;
 using SteganographyJr.Interfaces;
 using SteganographyJr.Models;
