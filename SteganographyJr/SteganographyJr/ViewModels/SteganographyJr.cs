@@ -26,9 +26,9 @@ namespace SteganographyJr.ViewModels
         bool useCustomTerminatingString;
         string customTerminatingString;
 
-        List<Message> messages;
-        Message selectedMessage;
-        StreamWithPath fileMessage;
+        List<Message> messages;     // text or file
+        Message selectedMessage;    // text or file, whichever is selected
+        StreamWithPath fileMessage; // if file is selected, the file the user selected
 
         public event PropertyChangedEventHandler PropertyChanged;
 
