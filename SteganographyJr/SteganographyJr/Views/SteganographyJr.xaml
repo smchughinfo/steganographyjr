@@ -25,19 +25,18 @@
                             </Grid.ColumnDefinitions>
 
                             <Button 
-                                x:Name="chooseImageBtn"
                                 Text="Change Image"
                                 HorizontalOptions="FillAndExpand"
                                 Grid.Row="0"
-                                Grid.Column="0"/>
+                                Grid.Column="0"
+                                Command="{Binding ChangeCarrierImageCommand}" />
                             <Image 
-                                x:Name="carrierImage"
                                 HeightRequest="200"
                                 Grid.Row="0"
                                 Grid.Column="1"
                                 Grid.RowSpan="2"
-                                HorizontalOptions="StartAndExpand"/>
-                            
+                                HorizontalOptions="StartAndExpand"
+                                Source="{Binding CarrierImageSource}"/>
                             
                         </Grid>
 
@@ -45,8 +44,7 @@
             </TableSection>
                 <TableSection Title="Mode">
                     <ViewCell>
-                        <Picker x:Name="modePicker" 
-                                ItemsSource="{Binding Modes}"
+                        <Picker ItemsSource="{Binding Modes}"
                                 ItemDisplayBinding="{Binding Value}"
                                 SelectedItem="{Binding SelectedMode}"/>
                     </ViewCell>
@@ -105,8 +103,7 @@
                 <TableSection Title="Message">
                     <ViewCell>
                         <StackLayout>
-                            <Picker x:Name="messagePicker"
-                                    ItemsSource="{Binding Messages}"
+                            <Picker ItemsSource="{Binding Messages}"
                                     ItemDisplayBinding="{Binding Value}"
                                     SelectedItem="{Binding SelectedMessage}" />
                             <Editor 
@@ -120,12 +117,17 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
-                                <Entry x:Name="chooseFileEntry" Grid.Row="0" Grid.Column="0" />
-                                <Button x:Name="chooseFileBtn" Text="Select File" Grid.Row="0" Grid.Column="1"/>
+                                <Button 
+                                    Text="Select File"
+                                    Grid.Row="0" Grid.Column="0"
+                                    Command="{Binding ChangeMessageFileCommand}"/>
+                                <Label
+                                    Grid.Row="0" Grid.Column="1" 
+                                    Text="{Binding FileMessage.Path}"/>
                             </Grid>
                             
                         </StackLayout>
@@ -146,13 +148,17 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <Button x:Name="executeBtn" Text="Execute" Grid.Row="0" Grid.Column="0"/>
-                            <ProgressBar Progress="40" Grid.Row="0" Grid.Column="1"/>
+                            <Button 
+                                Text="Execute"
+                                Grid.Row="0" Grid.Column="0"
+                                Command="{Binding ExecuteCommand}"/>
+                            <ProgressBar 
+                                Grid.Row="0" Grid.Column="1"
+                                Progress="{Binding ExecutionProgress}"/>
+                            
                         </Grid>
                     </ViewCell>
                 </TableSection>
-
-
 
             </TableRoot>
       </TableView>

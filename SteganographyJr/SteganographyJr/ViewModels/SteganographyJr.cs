@@ -1,14 +1,22 @@
-﻿using SteganographyJr.Models;
+﻿using SteganographyJr.DependencyService;
+using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace SteganographyJr.ViewModels
 {
     class SteganographyJr : INotifyPropertyChanged
     {
+        ImageSource carrierImageSource;
+
         List<Mode> modes;
         Mode selectedMode;
 
@@ -20,10 +28,55 @@ namespace SteganographyJr.ViewModels
 
         List<Message> messages;
         Message selectedMessage;
+        StreamWithPath fileMessage;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        bool changingCarrierImage = false;
+        public ICommand ChangeCarrierImageCommand { private set; get; }
+
+        bool changingMessageFile = false;
+        public ICommand ChangeMessageFileCommand { private set; get; }
+
+        bool executing = false;
+        public ICommand ExecuteCommand { private set; get; }
+        double executionProgress;
+
         public SteganographyJr()
+        {
+            InitCarrierImage();
+            InitMode();
+            InitEncryption();
+            InitTerminatingString();
+            InitMessage();
+            InitExecute();
+        }
+
+        private void InitCarrierImage()
+        {
+            var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
+            carrierImageSource = ImageSource.FromResource(StaticVariables.defaultCarrierImageResource, assembly);
+
+            ChangeCarrierImageCommand = new Command(
+                execute: async () =>
+                {
+                    changingCarrierImage = true;
+                    ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
+
+                    var source = await Xamarin.Forms.DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
+                    CarrierImageSource = ImageSource.FromStream(() => source);
+
+                    changingCarrierImage = false;
+                    ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
+                },
+                canExecute: () =>
+                {
+                    return !changingCarrierImage;
+                }
+            );
+        }
+        
+        private void InitMode()
         {
             Modes = new List<Mode>()
             {
@@ -31,19 +84,99 @@ namespace SteganographyJr.ViewModels
                 new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode"}
             };
             SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
+        }
 
+        private void InitEncryption()
+        {
             UseEncryption = false;
             EncryptionString = "";
+        }
 
+        private void InitTerminatingString()
+        {
             UseCustomTerminatingString = false;
             CustomTerminatingString = "";
+        }
 
+        private void InitMessage()
+        {
             Messages = new List<Message>()
             {
                 new Message() { Key=StaticVariables.Message.Text, Value="Text"},
                 new Message() { Key=StaticVariables.Message.File, Value="File"}
             };
             SelectedMessage = Messages.Single(m => m.Key == StaticVariables.Message.Text);
+
+            ChangeMessageFileCommand = new Command(
+                execute: async () =>
+                {
+                    changingMessageFile = true;
+                    ((Command)ChangeMessageFileCommand).ChangeCanExecute();
+
+                    FileMessage = await Xamarin.Forms.DependencyService.Get<IFilePicker>().GetSteamWithPathAsync();
+
+                    changingCarrierImage = false;
+                    ((Command)ChangeMessageFileCommand).ChangeCanExecute();
+                },
+                canExecute: () =>
+                {
+                    return !changingMessageFile;
+                }
+            );
+        }
+
+        private void InitExecute()
+        {
+            ExecuteCommand = new Command(
+                execute: async () =>
+                {
+                    executing = true;
+                    ((Command)ExecuteCommand).ChangeCanExecute();
+
+                    await Task.Delay(100);
+                    ExecutionProgress = 0;
+                    await Task.Delay(100);
+                    ExecutionProgress = .1;
+                    await Task.Delay(100);
+                    ExecutionProgress = .2;
+                    await Task.Delay(100);
+                    ExecutionProgress = .3;
+                    await Task.Delay(100);
+                    ExecutionProgress = .4;
+                    await Task.Delay(100);
+                    ExecutionProgress = .5;
+                    await Task.Delay(100);
+                    ExecutionProgress = .6;
+                    await Task.Delay(100);
+                    ExecutionProgress = .7;
+                    await Task.Delay(100);
+                    ExecutionProgress = .8;
+                    await Task.Delay(100);
+                    ExecutionProgress = .9;
+                    await Task.Delay(100);
+                    ExecutionProgress = 1;
+
+                    executing = false;
+                    ((Command)ExecuteCommand).ChangeCanExecute();
+                },
+                canExecute: () =>
+                {
+                    return !executing;
+                }
+            );
+        }
+
+        public ImageSource CarrierImageSource
+        {
+            get
+            {
+                return carrierImageSource;
+            }
+            set
+            {
+                carrierImageSource = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CarrierImageSource"));
+            }
         }
 
         public List<Mode> Modes
@@ -160,6 +293,19 @@ namespace SteganographyJr.ViewModels
             }
         }
 
+        public StreamWithPath FileMessage
+        {
+            get
+            {
+                return fileMessage;
+            }
+            set
+            {
+                fileMessage = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FileMessage"));
+            }
+        }
+
         public bool UsingTextMessage
         {
             get
@@ -173,6 +319,19 @@ namespace SteganographyJr.ViewModels
             get
             {
                 return SelectedMessage.Key == StaticVariables.Message.File;
+            }
+        }
+
+        public double ExecutionProgress
+        {
+            get
+            {
+                return executionProgress;
+            }
+            set
+            {
+                executionProgress = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExecutionProgress"));
             }
         }
     }
