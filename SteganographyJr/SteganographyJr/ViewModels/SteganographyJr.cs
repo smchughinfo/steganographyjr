@@ -113,7 +113,7 @@ namespace SteganographyJr.ViewModels
                     changingMessageFile = true;
                     ((Command)ChangeMessageFileCommand).ChangeCanExecute();
 
-                    FileMessage = await Xamarin.Forms.DependencyService.Get<IFilePicker>().GetSteamWithPathAsync();
+                    FileMessage = await Xamarin.Forms.DependencyService.Get<IFilePicker>().GetStreamWithPathAsync();
 
                     changingCarrierImage = false;
                     ((Command)ChangeMessageFileCommand).ChangeCanExecute();

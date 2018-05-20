@@ -18,7 +18,7 @@ namespace SteganographyJr.UWP.DependencyService
 {
     public class FilePickerImplementation : IFilePicker
     {
-        public async Task<StreamWithPath> GetSteamWithPathAsync()
+        public async Task<StreamWithPath> GetStreamWithPathAsync()
         {
             // Create and initialize the FileOpenPicker
             FileOpenPicker openPicker = new FileOpenPicker

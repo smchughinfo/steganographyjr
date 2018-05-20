@@ -9,6 +9,6 @@ namespace SteganographyJr.DependencyService
 {
     public interface IFilePicker
     {
-        Task<StreamWithPath> GetSteamWithPathAsync();
+        Task<StreamWithPath> GetStreamWithPathAsync();
     }
 }
