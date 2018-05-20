@@ -12,13 +12,36 @@
          <TableRoot>
             <TableSection Title="Image">
                <ViewCell>
-                   
-                        <StackLayout>
-                            <Image x:Name="carrierImage" HeightRequest="200"/>
-                            <Button x:Name="chooseImageBtn" Text="Change Image" HorizontalOptions="FillAndExpand"/>
-                        </StackLayout>
 
-               </ViewCell>
+                        <Grid RowSpacing="5" ColumnSpacing="5">
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button 
+                                x:Name="chooseImageBtn"
+                                Text="Change Image"
+                                HorizontalOptions="FillAndExpand"
+                                Grid.Row="0"
+                                Grid.Column="0"/>
+                            <Image 
+                                x:Name="carrierImage"
+                                HeightRequest="200"
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Grid.RowSpan="2"
+                                HorizontalOptions="StartAndExpand"/>
+                            
+                            
+                        </Grid>
+
+                    </ViewCell>
             </TableSection>
                 <TableSection Title="Mode">
                     <ViewCell>

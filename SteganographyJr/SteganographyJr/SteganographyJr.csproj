@@ -6,11 +6,12 @@
 
   <ItemGroup>
     <None Remove="Images\default-carrier-image.jpg" />
+    <None Remove="Images\default-carrier-image.png" />
     <None Remove="pic.jpg" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Images\default-carrier-image.jpg" />
+    <EmbeddedResource Include="Images\default-carrier-image.png" />
   </ItemGroup>
 
   <ItemGroup>
