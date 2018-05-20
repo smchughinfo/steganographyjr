@@ -63,14 +63,12 @@ namespace SteganographyJr.ViewModels
             ChangeCarrierImageCommand = new Command(
                 execute: async () =>
                 {
-                    changingCarrierImage = true;
-                    ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
+                    ChangingCarrierImage = true;
 
                     var source = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
                     CarrierImageSource = ImageSource.FromStream(() => source);
 
-                    changingCarrierImage = false;
-                    ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
+                    ChangingCarrierImage = false;
                 },
                 canExecute: () =>
                 {
@@ -78,7 +76,20 @@ namespace SteganographyJr.ViewModels
                 }
             );
         }
-        
+
+        public bool ChangingCarrierImage 
+        {
+            get
+            {
+                return changingCarrierImage;
+            }
+            set
+            {
+                changingCarrierImage = value;
+                ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
+            }
+        }
+
         private void InitMode()
         {
             Modes = new List<Mode>()
@@ -113,13 +124,10 @@ namespace SteganographyJr.ViewModels
             ChangeMessageFileCommand = new Command(
                 execute: async () =>
                 {
-                    changingMessageFile = true;
-                    ((Command)ChangeMessageFileCommand).ChangeCanExecute();
-
-                    FileMessage = await Xamarin.Forms.DependencyService.Get<IFilePicker>().GetStreamWithPathAsync();
-
-                    changingCarrierImage = false;
-                    ((Command)ChangeMessageFileCommand).ChangeCanExecute();
+                    ChangingMessageFile = true;
+                    FileMessage = await DependencyService.Get<IFilePicker>().GetStreamWithPathAsync();
+                    ChangingMessageFile = false;
+                    
                 },
                 canExecute: () =>
                 {
@@ -128,42 +136,59 @@ namespace SteganographyJr.ViewModels
             );
         }
 
+        public bool ChangingMessageFile
+        {
+            get
+            {
+                return changingMessageFile;
+            }
+            set
+            {
+                changingMessageFile = value;
+                ((Command)ChangeMessageFileCommand).ChangeCanExecute();
+            }
+        }
+
         private void InitExecute()
         {
             ExecuteCommand = new Command(
-                execute: () =>
+                execute: async () =>
                 {
-                    executing = true; // probably only needed if async
-                    ((Command)ExecuteCommand).ChangeCanExecute(); // probably only needed if async
+                    Executing = true;
 
-                    var encodingError = Steganography.GetFirstEncodingError();
-                    if(encodingError != null)
+                    if(selectedMode.Key == StaticVariables.Mode.Encode)
                     {
-                        var msg = new AlertMessage()
-                        {
-                            Title = "Encoding Error",
-                            Message = encodingError,
-                            CancelButtonText = "Okay"
-                        };
-                        MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, msg);
+                        await Encode();
                     }
                     else
                     {
-                        
+                        await Decode();
                     }
 
-                    executing = false; // probably only needed if async
-                    ((Command)ExecuteCommand).ChangeCanExecute(); // probably only needed if async
+                    Executing = false;
                 },
                 canExecute: () =>
                 {
-                    bool notExecuting = !executing;
+                    bool notExecuting = !executing; // TODO: these need finished.
                     bool encryptionOkay = !UseEncryption;
                     bool terminatingStringOkay = !UseCustomTerminatingString;
 
                     return notExecuting && encryptionOkay && terminatingStringOkay;
                 }
             );
+        }
+
+        private bool Executing
+        {
+            get
+            {
+                return executing;
+            }
+            set
+            {
+                executing = value;
+                ((Command)ExecuteCommand).ChangeCanExecute();
+            }
         }
 
         public ImageSource CarrierImageSource
@@ -333,6 +358,32 @@ namespace SteganographyJr.ViewModels
                 executionProgress = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExecutionProgress"));
             }
+        }
+
+        private async Task Encode()
+        {
+            var encodingError = Steganography.GetFirstEncodingError();
+            if (encodingError != null)
+            {
+                var msg = new AlertMessage()
+                {
+                    Title = "Encoding Error",
+                    Message = encodingError,
+                    CancelButtonText = "Okay"
+                };
+                MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, msg);
+            }
+            else
+            {
+
+            }
+
+            await Task.Delay(1000);
+        }
+
+        private async Task Decode()
+        {
+            await Task.Delay(1000);
         }
     }
 }
