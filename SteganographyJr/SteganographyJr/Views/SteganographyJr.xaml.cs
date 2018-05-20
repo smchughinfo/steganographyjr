@@ -1,5 +1,7 @@
 ﻿
 using SteganographyJr.DependencyService;
+using SteganographyJr.DTOs;
+using SteganographyJr.Interfaces;
 using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,11 @@ namespace SteganographyJr.Views
 		public SteganographyJr ()
 		{
 			InitializeComponent ();
+
+            MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
+            {
+                DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+            });
         }
     }
 }

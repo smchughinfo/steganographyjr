@@ -10,5 +10,6 @@ namespace SteganographyJr
         public enum Mode { Encode, Decode };
         public const string defaultTerminatingString = "0785AFAB-52E8-4356-A8F4-31CACB590B88";
         public enum Message { Text, File };
+        public const string DisplayAlertMessage = "DisplayAlertMessage";
     }
 }

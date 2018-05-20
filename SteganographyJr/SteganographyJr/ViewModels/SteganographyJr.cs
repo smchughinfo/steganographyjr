@@ -1,5 +1,8 @@
 ﻿using SteganographyJr.DependencyService;
+using SteganographyJr.DTOs;
+using SteganographyJr.Interfaces;
 using SteganographyJr.Models;
+using SteganographyJr.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +16,7 @@ using Xamarin.Forms;
 
 namespace SteganographyJr.ViewModels
 {
-    class SteganographyJr : INotifyPropertyChanged
+    class SteganographyJr : INotifyPropertyChanged, IViewModel
     {
         ImageSource carrierImageSource;
 
@@ -128,40 +131,37 @@ namespace SteganographyJr.ViewModels
         private void InitExecute()
         {
             ExecuteCommand = new Command(
-                execute: async () =>
+                execute: () =>
                 {
-                    executing = true;
-                    ((Command)ExecuteCommand).ChangeCanExecute();
+                    executing = true; // probably only needed if async
+                    ((Command)ExecuteCommand).ChangeCanExecute(); // probably only needed if async
 
-                    await Task.Delay(100);
-                    ExecutionProgress = 0;
-                    await Task.Delay(100);
-                    ExecutionProgress = .1;
-                    await Task.Delay(100);
-                    ExecutionProgress = .2;
-                    await Task.Delay(100);
-                    ExecutionProgress = .3;
-                    await Task.Delay(100);
-                    ExecutionProgress = .4;
-                    await Task.Delay(100);
-                    ExecutionProgress = .5;
-                    await Task.Delay(100);
-                    ExecutionProgress = .6;
-                    await Task.Delay(100);
-                    ExecutionProgress = .7;
-                    await Task.Delay(100);
-                    ExecutionProgress = .8;
-                    await Task.Delay(100);
-                    ExecutionProgress = .9;
-                    await Task.Delay(100);
-                    ExecutionProgress = 1;
+                    var encodingError = Steganography.GetFirstEncodingError();
+                    if(encodingError != null)
+                    {
+                        var msg = new AlertMessage()
+                        {
+                            Title = "Encoding Error",
+                            Message = encodingError,
+                            CancelButtonText = "Okay"
+                        };
+                        MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, msg);
+                    }
+                    else
+                    {
+                        
+                    }
 
-                    executing = false;
-                    ((Command)ExecuteCommand).ChangeCanExecute();
+                    executing = false; // probably only needed if async
+                    ((Command)ExecuteCommand).ChangeCanExecute(); // probably only needed if async
                 },
                 canExecute: () =>
                 {
-                    return !executing;
+                    bool notExecuting = !executing;
+                    bool encryptionOkay = !UseEncryption;
+                    bool terminatingStringOkay = !UseCustomTerminatingString;
+
+                    return notExecuting && encryptionOkay && terminatingStringOkay;
                 }
             );
         }
