@@ -24,11 +24,8 @@ namespace SteganographyJr.ViewModels
         List<Mode> modes;
         Mode selectedMode;
 
-        bool useEncryption;
-        string encryptionString;
-
-        bool useCustomTerminatingString;
-        string customTerminatingString;
+        bool usePassword;
+        string password;
 
         List<Message> messages;     // text or file
         Message selectedMessage;    // text or file, whichever is selected
@@ -50,10 +47,9 @@ namespace SteganographyJr.ViewModels
         {
             InitCarrierImage();
             InitMode();
-            InitEncryption();
-            InitTerminatingString();
             InitMessage();
             InitExecute();
+            InitPassword(); // has to go after InitExecute so objects exist
         }
 
         private void InitCarrierImage()
@@ -98,16 +94,10 @@ namespace SteganographyJr.ViewModels
             SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
         }
 
-        private void InitEncryption()
+        private void InitPassword()
         {
-            UseEncryption = false;
-            EncryptionString = "";
-        }
-
-        private void InitTerminatingString()
-        {
-            UseCustomTerminatingString = false;
-            CustomTerminatingString = "";
+            UsePassword = false;
+            Password = "";
         }
 
         private void InitMessage()
@@ -168,10 +158,9 @@ namespace SteganographyJr.ViewModels
                 canExecute: () =>
                 {
                     bool notExecuting = !Executing; // TODO: these need finished.
-                    bool encryptionOkay = !UseEncryption;
-                    bool terminatingStringOkay = !UseCustomTerminatingString;
+                    bool passwordOkay = !usePassword || !string.IsNullOrWhiteSpace(Password);
 
-                    return notExecuting && encryptionOkay && terminatingStringOkay;
+                    return notExecuting && passwordOkay;
                 }
             );
         }
@@ -247,63 +236,31 @@ namespace SteganographyJr.ViewModels
             }
         }
 
-        public bool UseEncryption
+        public bool UsePassword
         {
             get
             {
-                return useEncryption;
+                return usePassword;
             }
             set
             {
-                useEncryption = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseEncryption"));
+                usePassword = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsePassword"));
+                ((Command)ExecuteCommand).ChangeCanExecute();
             }
         }
 
-        public string EncryptionString
+        public string Password
         {
             get
             {
-                return encryptionString;
+                return password;
             }
             set
             {
-                encryptionString = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("EncryptionString"));
-            }
-        }
-
-        public bool UseCustomTerminatingString
-        {
-            get
-            {
-                return useCustomTerminatingString;
-            }
-            set
-            {
-                useCustomTerminatingString = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UseCustomTerminatingString"));
-            }
-        }
-
-        public string CustomTerminatingString
-        {
-            get
-            {
-                return customTerminatingString;
-            }
-            set
-            {
-                customTerminatingString = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CustomTerminatingString"));
-            }
-        }
-
-        public string TerminatingString
-        {
-            get
-            {
-                return useCustomTerminatingString ? customTerminatingString : StaticVariables.defaultTerminatingString;
+                password = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Password"));
+                ((Command)ExecuteCommand).ChangeCanExecute();
             }
         }
 

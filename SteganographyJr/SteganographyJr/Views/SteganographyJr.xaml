@@ -48,8 +48,8 @@
                                 SelectedItem="{Binding SelectedMode}"/>
                     </ViewCell>
                 </TableSection>
-          
-                <TableSection Title="Encryption">
+
+                <TableSection Title="Password">
                     <ViewCell>
 
                         <Grid RowSpacing="5" ColumnSpacing="5">
@@ -63,36 +63,11 @@
                             </Grid.ColumnDefinitions>
 
                             <Switch 
-                                IsToggled="{Binding UseEncryption}" 
+                                IsToggled="{Binding UsePassword}" 
                                 Grid.Row="0" Grid.Column="0"/>
                             <Entry
-                                IsEnabled="{Binding UseEncryption}"
-                                Text="{Binding EncryptionString}"
-                                Grid.Row="0" Grid.Column="1"/>
-                        </Grid>
-                        
-                    </ViewCell>
-                </TableSection>
-
-                <TableSection Title="Terminating String">
-                    <ViewCell>
-
-                        <Grid RowSpacing="5" ColumnSpacing="5">
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <Switch 
-                                IsToggled="{Binding UseCustomTerminatingString}" 
-                                Grid.Row="0" Grid.Column="0"/>
-                            <Entry
-                                IsEnabled="{Binding UseCustomTerminatingString}"
-                                Text="{Binding CustomTerminatingString}"
+                                IsEnabled="{Binding UsePassword}"
+                                Text="{Binding Password}"
                                 Grid.Row="0" Grid.Column="1"/>
                         </Grid>
 
