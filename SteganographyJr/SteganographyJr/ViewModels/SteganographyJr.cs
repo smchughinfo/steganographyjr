@@ -169,7 +169,7 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    bool notExecuting = !executing; // TODO: these need finished.
+                    bool notExecuting = !Executing; // TODO: these need finished.
                     bool encryptionOkay = !UseEncryption;
                     bool terminatingStringOkay = !UseCustomTerminatingString;
 
