@@ -18,6 +18,7 @@ namespace SteganographyJr.ViewModels
 {
     class SteganographyJr : INotifyPropertyChanged, IViewModel
     {
+        Stream carrierImageStream;
         ImageSource carrierImageSource;
 
         List<Mode> modes;
@@ -58,16 +59,13 @@ namespace SteganographyJr.ViewModels
         private void InitCarrierImage()
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
-            carrierImageSource = ImageSource.FromResource(StaticVariables.defaultCarrierImageResource, assembly);
+            CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
 
             ChangeCarrierImageCommand = new Command(
                 execute: async () =>
                 {
                     ChangingCarrierImage = true;
-
-                    var source = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
-                    CarrierImageSource = ImageSource.FromStream(() => source);
-
+                    CarrierImageStream = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
                     ChangingCarrierImage = false;
                 },
                 canExecute: () =>
@@ -188,6 +186,24 @@ namespace SteganographyJr.ViewModels
             {
                 executing = value;
                 ((Command)ExecuteCommand).ChangeCanExecute();
+            }
+        }
+
+        public Stream CarrierImageStream
+        {
+            get
+            {
+                return carrierImageStream;
+            }
+            set
+            {
+                carrierImageStream = value;
+
+                var streamCopy = new MemoryStream();
+                carrierImageStream.CopyTo(streamCopy);
+                streamCopy.Position = 0;
+
+                CarrierImageSource = ImageSource.FromStream(() => streamCopy);
             }
         }
 
@@ -362,7 +378,7 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
-            var encodingError = Steganography.GetFirstEncodingError();
+            var encodingError = Steganography.GetFirstEncodingError(CarrierImageStream);
             if (encodingError != null)
             {
                 var msg = new AlertMessage()
