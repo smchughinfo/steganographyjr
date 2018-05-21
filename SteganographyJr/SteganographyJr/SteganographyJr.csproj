@@ -28,6 +28,9 @@
     </Compile>
   </ItemGroup>
 
+  <!-- TODO: REMOVE THIS SECTION IF/WHEN YOU SWITCH TO SYSTEM.DRAWING.COMMON -->  
+  <!-- https://github.com/NuGet/Home/issues/4989 -->
+  <!-- https://stackoverflow.com/questions/33460667/how-to-use-extern-alias-with-nuget -->
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>
       <ReferencePath Condition="'%(FileName)' == 'CoreCompat.System.Drawing'">
