@@ -182,11 +182,15 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                // TODO: MAKE SURE THIS CAN HANDLE NULLS FROM IF YOU CANCEL A DIALOG.
                 return carrierImageStream;
             }
             set
             {
+                if(value == null)
+                {
+                    return;
+                }
+
                 carrierImageStream = value;
 
                 var streamCopy = new MemoryStream();
