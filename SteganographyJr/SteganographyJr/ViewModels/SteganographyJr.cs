@@ -193,6 +193,7 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
+                // TODO: MAKE SURE THIS CAN HANDLE NULLS FROM IF YOU CANCEL A DIALOG.
                 return carrierImageStream;
             }
             set
@@ -394,6 +395,10 @@ namespace SteganographyJr.ViewModels
 
             }
 
+            carrierImageStream.Position = 0;
+            var st = Steganography.Test(CarrierImageStream);
+            st.Position = 0;
+            CarrierImageStream = st;
             await Task.Delay(1000);
         }
 

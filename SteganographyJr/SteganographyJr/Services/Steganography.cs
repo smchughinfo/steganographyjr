@@ -1,9 +1,11 @@
-﻿using System;
+﻿extern alias CoreCompat;
+
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Text;
 using Xamarin.Forms;
+using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.Services
 {
@@ -12,17 +14,50 @@ namespace SteganographyJr.Services
         public static string GetFirstEncodingError(Stream imageStream)
         {
             var payloadSize = GetMaxPayloadSizeInBits(imageStream);
+            // common sense checks like image actually has > 0 pixels
 
             return "the payload size is " + payloadSize;
         }
 
         public static int GetMaxPayloadSizeInBits(Stream imageStream)
         {
-            Bitmap bitmap = new Bitmap(imageStream);
+            Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
             var numPixels = bitmap.Height * bitmap.Width;
             var numBits = numPixels * 3;
             return numBits;
         }
+
+        private static void IterateBitmap(Drawing.Bitmap bitmap, Action<int, int, int> onPixel)
+        {
+            var i = 0;
+            for(var r = 0; r < bitmap.Height; r++)
+            {
+                for(var c = 0; c < bitmap.Width; c++)
+                {
+                    onPixel(i++, r, c);
+                }
+            }
+        }
+
+        public static Stream Test(Stream imageStream)
+        {
+            Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
+            IterateBitmap(bitmap, (i, r, c) => {
+                var pixel = bitmap.GetPixel(c, r);
+                var newPixel = Drawing.Color.FromArgb(
+                    pixel.A,
+                    Math.Abs(255- pixel.R),
+                    Math.Abs(255- pixel.G),
+                    Math.Abs(255- pixel.B)
+                );
+                bitmap.SetPixel(c, r, newPixel);
+            });
+
+            MemoryStream memoryStream = new MemoryStream();
+            bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
+
+            return memoryStream;
+        } 
     }
 
     /*

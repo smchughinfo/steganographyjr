@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,9 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Images\default-carrier-image.jpg" />
     <None Remove="Images\default-carrier-image.png" />
-    <None Remove="pic.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,4 +27,13 @@
       <DependentUpon>*.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
+
+  <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'CoreCompat.System.Drawing'">
+        <Aliases>CoreCompat</Aliases>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+  
 </Project>
