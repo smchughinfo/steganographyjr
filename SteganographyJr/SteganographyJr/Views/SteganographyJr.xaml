@@ -8,31 +8,20 @@
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <ScrollView>
-            <StackLayout>
-                <Frame>
+            <StackLayout Style="{StaticResource PageForm}">
 
-                    <Grid ColumnSpacing="5" HeightRequest="200" HorizontalOptions="CenterAndExpand">
+                <Label Text="Image (click to change)" />
 
-                        
-                        <Image 
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalOptions="CenterAndExpand"
-                                VerticalOptions="CenterAndExpand"
-                                Source="{Binding CarrierImageSource}"/>
+                <Image
+                    HeightRequest="200"
+                    HorizontalOptions="CenterAndExpand"
+                    Source="{Binding CarrierImageSource}">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ChangeCarrierImageCommand}" />
+                        </Image.GestureRecognizers>                
+                </Image>
 
-                        <Label 
-                                Text="Change Image"
-                                Grid.Row="0"
-                                Grid.Column="0"
-                                HorizontalOptions="CenterAndExpand"
-                                VerticalOptions="CenterAndExpand" />
-
-                    </Grid>
-
-                </Frame>
-
-                <BoxView HeightRequest="1" BackgroundColor="Red" Margin="0, 5, 0, 5" />
+                <BoxView Style="{StaticResource Seperator}" />
 
                 <Label Text="Mode" />
 
@@ -40,6 +29,9 @@
                                 ItemDisplayBinding="{Binding Value}"
                                 SelectedItem="{Binding SelectedMode}"/>
 
+                <BoxView Style="{StaticResource Seperator}" />
+
+                <Label Text="Password" />
                 <Grid RowSpacing="5" ColumnSpacing="5">
 
                     <Grid.RowDefinitions>
@@ -58,6 +50,10 @@
                                 Text="{Binding Password}"
                                 Grid.Row="0" Grid.Column="1"/>
                 </Grid>
+
+                <BoxView Style="{StaticResource Seperator}" />
+
+                <Label Text="Message" />
 
                 <Picker ItemsSource="{Binding Messages}"
                                     ItemDisplayBinding="{Binding Value}"
@@ -86,6 +82,8 @@
                                     Text="{Binding FileMessage.Path}"/>
                 </Grid>
 
+                <BoxView Style="{StaticResource Seperator}" />
+
                 <Grid>
 
                     <Grid.RowDefinitions>
@@ -109,48 +107,5 @@
             </StackLayout>
         </ScrollView>
         
-        
-        
-    <!--  <TableView Intent="Form" Margin="10,10,10,10">
-         <TableRoot>
-            <TableSection Title="Image">
-               <ViewCell>
-
-
-
-                    </ViewCell>
-            </TableSection>
-                <TableSection Title="Mode">
-                    <ViewCell>
-
-                    </ViewCell>
-                </TableSection>
-
-                <TableSection Title="Password">
-                    <ViewCell>
-
-                    </ViewCell>
-                </TableSection>
-
-                <TableSection Title="Message">
-                    <ViewCell>
-                        <StackLayout>
-
-                            
-                        </StackLayout>
-                    </ViewCell>
-                </TableSection>
-
-
-
-                <TableSection>
-                    <ViewCell>
-
-                    </ViewCell>
-                </TableSection>
-
-            </TableRoot>
-      </TableView>-->
-
    </ContentPage.Content>
 </ContentPage>
