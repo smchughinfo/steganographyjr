@@ -26,8 +26,8 @@
                 <Label Text="Mode" />
 
                 <Picker ItemsSource="{Binding Modes}"
-                                ItemDisplayBinding="{Binding Value}"
-                                SelectedItem="{Binding SelectedMode}"/>
+                    ItemDisplayBinding="{Binding Value}"
+                    SelectedItem="{Binding SelectedMode}"/>
 
                 <BoxView Style="{StaticResource Seperator}" />
 
@@ -43,12 +43,12 @@
                     </Grid.ColumnDefinitions>
 
                     <Switch 
-                                IsToggled="{Binding UsePassword}" 
-                                Grid.Row="0" Grid.Column="0"/>
+                        IsToggled="{Binding UsePassword}" 
+                        Grid.Row="0" Grid.Column="0"/>
                     <Entry
-                                IsEnabled="{Binding UsePassword}"
-                                Text="{Binding Password}"
-                                Grid.Row="0" Grid.Column="1"/>
+                        IsEnabled="{Binding UsePassword}"
+                        Text="{Binding Password}"
+                        Grid.Row="0" Grid.Column="1"/>
                 </Grid>
 
                 <BoxView Style="{StaticResource Seperator}" />
@@ -56,12 +56,12 @@
                 <Label Text="Message" />
 
                 <Picker ItemsSource="{Binding Messages}"
-                                    ItemDisplayBinding="{Binding Value}"
-                                    SelectedItem="{Binding SelectedMessage}" />
+                    ItemDisplayBinding="{Binding Value}"
+                    SelectedItem="{Binding SelectedMessage}" />
                 <Editor 
-                                HeightRequest="100"
-                                Text="Write your message here."
-                                IsVisible="{Binding UsingTextMessage}"/>
+                    HeightRequest="100"
+                    Text="Write your message here."
+                    IsVisible="{Binding UsingTextMessage}"/>
 
                 <Grid IsVisible="{Binding UsingFileMessage}">
 
@@ -74,12 +74,12 @@
                     </Grid.ColumnDefinitions>
 
                     <Button 
-                                    Text="Select File"
-                                    Grid.Row="0" Grid.Column="0"
-                                    Command="{Binding ChangeMessageFileCommand}"/>
+                        Text="Select File"
+                        Grid.Row="0" Grid.Column="0"
+                        Command="{Binding ChangeMessageFileCommand}"/>
                     <Label
-                                    Grid.Row="0" Grid.Column="1" 
-                                    Text="{Binding FileMessage.Path}"/>
+                        Grid.Row="0" Grid.Column="1" 
+                        Text="{Binding FileMessage.Path}"/>
                 </Grid>
 
                 <BoxView Style="{StaticResource Seperator}" />
@@ -95,12 +95,12 @@
                     </Grid.ColumnDefinitions>
 
                     <Button 
-                                Text="Execute"
-                                Grid.Row="0" Grid.Column="0"
-                                Command="{Binding ExecuteCommand}"/>
+                        Text="Execute"
+                        Grid.Row="0" Grid.Column="0"
+                        Command="{Binding ExecuteCommand}"/>
                     <ProgressBar 
-                                Grid.Row="0" Grid.Column="1"
-                                Progress="{Binding ExecutionProgress}"/>
+                        Grid.Row="0" Grid.Column="1"
+                        Progress="{Binding ExecutionProgress}"/>
 
                 </Grid>
 
