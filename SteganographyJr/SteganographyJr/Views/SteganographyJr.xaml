@@ -57,13 +57,14 @@
 
                 <Picker ItemsSource="{Binding Messages}"
                     ItemDisplayBinding="{Binding Value}"
-                    SelectedItem="{Binding SelectedMessage}" />
+                    SelectedItem="{Binding SelectedMessage}"
+                    IsVisible="{Binding SelectedModeIsEncode}" />
                 <Editor 
                     HeightRequest="100"
                     Text="Write your message here."
-                    IsVisible="{Binding UsingTextMessage}"/>
+                    IsVisible="{Binding ShowTextMessage}"/>
 
-                <Grid IsVisible="{Binding UsingFileMessage}">
+                <Grid IsVisible="{Binding ShowFileMessage}">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -81,6 +82,11 @@
                         Grid.Row="0" Grid.Column="1" 
                         Text="{Binding FileMessage.Path}"/>
                 </Grid>
+
+                <Editor 
+                    HeightRequest="100"
+                    Text="System Message..."
+                    IsVisible="{Binding SelectedModeIsDecode}" />
 
                 <BoxView Style="{StaticResource Seperator}" />
 

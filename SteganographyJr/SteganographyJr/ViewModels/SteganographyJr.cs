@@ -237,6 +237,26 @@ namespace SteganographyJr.ViewModels
             {
                 selectedMode = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedMode"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedModeIsEncode"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedModeIsDecode"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowTextMessage"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowFileMessage"));
+            }
+        }
+
+        public bool SelectedModeIsEncode
+        {
+            get
+            {
+                return SelectedMode.Key == StaticVariables.Mode.Encode;
+            }
+        }
+
+        public bool SelectedModeIsDecode
+        {
+            get
+            {
+                return SelectedMode.Key == StaticVariables.Mode.Decode;
             }
         }
 
@@ -292,7 +312,9 @@ namespace SteganographyJr.ViewModels
                 selectedMessage = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedMessage"));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingTextMessage"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowTextMessage"));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingFileMessage"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowFileMessage"));
             }
         }
 
@@ -317,11 +339,27 @@ namespace SteganographyJr.ViewModels
             }
         }
 
+        public bool ShowTextMessage
+        {
+            get
+            {
+                return SelectedModeIsEncode && UsingTextMessage;
+            }
+        }
+
         public bool UsingFileMessage
         {
             get
             {
                 return SelectedMessage.Key == StaticVariables.Message.File;
+            }
+        }
+
+        public bool ShowFileMessage
+        {
+            get
+            {
+                return SelectedModeIsEncode && UsingFileMessage;
             }
         }
 
@@ -340,7 +378,17 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
-            var encodingError = Steganography.GetFirstEncodingError(CarrierImageStream);
+            for(var i = 0; i <= 10; i++)
+            {
+                await Task.Delay(250);
+                ExecutionProgress = (double)i / 10;
+            }
+
+
+
+
+
+            /*var encodingError = Steganography.GetFirstEncodingError(CarrierImageStream);
             if (encodingError != null)
             {
                 var msg = new AlertMessage()
@@ -360,7 +408,7 @@ namespace SteganographyJr.ViewModels
             var st = Steganography.Test(CarrierImageStream);
             st.Position = 0;
             CarrierImageStream = st;
-            await Task.Delay(1000);
+            await Task.Delay(1000);*/
         }
 
         private async Task Decode()
