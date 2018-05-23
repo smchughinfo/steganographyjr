@@ -5,6 +5,11 @@
 	<Application.Resources>
 
 		<!-- Application resource dictionary -->
-
-	</Application.Resources>
+        <ResourceDictionary>
+            <Style x:Key="PageForm" TargetType="StackLayout">
+                <Setter Property="Padding" Value="5,0,5,0" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+    
 </Application>
