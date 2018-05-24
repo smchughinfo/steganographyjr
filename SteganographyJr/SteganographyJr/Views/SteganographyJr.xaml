@@ -10,7 +10,7 @@
         <ScrollView>
             <StackLayout Style="{StaticResource PageForm}">
 
-                <Label Text="Image (click to change)" />
+                <Label Text="Image (tap to change)" />
 
                 <Image
                     HeightRequest="200"
@@ -42,8 +42,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-<Switch IsToggled="{Binding UsePassword}"/>
-<Entry  IsEnabled="{Binding UsePassword}"/>
+                    <Switch 
+                        IsToggled="{Binding UsePassword}"
+                        Grid.Column="0"/>
+                    <Entry 
+                        IsEnabled="{Binding UsePassword}"
+                        Grid.Column="1"/>
                     
                 </Grid>
 
