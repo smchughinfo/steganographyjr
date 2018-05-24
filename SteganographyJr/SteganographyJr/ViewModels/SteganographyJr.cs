@@ -13,35 +13,34 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+using SteganographyJr.Mvvm;
 
 namespace SteganographyJr.ViewModels
 {
-    class SteganographyJr : INotifyPropertyChanged, IViewModel
+    class SteganographyJr : ObservableObject, IViewModel
     {
-        Stream carrierImageStream;
-        ImageSource carrierImageSource;
+        Stream _carrierImageStream;
+        ImageSource _carrierImageSource;
 
-        List<Mode> modes;
-        Mode selectedMode;
+        List<Mode> _modes;
+        Mode _selectedMode;
 
-        bool usePassword;
-        string password;
+        bool _usePassword;
+        string _password;
 
-        List<Message> messages;     // text or file
-        Message selectedMessage;    // text or file, whichever is selected
-        StreamWithPath fileMessage; // if file is selected, the file the user selected
+        List<Message> _messages;     // text or file
+        Message _selectedMessage;    // text or file, whichever is selected
+        StreamWithPath _fileMessage; // if file is selected, the file the user selected
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        bool _changingCarrierImage = false;
+        public DelegateCommand ChangeCarrierImageCommand { get; private set; }
 
-        bool changingCarrierImage = false;
-        public ICommand ChangeCarrierImageCommand { private set; get; }
+        bool _changingMessageFile = false;
+        public DelegateCommand ChangeMessageFileCommand { get; private set; }
 
-        bool changingMessageFile = false;
-        public ICommand ChangeMessageFileCommand { private set; get; }
-
-        bool executing = false;
-        public ICommand ExecuteCommand { private set; get; }
-        double executionProgress;
+        bool _executing = false;
+        public DelegateCommand ExecuteCommand { get; private set; }
+        double _executionProgress;
 
         public SteganographyJr()
         {
@@ -50,14 +49,49 @@ namespace SteganographyJr.ViewModels
             InitMessage();
             InitExecute();
             InitPassword(); // has to go after InitExecute so objects exist
+            BindDependencies();
+        }
+
+        private void BindDependencies()
+        {
+            WhenPropertyChanges(() => ChangingCarrierImage)
+                .AlsoInvokeAction(ChangeCarrierImageCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => ChangingMessageFile)
+                .AlsoInvokeAction(ChangeMessageFileCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => Executing)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => CarrierImageStream)
+                .AlsoInvokeAction(UpdateCarrierImageSource);
+
+            WhenPropertyChanges(() => SelectedMode)
+                .AlsoRaisePropertyChangedFor(() => SelectedModeIsEncode)
+                .AlsoRaisePropertyChangedFor(() => SelectedModeIsDecode)
+                .AlsoRaisePropertyChangedFor(() => ShowTextMessage)
+                .AlsoRaisePropertyChangedFor(() => ShowFileMessage);
+
+            WhenPropertyChanges(() => UsePassword)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => Password)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => SelectedMessage)
+                .AlsoRaisePropertyChangedFor(() => UsingTextMessage)
+                .AlsoRaisePropertyChangedFor(() => ShowTextMessage)
+                .AlsoRaisePropertyChangedFor(() => UsingFileMessage)
+                .AlsoRaisePropertyChangedFor(() => ShowFileMessage);
         }
 
         private void InitCarrierImage()
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
             CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
+            UpdateCarrierImageSource();
 
-            ChangeCarrierImageCommand = new Command(
+            ChangeCarrierImageCommand = new DelegateCommand(
                 execute: async () =>
                 {
                     ChangingCarrierImage = true;
@@ -66,22 +100,14 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    return !changingCarrierImage;
+                    return !ChangingCarrierImage;
                 }
             );
         }
 
-        public bool ChangingCarrierImage 
-        {
-            get
-            {
-                return changingCarrierImage;
-            }
-            set
-            {
-                changingCarrierImage = value;
-                ((Command)ChangeCarrierImageCommand).ChangeCanExecute();
-            }
+        public bool ChangingCarrierImage {
+            get { return _changingCarrierImage; }
+            set { SetPropertyValue(ref _changingCarrierImage, value); }
         }
 
         private void InitMode()
@@ -109,7 +135,7 @@ namespace SteganographyJr.ViewModels
             };
             SelectedMessage = Messages.Single(m => m.Key == StaticVariables.Message.Text);
 
-            ChangeMessageFileCommand = new Command(
+            ChangeMessageFileCommand = new DelegateCommand(
                 execute: async () =>
                 {
                     ChangingMessageFile = true;
@@ -119,32 +145,24 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    return !changingMessageFile;
+                    return !ChangingMessageFile;
                 }
             );
         }
 
-        public bool ChangingMessageFile
-        {
-            get
-            {
-                return changingMessageFile;
-            }
-            set
-            {
-                changingMessageFile = value;
-                ((Command)ChangeMessageFileCommand).ChangeCanExecute();
-            }
+        public bool ChangingMessageFile {
+            get { return _changingMessageFile; }
+            set { SetPropertyValue(ref _changingMessageFile, value); }
         }
 
         private void InitExecute()
         {
-            ExecuteCommand = new Command(
+            ExecuteCommand = new DelegateCommand(
                 execute: async () =>
                 {
                     Executing = true;
 
-                    if(selectedMode.Key == StaticVariables.Mode.Encode)
+                    if(SelectedMode.Key == StaticVariables.Mode.Encode)
                     {
                         await Encode();
                     }
@@ -158,222 +176,99 @@ namespace SteganographyJr.ViewModels
                 canExecute: () =>
                 {
                     bool notExecuting = !Executing; // TODO: these need finished.
-                    bool passwordOkay = !usePassword || !string.IsNullOrWhiteSpace(Password);
+                    bool passwordOkay = !UsePassword || !string.IsNullOrWhiteSpace(Password);
 
                     return notExecuting && passwordOkay;
                 }
             );
         }
 
-        private bool Executing
-        {
-            get
-            {
-                return executing;
-            }
-            set
-            {
-                executing = value;
-                ((Command)ExecuteCommand).ChangeCanExecute();
-            }
+        private bool Executing {
+            get { return _executing; }
+            set { SetPropertyValue(ref _executing, value); }
         }
 
-        public Stream CarrierImageStream
-        {
-            get
-            {
-                return carrierImageStream;
-            }
-            set
-            {
-                if(value == null)
-                {
-                    return;
-                }
-
-                carrierImageStream = value;
-
-                var streamCopy = new MemoryStream();
-                carrierImageStream.CopyTo(streamCopy);
-                streamCopy.Position = 0;
-
-                CarrierImageSource = ImageSource.FromStream(() => streamCopy);
-            }
+        public Stream CarrierImageStream {
+            get { return _carrierImageStream; }
+            set { SetPropertyValue(ref _carrierImageStream, value); }
         }
 
-        public ImageSource CarrierImageSource
-        {
-            get
-            {
-                return carrierImageSource;
-            }
-            set
-            {
-                carrierImageSource = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CarrierImageSource"));
-            }
+        public ImageSource CarrierImageSource {
+            get { return _carrierImageSource; }
+            set { SetPropertyValue(ref _carrierImageSource, value); }
         }
 
-        public List<Mode> Modes
+        private void UpdateCarrierImageSource()
         {
-            get
-            {
-                return modes;
-            }
-            set
-            {
-                modes = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Modes"));
-            }
+            var streamCopy = new MemoryStream();
+            CarrierImageStream.CopyTo(streamCopy);
+            streamCopy.Position = 0;
+
+            CarrierImageSource = ImageSource.FromStream(() => streamCopy);
         }
 
-        public Mode SelectedMode
-        {
-            get
-            {
-                return selectedMode;
-            }
-            set
-            {
-                selectedMode = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedMode"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedModeIsEncode"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedModeIsDecode"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowTextMessage"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowFileMessage"));
-            }
+        public List<Mode> Modes {
+            get { return _modes; }
+            set { SetPropertyValue(ref _modes, value); }
         }
 
-        public bool SelectedModeIsEncode
-        {
-            get
-            {
-                return SelectedMode.Key == StaticVariables.Mode.Encode;
-            }
+        public Mode SelectedMode {
+            get { return _selectedMode; }
+            set { SetPropertyValue(ref _selectedMode, value); }
         }
 
-        public bool SelectedModeIsDecode
-        {
-            get
-            {
-                return SelectedMode.Key == StaticVariables.Mode.Decode;
-            }
+        public bool SelectedModeIsEncode {
+            get { return SelectedMode.Key == StaticVariables.Mode.Encode; }
         }
 
-        public bool UsePassword
-        {
-            get
-            {
-                return usePassword;
-            }
-            set
-            {
-                usePassword = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsePassword"));
-                ((Command)ExecuteCommand).ChangeCanExecute();
-            }
+        public bool SelectedModeIsDecode {
+            get { return SelectedMode.Key == StaticVariables.Mode.Decode; }
         }
 
-        public string Password
-        {
-            get
-            {
-                return password;
-            }
-            set
-            {
-                password = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Password"));
-                ((Command)ExecuteCommand).ChangeCanExecute();
-            }
+        public bool UsePassword {
+            get { return _usePassword; }
+            set { SetPropertyValue(ref _usePassword, value); }
         }
 
-        public List<Message> Messages
-        {
-            get
-            {
-                return messages;
-            }
-            set
-            {
-                messages = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Messages"));
-            }
+        public string Password {
+            get { return _password; }
+            set { SetPropertyValue(ref _password, value); }
         }
 
-        public Message SelectedMessage
-        {
-            get
-            {
-                return selectedMessage;
-            }
-            set
-            {
-                selectedMessage = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedMessage"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingTextMessage"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowTextMessage"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("UsingFileMessage"));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ShowFileMessage"));
-            }
+        public List<Message> Messages {
+            get { return _messages; }
+            set { SetPropertyValue(ref _messages, value); }
         }
 
-        public StreamWithPath FileMessage
-        {
-            get
-            {
-                return fileMessage;
-            }
-            set
-            {
-                fileMessage = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FileMessage"));
-            }
+        public Message SelectedMessage {
+            get { return _selectedMessage; }
+            set { SetPropertyValue(ref _selectedMessage, value); }
         }
 
-        public bool UsingTextMessage
-        {
-            get
-            {
-                return SelectedMessage.Key == StaticVariables.Message.Text;
-            }
+        public StreamWithPath FileMessage {
+            get { return _fileMessage; }
+            set { SetPropertyValue(ref _fileMessage, value); }
         }
 
-        public bool ShowTextMessage
-        {
-            get
-            {
-                return SelectedModeIsEncode && UsingTextMessage;
-            }
+        public bool UsingTextMessage {
+            get { return SelectedMessage.Key == StaticVariables.Message.Text; }
         }
 
-        public bool UsingFileMessage
-        {
-            get
-            {
-                return SelectedMessage.Key == StaticVariables.Message.File;
-            }
+        public bool ShowTextMessage {
+            get { return SelectedModeIsEncode && UsingTextMessage; }
         }
 
-        public bool ShowFileMessage
-        {
-            get
-            {
-                return SelectedModeIsEncode && UsingFileMessage;
-            }
+        public bool UsingFileMessage {
+            get { return SelectedMessage.Key == StaticVariables.Message.File; }
         }
 
-        public double ExecutionProgress
-        {
-            get
-            {
-                return executionProgress;
-            }
-            set
-            {
-                executionProgress = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExecutionProgress"));
-            }
+        public bool ShowFileMessage {
+            get { return SelectedModeIsEncode && UsingFileMessage; }
+        }
+
+        public double ExecutionProgress {
+            get { return _executionProgress; }
+            set { SetPropertyValue(ref _executionProgress, value); }
         }
 
         private async Task Encode()

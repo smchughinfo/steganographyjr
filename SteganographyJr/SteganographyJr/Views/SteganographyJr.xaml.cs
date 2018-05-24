@@ -22,7 +22,6 @@ namespace SteganographyJr.Views
 		public SteganographyJr ()
 		{
 			InitializeComponent ();
-
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);

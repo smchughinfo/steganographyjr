@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace SteganographyJr.Mvvm
 {
@@ -136,6 +137,11 @@ namespace SteganographyJr.Mvvm
             if (eventHandler == null)
                 return;
             eventHandler(this, EventArgs.Empty);
+        }
+
+        public static implicit operator DelegateCommand(Command v)
+        {
+            throw new NotImplementedException();
         }
     }
 
