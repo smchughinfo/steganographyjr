@@ -7,7 +7,7 @@
             <Label Text="About"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />
-            <Label Text="https://pixabay.com/en/dinosaur-bones-rex-toy-grass-1512250/"/>
+            <Label Text="https://pixabay.com/en/dinosaur-bones-rex-toy-grass-1512250/ https://www.wintellect.com/linking-property-change-notifications-in-xamarin-forms-or-wpfsilverlight/ https://github.com/Wintellect/XamarinSamples/tree/master/PropertyDependencyDemo"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

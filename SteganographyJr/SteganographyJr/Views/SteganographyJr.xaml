@@ -42,13 +42,9 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Switch 
-                        IsToggled="{Binding UsePassword}" 
-                        Grid.Row="0" Grid.Column="0"/>
-                    <Entry
-                        IsEnabled="{Binding UsePassword}"
-                        Text="{Binding Password}"
-                        Grid.Row="0" Grid.Column="1"/>
+<Switch IsToggled="{Binding UsePassword}"/>
+<Entry  IsEnabled="{Binding UsePassword}"/>
+                    
                 </Grid>
 
                 <BoxView Style="{StaticResource Seperator}" />
