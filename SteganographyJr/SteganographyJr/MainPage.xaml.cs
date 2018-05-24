@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace SteganographyJr
 {
-	public partial class MainPage : CarouselPage
+	public partial class MainPage : TabbedPage
 	{
 		public MainPage()
 		{

@@ -10,6 +10,8 @@
         <ScrollView>
             <StackLayout Style="{StaticResource PageForm}">
 
+                <BoxView x:Name="topSeperator" Style="{StaticResource Seperator}" />
+
                 <Label Text="Image (tap to change)" />
 
                 <Image

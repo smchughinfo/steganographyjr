@@ -15,6 +15,8 @@ namespace SteganographyJr.Views
 		public About ()
 		{
 			InitializeComponent ();
-		}
+
+            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+        }
 	}
 }

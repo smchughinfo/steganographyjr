@@ -4,6 +4,9 @@
              x:Class="SteganographyJr.Views.About">
     <ContentPage.Content>
         <StackLayout>
+
+            <BoxView x:Name="topSeperator" Style="{StaticResource Seperator}" />
+
             <Label Text="About"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand" />

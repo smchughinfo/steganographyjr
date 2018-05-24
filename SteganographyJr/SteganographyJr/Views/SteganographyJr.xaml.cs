@@ -22,6 +22,9 @@ namespace SteganographyJr.Views
 		public SteganographyJr ()
 		{
 			InitializeComponent ();
+
+            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
