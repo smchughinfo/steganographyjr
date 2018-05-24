@@ -6,7 +6,6 @@
 
 		<!-- Application resource dictionary -->
         <ResourceDictionary>
-            <OnPlatform x:TypeArguments="Font" Android="30" iOS="40" WinPhone="20" x:Key="Is" />
             <Style x:Key="PageForm" TargetType="StackLayout">
                 <Setter Property="Padding" Value="5,0,5,0" />
             </Style>
