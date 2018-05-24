@@ -12,6 +12,6 @@ namespace SteganographyJr
 		public MainPage()
 		{
          InitializeComponent();
-      }
+        }
 	}
 }
