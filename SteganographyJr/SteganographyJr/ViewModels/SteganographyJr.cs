@@ -29,7 +29,8 @@ namespace SteganographyJr.ViewModels
         string _password;
 
         List<Message> _messages;     // text or file
-        Message _selectedMessage;    // text or file, whichever is selected
+        Message _SelectedMessageType;    // text or file, whichever is selected
+        string _textMessage;         // if text is selected, the text the user entered
         StreamWithPath _fileMessage; // if file is selected, the file the user selected
 
         bool _changingCarrierImage = false;
@@ -61,28 +62,43 @@ namespace SteganographyJr.ViewModels
                 .AlsoInvokeAction(ChangeMessageFileCommand.ChangeCanExecute);
 
             WhenPropertyChanges(() => Executing)
-                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
+                .AlsoRaisePropertyChangedFor(() => NotExecuting);
+
+            WhenPropertyChanges(() => NotExecuting)
+                .AlsoRaisePropertyChangedFor(() => EnablePassword);
 
             WhenPropertyChanges(() => CarrierImageStream)
                 .AlsoInvokeAction(UpdateCarrierImageSource);
 
             WhenPropertyChanges(() => SelectedMode)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
                 .AlsoRaisePropertyChangedFor(() => SelectedModeIsEncode)
                 .AlsoRaisePropertyChangedFor(() => SelectedModeIsDecode)
                 .AlsoRaisePropertyChangedFor(() => ShowTextMessage)
                 .AlsoRaisePropertyChangedFor(() => ShowFileMessage);
 
             WhenPropertyChanges(() => UsePassword)
-                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
+                .AlsoRaisePropertyChangedFor(() => EnablePassword)
+                .AlsoRaisePropertyChangedFor(() => DisablePassword);
 
-            WhenPropertyChanges(() => Password)
-                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
 
-            WhenPropertyChanges(() => SelectedMessage)
+            WhenPropertyChanges(() => SelectedMessageType)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
                 .AlsoRaisePropertyChangedFor(() => UsingTextMessage)
                 .AlsoRaisePropertyChangedFor(() => ShowTextMessage)
                 .AlsoRaisePropertyChangedFor(() => UsingFileMessage)
                 .AlsoRaisePropertyChangedFor(() => ShowFileMessage);
+
+            WhenPropertyChanges(() => Password)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => TextMessage)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
+
+            WhenPropertyChanges(() => FileMessage)
+                .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
         }
 
         private void InitCarrierImage()
@@ -100,7 +116,7 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    return !ChangingCarrierImage;
+                    return NotExecuting && !ChangingCarrierImage;
                 }
             );
         }
@@ -133,7 +149,10 @@ namespace SteganographyJr.ViewModels
                 new Message() { Key=StaticVariables.Message.Text, Value="Text"},
                 new Message() { Key=StaticVariables.Message.File, Value="File"}
             };
-            SelectedMessage = Messages.Single(m => m.Key == StaticVariables.Message.Text);
+
+            TextMessage = "";
+
+            SelectedMessageType = Messages.Single(m => m.Key == StaticVariables.Message.Text);
 
             ChangeMessageFileCommand = new DelegateCommand(
                 execute: async () =>
@@ -145,7 +164,7 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    return !ChangingMessageFile;
+                    return NotExecuting && !ChangingMessageFile;
                 }
             );
         }
@@ -162,7 +181,7 @@ namespace SteganographyJr.ViewModels
                 {
                     Executing = true;
 
-                    if(SelectedMode.Key == StaticVariables.Mode.Encode)
+                    if(SelectedModeIsEncode)
                     {
                         await Encode();
                     }
@@ -175,17 +194,24 @@ namespace SteganographyJr.ViewModels
                 },
                 canExecute: () =>
                 {
-                    bool notExecuting = !Executing; // TODO: these need finished.
-                    bool passwordOkay = !UsePassword || !string.IsNullOrWhiteSpace(Password);
+                    bool passwordOkay = !UsePassword || !string.IsNullOrEmpty(Password);
+                    bool textMessageOkay = ShowTextMessage && !string.IsNullOrEmpty(TextMessage);
+                    bool fileMessageOkay = ShowFileMessage && FileMessage != null;
 
-                    return notExecuting && passwordOkay;
+                    bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
+
+                    return NotExecuting && passwordOkay && encodingOkay;
                 }
             );
         }
 
-        private bool Executing {
+        public bool Executing {
             get { return _executing; }
             set { SetPropertyValue(ref _executing, value); }
+        }
+
+        public bool NotExecuting {
+            get { return !Executing; }
         }
 
         public Stream CarrierImageStream {
@@ -195,7 +221,12 @@ namespace SteganographyJr.ViewModels
 
         public ImageSource CarrierImageSource {
             get { return _carrierImageSource; }
-            set { SetPropertyValue(ref _carrierImageSource, value); }
+            set {
+                if(value == null) {
+                    return;
+                }
+                SetPropertyValue(ref _carrierImageSource, value);
+            }
         }
 
         private void UpdateCarrierImageSource()
@@ -230,6 +261,15 @@ namespace SteganographyJr.ViewModels
             set { SetPropertyValue(ref _usePassword, value); }
         }
 
+        public bool EnablePassword {
+            get { return UsePassword && NotExecuting; }
+        }
+
+        public bool DisablePassword
+        {
+            get { return !EnablePassword; }
+        }
+
         public string Password {
             get { return _password; }
             set { SetPropertyValue(ref _password, value); }
@@ -240,9 +280,14 @@ namespace SteganographyJr.ViewModels
             set { SetPropertyValue(ref _messages, value); }
         }
 
-        public Message SelectedMessage {
-            get { return _selectedMessage; }
-            set { SetPropertyValue(ref _selectedMessage, value); }
+        public Message SelectedMessageType {
+            get { return _SelectedMessageType; }
+            set { SetPropertyValue(ref _SelectedMessageType, value); }
+        }
+
+        public string TextMessage {
+            get { return _textMessage; }
+            set { SetPropertyValue(ref _textMessage, value); }
         }
 
         public StreamWithPath FileMessage {
@@ -251,7 +296,7 @@ namespace SteganographyJr.ViewModels
         }
 
         public bool UsingTextMessage {
-            get { return SelectedMessage.Key == StaticVariables.Message.Text; }
+            get { return SelectedMessageType.Key == StaticVariables.Message.Text; }
         }
 
         public bool ShowTextMessage {
@@ -259,7 +304,7 @@ namespace SteganographyJr.ViewModels
         }
 
         public bool UsingFileMessage {
-            get { return SelectedMessage.Key == StaticVariables.Message.File; }
+            get { return SelectedMessageType.Key == StaticVariables.Message.File; }
         }
 
         public bool ShowFileMessage {
@@ -279,6 +324,8 @@ namespace SteganographyJr.ViewModels
                 ExecutionProgress = (double)i / 10;
             }
 
+            await Task.Delay(250);
+            ExecutionProgress = 0;
 
 
 
@@ -308,7 +355,16 @@ namespace SteganographyJr.ViewModels
 
         private async Task Decode()
         {
-            await Task.Delay(1000);
+            await Task.Delay(250);
+            ExecutionProgress = 1;
+
+            for (var i = 10; i >= 0; i--)
+            {
+                await Task.Delay(250);
+                ExecutionProgress = (double)i / 10;
+            }
+
+            
         }
     }
 }

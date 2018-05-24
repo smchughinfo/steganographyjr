@@ -29,7 +29,8 @@
 
                 <Picker ItemsSource="{Binding Modes}"
                     ItemDisplayBinding="{Binding Value}"
-                    SelectedItem="{Binding SelectedMode}"/>
+                    SelectedItem="{Binding SelectedMode}"
+                    IsEnabled="{Binding NotExecuting}" />
 
                 <BoxView Style="{StaticResource Seperator}" />
 
@@ -46,25 +47,36 @@
 
                     <Switch 
                         IsToggled="{Binding UsePassword}"
+                        IsEnabled="{Binding NotExecuting}"
                         Grid.Column="0"/>
                     <Entry 
-                        IsEnabled="{Binding UsePassword}"
+                        Text="{Binding Password}"
+                        IsVisible="{Binding EnablePassword}"
+                        Grid.Column="1"/>
+                    <Entry 
+                        Text=""
+                        IsVisible="{Binding DisablePassword}"
+                        IsEnabled="false"
                         Grid.Column="1"/>
                     
                 </Grid>
 
                 <BoxView Style="{StaticResource Seperator}" />
 
-                <Label Text="Message" />
+                <Label 
+                    Text="Message" 
+                    IsVisible="{Binding SelectedModeIsEncode}" />
 
                 <Picker ItemsSource="{Binding Messages}"
                     ItemDisplayBinding="{Binding Value}"
-                    SelectedItem="{Binding SelectedMessage}"
-                    IsVisible="{Binding SelectedModeIsEncode}" />
+                    SelectedItem="{Binding SelectedMessageType}"
+                    IsVisible="{Binding SelectedModeIsEncode}" 
+                    IsEnabled="{Binding NotExecuting}"/>
                 <Editor 
                     HeightRequest="100"
-                    Text="Write your message here."
-                    IsVisible="{Binding ShowTextMessage}"/>
+                    Text="{Binding TextMessage}"
+                    IsVisible="{Binding ShowTextMessage}"
+                    IsEnabled="{Binding NotExecuting}" />
 
                 <Grid IsVisible="{Binding ShowFileMessage}">
 
@@ -79,18 +91,16 @@
                     <Button 
                         Text="Select File"
                         Grid.Row="0" Grid.Column="0"
-                        Command="{Binding ChangeMessageFileCommand}"/>
+                        Command="{Binding ChangeMessageFileCommand}"
+                        IsEnabled="{Binding NotExecuting}" />
                     <Label
                         Grid.Row="0" Grid.Column="1" 
                         Text="{Binding FileMessage.Path}"/>
                 </Grid>
 
-                <Editor 
-                    HeightRequest="100"
-                    Text="System Message..."
-                    IsVisible="{Binding SelectedModeIsDecode}" />
-
-                <BoxView Style="{StaticResource Seperator}" />
+                <BoxView 
+                    Style="{StaticResource Seperator}" 
+                    IsVisible="{Binding SelectedModeIsEncode}" />
 
                 <Grid>
 
