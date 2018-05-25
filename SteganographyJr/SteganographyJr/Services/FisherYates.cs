@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SteganographyJr.Services
 {
-    static class BitmapEnumerators
+    static class FisherYates
     {
-        public static int[] FisherYates(int size)
+        public static int[] Shuffle(int size)
         {
             // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
             int[] source = GenerateSequentialArray(size);

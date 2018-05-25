@@ -328,8 +328,9 @@ namespace SteganographyJr.ViewModels
             ExecutionProgress = 0;
             */
 
-            var fy = BitmapEnumerators.FisherYates(11);
-            TextMessage = String.Join(",", fy);
+            var fy = FisherYates.Shuffle(1000*1000);
+            ;
+            //TextMessage = String.Join(",", fy);
 
             /*await Steganography.Test(CarrierImageStream, stream =>
             {
