@@ -150,7 +150,7 @@ namespace SteganographyJr.ViewModels
                 new Message() { Key=StaticVariables.Message.File, Value="File"}
             };
 
-            TextMessage = "";
+            TextMessage = "Type your message here";
 
             SelectedMessageType = Messages.Single(m => m.Key == StaticVariables.Message.Text);
 
@@ -318,7 +318,7 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
-            for(var i = 0; i <= 10; i++)
+            /*for(var i = 0; i <= 10; i++)
             {
                 await Task.Delay(250);
                 ExecutionProgress = (double)i / 10;
@@ -326,6 +326,12 @@ namespace SteganographyJr.ViewModels
 
             await Task.Delay(250);
             ExecutionProgress = 0;
+            */
+
+            await Steganography.Test(CarrierImageStream, stream =>
+            {
+                CarrierImageStream = stream;
+            });
 
 
 

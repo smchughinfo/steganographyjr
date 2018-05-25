@@ -4,11 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.Services
 {
+
+
     static class Steganography
     {
         public static string GetFirstEncodingError(Stream imageStream)
@@ -27,36 +30,47 @@ namespace SteganographyJr.Services
             return numBits;
         }
 
-        private static void IterateBitmap(Drawing.Bitmap bitmap, Action<int, int, int> onPixel)
+        private static async Task IterateBitmap(Drawing.Bitmap bitmap, Action<int, int, int> onPixel)
         {
             var i = 0;
             for(var r = 0; r < bitmap.Height; r++)
             {
                 for(var c = 0; c < bitmap.Width; c++)
                 {
-                    onPixel(i++, r, c);
+                    await Task.Run(async () => {
+                        onPixel(i++, r, c);
+                        await Task.Delay(0);
+                    });
                 }
             }
         }
 
-        public static Stream Test(Stream imageStream)
+        public static async Task Test(Stream imageStream, Action<Stream> OnUpdate)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
-            IterateBitmap(bitmap, (i, r, c) => {
+
+            await IterateBitmap(bitmap, (i, r, c) =>
+            {
                 var pixel = bitmap.GetPixel(c, r);
                 var newPixel = Drawing.Color.FromArgb(
                     pixel.A,
-                    Math.Abs(255- pixel.R),
-                    Math.Abs(255- pixel.G),
-                    Math.Abs(255- pixel.B)
+                    Math.Abs(255 - pixel.R),
+                    Math.Abs(255 - pixel.G),
+                    Math.Abs(255 - pixel.B)
                 );
                 bitmap.SetPixel(c, r, newPixel);
+                
+                if((double) i % 1000 == 0)
+                {
+                    MemoryStream memoryStream = new MemoryStream();
+                    bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
+                    memoryStream.Position = 0;
+
+                    OnUpdate(memoryStream);
+
+                    memoryStream.Close();
+                }
             });
-
-            MemoryStream memoryStream = new MemoryStream();
-            bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
-
-            return memoryStream;
         } 
     }
 
