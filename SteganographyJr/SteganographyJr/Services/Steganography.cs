@@ -38,52 +38,50 @@ namespace SteganographyJr.Services
             int rowInt = Convert.ToInt32(row);
             int colInt = Convert.ToInt32(col);
 
-            return (x:rowInt, y:colInt);
+            return (x:colInt, y:rowInt);
         }
 
-        private static async Task IterateBitmap(Drawing.Bitmap bitmap, Action<int, int, int> onPixel)
+        private static void IterateBitmap(Drawing.Bitmap bitmap, string password, Action<int, int, int> onPixel)
         {
-            var shuffledIndices = FisherYates.Shuffle(bitmap.Height * bitmap.Width);
-            for(var i = 0; i < shuffledIndices.Length; i++)
+            var shuffledIndices = FisherYates.Shuffle(bitmap.Height * bitmap.Width, password);
+            for (var i = 0; i < shuffledIndices.Length; i++)
             {
                 var coord = Get2DCoordinate(shuffledIndices[i], bitmap.Height, bitmap.Width);
-                await Task.Run(async () => {
-                    onPixel(i, coord.x, coord.y);
-                    await Task.Delay(0);
-                });
+                onPixel(i, coord.y, coord.x);
             }
-
-            /*
-            var i2 = 0;
-            for(var r = 0; r < bitmap.Height; r++)
-            {
-                for(var c = 0; c < bitmap.Width; c++)
-                {
-                    await Task.Run(async () => {
-                        onPixel(i2++, r, c);
-                        await Task.Delay(0);
-                    });
-                }
-            }*/
         }
 
-        public static async Task Test(Stream imageStream, Action<Stream> OnUpdate)
+        private static TaskCompletionSource<bool> IterateBitmapAsync(Drawing.Bitmap bitmap, string password, Action<int, int, int> onPixel)
+        {
+            var promise = new TaskCompletionSource<bool>();
+            Task.Run(() =>
+            {
+                IterateBitmap(bitmap, password, async (i, r, c) =>
+                {
+                    onPixel(i, r, c);
+                    await Task.Delay(0);
+                });
+                promise.SetResult(true);
+            });
+            return promise;
+        }
+
+        public static async Task Test(Stream imageStream, string password, Action<Stream> OnUpdate)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
 
-            await IterateBitmap(bitmap, (i, r, c) =>
+            await IterateBitmapAsync(bitmap, password, (i, r, c) =>
             {
-                var pixel = bitmap.GetPixel(c, r);
+                var pixel = bitmap.GetPixel(c,r);
                 var newPixel = Drawing.Color.FromArgb(
                     pixel.A,
-                   // Math.Abs(255 - pixel.R),
-                   // Math.Abs(255 - pixel.G),
-                   // Math.Abs(255 - pixel.B)
-                   255, 0 ,0
+                    Math.Abs(255 - pixel.R),
+                    Math.Abs(255 - pixel.G),
+                    Math.Abs(255 - pixel.B)
                 );
                 bitmap.SetPixel(c, r, newPixel);
-                
-                if((double) i % 1000 == 0)
+
+                if ((double)i % 1000 == 0)
                 {
                     MemoryStream memoryStream = new MemoryStream();
                     bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
@@ -93,7 +91,7 @@ namespace SteganographyJr.Services
 
                     memoryStream.Close();
                 }
-            });
+            }).Task;
 
             MemoryStream memoryStream2 = new MemoryStream();
             bitmap.Save(memoryStream2, Drawing.Imaging.ImageFormat.Png);

@@ -315,25 +315,21 @@ namespace SteganographyJr.ViewModels
             get { return _executionProgress; }
             set { SetPropertyValue(ref _executionProgress, value); }
         }
+        
+        private string GetSteganographyPassword()
+        {
+            return UsePassword ? Password : StaticVariables.defaultPassword;
+        }
 
         private async Task Encode()
         {
-            /*for(var i = 0; i <= 10; i++)
+            var password = GetSteganographyPassword();
+            await Steganography.Test(CarrierImageStream, password, stream =>
             {
-                await Task.Delay(250);
-                ExecutionProgress = (double)i / 10;
-            }
-
-            await Task.Delay(250);
-            ExecutionProgress = 0;
-            */
-
-            
-            //TextMessage = String.Join(",", fy);
-
-            await Steganography.Test(CarrierImageStream, stream =>
-            {
-                CarrierImageStream = stream;
+                var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                ms.Position = 0;
+                CarrierImageStream = ms;
             });
 
 
