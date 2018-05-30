@@ -324,38 +324,17 @@ namespace SteganographyJr.ViewModels
         private async Task Encode()
         {
             var password = GetSteganographyPassword();
-            await Steganography.Test(CarrierImageStream, password, stream =>
+            await Steganography.Test(CarrierImageStream, password, (stream, progress) =>
             {
                 var ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Position = 0;
                 CarrierImageStream = ms;
+
+                ExecutionProgress = progress;
             });
-
-
-
-
-            /*var encodingError = Steganography.GetFirstEncodingError(CarrierImageStream);
-            if (encodingError != null)
-            {
-                var msg = new AlertMessage()
-                {
-                    Title = "Encoding Error",
-                    Message = encodingError,
-                    CancelButtonText = "Okay"
-                };
-                MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, msg);
-            }
-            else
-            {
-
-            }
-
-            carrierImageStream.Position = 0;
-            var st = Steganography.Test(CarrierImageStream);
-            st.Position = 0;
-            CarrierImageStream = st;
-            await Task.Delay(1000);*/
+            await Task.Delay(1000);
+            ExecutionProgress = 0;
         }
 
         private async Task Decode()
@@ -368,8 +347,6 @@ namespace SteganographyJr.ViewModels
                 await Task.Delay(250);
                 ExecutionProgress = (double)i / 10;
             }
-
-            
         }
     }
 }
