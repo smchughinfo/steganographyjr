@@ -328,14 +328,13 @@ namespace SteganographyJr.ViewModels
             ExecutionProgress = 0;
             */
 
-            var fy = FisherYates.Shuffle(1000*1000);
-            ;
+            
             //TextMessage = String.Join(",", fy);
 
-            /*await Steganography.Test(CarrierImageStream, stream =>
+            await Steganography.Test(CarrierImageStream, stream =>
             {
                 CarrierImageStream = stream;
-            });*/
+            });
 
 
 

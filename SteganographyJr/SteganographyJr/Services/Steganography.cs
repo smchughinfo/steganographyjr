@@ -30,19 +30,41 @@ namespace SteganographyJr.Services
             return numBits;
         }
 
+        private static (int x, int y) Get2DCoordinate (int _1DCoordinate, int rows, int columns)
+        {
+            double row = Math.Floor(_1DCoordinate / (double)columns);
+            double col = _1DCoordinate - (row * columns);
+
+            int rowInt = Convert.ToInt32(row);
+            int colInt = Convert.ToInt32(col);
+
+            return (x:rowInt, y:colInt);
+        }
+
         private static async Task IterateBitmap(Drawing.Bitmap bitmap, Action<int, int, int> onPixel)
         {
-            var i = 0;
+            var shuffledIndices = FisherYates.Shuffle(bitmap.Height * bitmap.Width);
+            for(var i = 0; i < shuffledIndices.Length; i++)
+            {
+                var coord = Get2DCoordinate(shuffledIndices[i], bitmap.Height, bitmap.Width);
+                await Task.Run(async () => {
+                    onPixel(i, coord.x, coord.y);
+                    await Task.Delay(0);
+                });
+            }
+
+            /*
+            var i2 = 0;
             for(var r = 0; r < bitmap.Height; r++)
             {
                 for(var c = 0; c < bitmap.Width; c++)
                 {
                     await Task.Run(async () => {
-                        onPixel(i++, r, c);
+                        onPixel(i2++, r, c);
                         await Task.Delay(0);
                     });
                 }
-            }
+            }*/
         }
 
         public static async Task Test(Stream imageStream, Action<Stream> OnUpdate)
@@ -54,9 +76,10 @@ namespace SteganographyJr.Services
                 var pixel = bitmap.GetPixel(c, r);
                 var newPixel = Drawing.Color.FromArgb(
                     pixel.A,
-                    Math.Abs(255 - pixel.R),
-                    Math.Abs(255 - pixel.G),
-                    Math.Abs(255 - pixel.B)
+                   // Math.Abs(255 - pixel.R),
+                   // Math.Abs(255 - pixel.G),
+                   // Math.Abs(255 - pixel.B)
+                   255, 0 ,0
                 );
                 bitmap.SetPixel(c, r, newPixel);
                 
@@ -71,6 +94,14 @@ namespace SteganographyJr.Services
                     memoryStream.Close();
                 }
             });
+
+            MemoryStream memoryStream2 = new MemoryStream();
+            bitmap.Save(memoryStream2, Drawing.Imaging.ImageFormat.Png);
+            memoryStream2.Position = 0;
+
+            OnUpdate(memoryStream2);
+
+            memoryStream2.Close();
         } 
     }
 
