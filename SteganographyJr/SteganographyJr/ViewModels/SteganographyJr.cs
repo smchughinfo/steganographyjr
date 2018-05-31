@@ -28,29 +28,42 @@ namespace SteganographyJr.ViewModels
         bool _usePassword;
         string _password;
 
-        List<Message> _messages;     // text or file
-        Message _SelectedMessageType;    // text or file, whichever is selected
-        string _textMessage;         // if text is selected, the text the user entered
-        StreamWithPath _fileMessage; // if file is selected, the file the user selected
+        List<Message> _messages;      // text or file
+        Message _SelectedMessageType; // text or file, whichever is selected
+        string _textMessage;          // if text is selected, the text the user entered
+        StreamWithPath _fileMessage;  // if file is selected, the file the user selected
 
-        bool _changingCarrierImage = false;
+        bool _changingCarrierImage;
         public DelegateCommand ChangeCarrierImageCommand { get; private set; }
 
-        bool _changingMessageFile = false;
+        bool _changingMessageFile;
         public DelegateCommand ChangeMessageFileCommand { get; private set; }
 
-        bool _executing = false;
+        bool _executing;
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
 
+        Steganography _steganography;
+
         public SteganographyJr()
         {
+            InitSteganography();
             InitCarrierImage();
             InitMode();
             InitMessage();
             InitExecute();
             InitPassword(); // has to go after InitExecute so objects exist
             BindDependencies();
+        }
+
+        private void InitSteganography()
+        {
+            _steganography = new Steganography();
+
+            _steganography.ProgressChanged += (object sender, double progress) =>
+            {
+                ExecutionProgress = progress;
+            };
         }
 
         private void BindDependencies()
@@ -107,6 +120,7 @@ namespace SteganographyJr.ViewModels
             CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
             UpdateCarrierImageSource();
 
+            _changingCarrierImage = false;
             ChangeCarrierImageCommand = new DelegateCommand(
                 execute: async () =>
                 {
@@ -154,6 +168,7 @@ namespace SteganographyJr.ViewModels
 
             SelectedMessageType = Messages.Single(m => m.Key == StaticVariables.Message.Text);
 
+            _changingMessageFile = false;
             ChangeMessageFileCommand = new DelegateCommand(
                 execute: async () =>
                 {
@@ -176,6 +191,7 @@ namespace SteganographyJr.ViewModels
 
         private void InitExecute()
         {
+            _executing = false;
             ExecuteCommand = new DelegateCommand(
                 execute: async () =>
                 {
@@ -321,18 +337,25 @@ namespace SteganographyJr.ViewModels
             return UsePassword ? Password : StaticVariables.defaultPassword;
         }
 
+        private byte[] GetSteganographyMessage()
+        {
+            var bytes = new List<byte>(
+                UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.GetBytes()
+            );
+
+            var terminatingStringBytes = Encoding.UTF8.GetBytes(GetSteganographyPassword());
+            bytes.AddRange(terminatingStringBytes);
+
+            return bytes.ToArray();
+        }
+
         private async Task Encode()
         {
             var password = GetSteganographyPassword();
-            await Steganography.Test(CarrierImageStream, password, (stream, progress) =>
-            {
-                var ms = new MemoryStream();
-                stream.CopyTo(ms);
-                ms.Position = 0;
-                CarrierImageStream = ms;
+            var message = GetSteganographyMessage();
 
-                ExecutionProgress = progress;
-            });
+            CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
+
             await Task.Delay(1000);
             ExecutionProgress = 0;
         }

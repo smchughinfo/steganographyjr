@@ -10,11 +10,11 @@ using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.Services
 {
-
-
-    static class Steganography
+    class Steganography
     {
-        public static string GetFirstEncodingError(Stream imageStream)
+        public event EventHandler<double> ProgressChanged;
+
+        public string GetFirstEncodingError(Stream imageStream)
         {
             var payloadSize = GetMaxPayloadSizeInBits(imageStream);
             // common sense checks like image actually has > 0 pixels
@@ -22,7 +22,7 @@ namespace SteganographyJr.Services
             return "the payload size is " + payloadSize;
         }
 
-        public static int GetMaxPayloadSizeInBits(Stream imageStream)
+        public int GetMaxPayloadSizeInBits(Stream imageStream)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
             var numPixels = bitmap.Height * bitmap.Width;
@@ -30,7 +30,7 @@ namespace SteganographyJr.Services
             return numBits;
         }
 
-        private static (int x, int y) Get2DCoordinate (int _1DCoordinate, int rows, int columns)
+        private (int x, int y) Get2DCoordinate (int _1DCoordinate, int rows, int columns)
         {
             double row = Math.Floor(_1DCoordinate / (double)columns);
             double col = _1DCoordinate - (row * columns);
@@ -41,67 +41,51 @@ namespace SteganographyJr.Services
             return (x:colInt, y:rowInt);
         }
 
-        private static void IterateBitmap(Drawing.Bitmap bitmap, string password, Action<int, int, int, double> onPixel)
+        private void IterateBitmap(Drawing.Bitmap bitmap, string password, Func<int, int, int, bool> onPixel)
         {
             var shuffledIndices = FisherYates.Shuffle(bitmap.Height * bitmap.Width, password);
             for (var i = 0; i < shuffledIndices.Length; i++)
             {
                 var coord = Get2DCoordinate(shuffledIndices[i], bitmap.Height, bitmap.Width);
-                var percentComplete = (double)i/shuffledIndices.Length;
 
-                onPixel(i, coord.y, coord.x, percentComplete);
+                var done = onPixel(i, coord.y, coord.x);
+                if(done)
+                {
+                    break;
+                }
             }
         }
 
-        private static TaskCompletionSource<bool> IterateBitmapAsync(Drawing.Bitmap bitmap, string password, Action<int, int, int, double> onPixel)
-        {
-            var promise = new TaskCompletionSource<bool>();
-            Task.Run(() =>
-            {
-                IterateBitmap(bitmap, password, async (i, r, c, p) =>
-                {
-                    onPixel(i, r, c, p);
-                    await Task.Delay(0);
-                });
-                promise.SetResult(true);
-            });
-            return promise;
-        }
-
-        public static async Task Test(Stream imageStream, string password, Action<Stream, double> OnUpdate)
+        public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
 
-            await IterateBitmapAsync(bitmap, password, (i, r, c, p) =>
+            await Task.Run(() =>
             {
-                var pixel = bitmap.GetPixel(c,r);
-                var newPixel = Drawing.Color.FromArgb(
-                    pixel.A,
-                    Math.Abs(255 - pixel.R),
-                    Math.Abs(255 - pixel.G),
-                    Math.Abs(255 - pixel.B)
-                );
-                bitmap.SetPixel(c, r, newPixel);
-
-                if ((double)i % 1000 == 0)
+                IterateBitmap(bitmap, password, (i, r, c) =>
                 {
-                    MemoryStream memoryStream = new MemoryStream();
-                    bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
-                    memoryStream.Position = 0;
+                    var pixel = bitmap.GetPixel(c, r);
 
-                    OnUpdate(memoryStream, p);
+                    var newPixel = Drawing.Color.FromArgb(
+                        pixel.A,
+                        255, 0, 0
+                        //Math.Abs(255 - pixel.R),
+                        //Math.Abs(255 - pixel.G),
+                        //Math.Abs(255 - pixel.B)
+                    );
+                    bitmap.SetPixel(c, r, newPixel);
 
-                    memoryStream.Close();
-                }
-            }).Task;
+                    var percentComplete = (double)i / message.Length;
+                    ProgressChanged?.Invoke(this, percentComplete);
 
-            MemoryStream memoryStream2 = new MemoryStream();
-            bitmap.Save(memoryStream2, Drawing.Imaging.ImageFormat.Png);
-            memoryStream2.Position = 0;
+                    return i == message.Length;
+                });
+            });
 
-            OnUpdate(memoryStream2, 1);
-
-            memoryStream2.Close();
+            MemoryStream memoryStream = new MemoryStream();
+            bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
+            memoryStream.Position = 0;
+            return memoryStream;
         } 
     }
 
