@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,7 @@ namespace SteganographyJr.Services
     class Steganography
     {
         public event EventHandler<double> ProgressChanged;
+        const int UPDATE_RATE = 100;
 
         public string GetFirstEncodingError(Stream imageStream)
         {
@@ -59,10 +61,12 @@ namespace SteganographyJr.Services
 
         public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
         {
+            Stopwatch stopwatch = new Stopwatch();
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
-
+            
             await Task.Run(() =>
             {
+                stopwatch.Start();
                 IterateBitmap(bitmap, password, (i, r, c) =>
                 {
                     var pixel = bitmap.GetPixel(c, r);
@@ -78,10 +82,11 @@ namespace SteganographyJr.Services
 
                     var percentComplete = (double)i / message.Length;
 
-                    if(i%100 == 0)
+                    if(stopwatch.ElapsedMilliseconds > UPDATE_RATE)
                     {
                         ProgressChanged?.Invoke(this, percentComplete);
-                        Thread.Sleep(0);
+                        Thread.Sleep(0); // keep the ui thread from freezing
+                        stopwatch.Restart();
                     }
 
                     return i == message.Length;

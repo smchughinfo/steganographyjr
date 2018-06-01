@@ -356,6 +356,7 @@ namespace SteganographyJr.ViewModels
 
             CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
 
+            ExecutionProgress = 100;
             await Task.Delay(1000);
             ExecutionProgress = 0;
         }
