@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Drawing = CoreCompat.System.Drawing;
@@ -76,7 +77,12 @@ namespace SteganographyJr.Services
                     bitmap.SetPixel(c, r, newPixel);
 
                     var percentComplete = (double)i / message.Length;
-                    ProgressChanged?.Invoke(this, percentComplete);
+
+                    if(i%100 == 0)
+                    {
+                        ProgressChanged?.Invoke(this, percentComplete);
+                        Thread.Sleep(0);
+                    }
 
                     return i == message.Length;
                 });
