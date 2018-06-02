@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteganographyJr.iOS", "Steg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteganographyJr.UWP", "SteganographyJr\SteganographyJr.UWP\SteganographyJr.UWP.csproj", "{782FEBA8-D0D3-4E45-8754-FF088949BB0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteganographyJr", "SteganographyJr\SteganographyJr\SteganographyJr.csproj", "{8AB55DF1-F7BA-44C7-857B-ECA3F32DF379}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteganographyJr", "SteganographyJr\SteganographyJr\SteganographyJr.csproj", "{8AB55DF1-F7BA-44C7-857B-ECA3F32DF379}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
