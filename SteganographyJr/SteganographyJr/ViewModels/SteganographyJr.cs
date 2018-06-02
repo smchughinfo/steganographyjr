@@ -82,7 +82,8 @@ namespace SteganographyJr.ViewModels
                 .AlsoRaisePropertyChangedFor(() => EnablePassword);
 
             WhenPropertyChanges(() => CarrierImageStream)
-                .AlsoInvokeAction(UpdateCarrierImageSource);
+                .AlsoInvokeAction(UpdateCarrierImageSource)
+                .AlsoRaisePropertyChangedFor(() => MessageCapacity);
 
             WhenPropertyChanges(() => SelectedMode)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
@@ -127,7 +128,10 @@ namespace SteganographyJr.ViewModels
                     ChangingCarrierImage = true;
 
                     var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
-                    CarrierImageStream = streamWithPath.Stream;
+                    if(streamWithPath != null)
+                    {
+                        CarrierImageStream = streamWithPath.Stream;
+                    }
 
                     ChangingCarrierImage = false;
                 },
@@ -328,6 +332,15 @@ namespace SteganographyJr.ViewModels
 
         public bool ShowFileMessage {
             get { return SelectedModeIsEncode && UsingFileMessage; }
+        }
+
+        public string MessageCapacity
+        {
+            get
+            {
+                var size = _steganography.GetHumanReadableFileSize(CarrierImageStream);
+                return $"Message Capacity: {size}";
+            }
         }
 
         public double ExecutionProgress {

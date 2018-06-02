@@ -29,7 +29,7 @@ namespace SteganographyJr.Services
 
         public string GetFirstEncodingError(Stream imageStream)
         {
-            var payloadSize = GetMaxPayloadSizeInBits(imageStream);
+            var payloadSize = GetMessageCapacity(imageStream);
             // common sense checks like image actually has > 0 pixels
 
             return "the payload size is " + payloadSize;
@@ -84,6 +84,27 @@ namespace SteganographyJr.Services
             return null;
         }
 
+        // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
+        public string GetHumanReadableFileSize(Stream imageSource)
+        {
+            // TODO: test this more
+            var len = GetMessageCapacity(imageSource) / 8;
+
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len = len / 1024;
+            }
+
+            // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
+            // show a single decimal place, and no space.
+            string result = String.Format("{0:0.##} {1}", len, sizes[order]);
+
+            return result;
+        }
+
         private void InitializeFields(Stream imageStream, byte[] message, string password)
         {
             _bitmap = new Drawing.Bitmap(imageStream);
@@ -102,7 +123,7 @@ namespace SteganographyJr.Services
             _messageIndex = 0;
         }
 
-        private int GetMaxPayloadSizeInBits(Stream imageStream)
+        private int GetMessageCapacity(Stream imageStream)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
             var numPixels = bitmap.Height * bitmap.Width;

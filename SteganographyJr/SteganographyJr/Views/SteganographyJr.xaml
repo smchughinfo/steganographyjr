@@ -23,6 +23,11 @@
                         </Image.GestureRecognizers>                
                 </Image>
 
+
+                <Label 
+                    Text="{Binding MessageCapacity}" 
+                    HorizontalOptions="Center" />
+
                 <BoxView Style="{StaticResource Seperator}" />
 
                 <Label Text="Mode" />
