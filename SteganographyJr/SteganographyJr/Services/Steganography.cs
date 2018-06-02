@@ -14,6 +14,16 @@ namespace SteganographyJr.Services
 {
     class Steganography
     {
+        // BEGIN CLEAR THESE FIELDS
+        Drawing.Bitmap _bitmap;
+        byte[] _message;
+        string _password;
+        Stopwatch _stopwatch;
+        int _messageIndex;
+        // END CLEAR THESE FIELDS
+
+        enum ColorChannel { R, G, B };
+
         public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
@@ -25,7 +35,74 @@ namespace SteganographyJr.Services
             return "the payload size is " + payloadSize;
         }
 
-        public int GetMaxPayloadSizeInBits(Stream imageStream)
+        public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
+        {
+            InitializeFields(imageStream, message, password);
+
+            await Task.Run(() => // move away from the calling thread while working
+            {
+                IterateBitmap((x, y) => {
+                    EncodePixel(x, y);
+                    UpdateProgress();
+
+                    return _messageIndex >= _message.Length;
+                });
+            });
+
+            var encodedStream = ConvertBitmapToStream(_bitmap);
+
+            ClearFields();
+            return encodedStream;
+        }
+
+        public async Task<byte[]> Decode(Stream imageStream, string password)
+        {
+            ProgressChanged?.Invoke(this, 1);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .9);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .8);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .7);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .6);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .5);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .4);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .3);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .2);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, .1);
+            await Task.Delay(100);
+            ProgressChanged?.Invoke(this, 0);
+            await Task.Delay(100);
+            
+            ClearFields(); // <---------------------- !!!!!!!!!!!!!!!! DONT ERASE THIS
+            return null;
+        }
+
+        private void InitializeFields(Stream imageStream, byte[] message, string password)
+        {
+            _bitmap = new Drawing.Bitmap(imageStream);
+            _message = message;
+            _password = password;
+            _stopwatch = new Stopwatch();
+            _messageIndex = 0;
+        }
+
+        private void ClearFields()
+        {
+            _bitmap = null;
+            _message = null;
+            _password = null;
+            _stopwatch = null;
+            _messageIndex = 0;
+        }
+
+        private int GetMaxPayloadSizeInBits(Stream imageStream)
         {
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
             var numPixels = bitmap.Height * bitmap.Width;
@@ -33,7 +110,7 @@ namespace SteganographyJr.Services
             return numBits;
         }
 
-        private (int x, int y) Get2DCoordinate (int _1DCoordinate, int rows, int columns)
+        private (int x, int y) Get2DCoordinate(int _1DCoordinate, int rows, int columns)
         {
             double row = Math.Floor(_1DCoordinate / (double)columns);
             double col = _1DCoordinate - (row * columns);
@@ -41,63 +118,104 @@ namespace SteganographyJr.Services
             int rowInt = Convert.ToInt32(row);
             int colInt = Convert.ToInt32(col);
 
-            return (x:colInt, y:rowInt);
+            return (x: colInt, y: rowInt);
         }
 
-        private void IterateBitmap(Drawing.Bitmap bitmap, string password, Func<int, int, int, bool> onPixel)
+        private void IterateBitmap(Func<int, int, bool> onPixel)
         {
-            var shuffledIndices = FisherYates.Shuffle(bitmap.Height * bitmap.Width, password);
-            for (var i = 0; i < shuffledIndices.Length; i++)
-            {
-                var coord = Get2DCoordinate(shuffledIndices[i], bitmap.Height, bitmap.Width);
+            var shuffledIndices = FisherYates.Shuffle(_bitmap.Height * _bitmap.Width, _password);
 
-                var done = onPixel(i, coord.y, coord.x);
-                if(done)
+            for (var i = 0; i < shuffledIndices.Length; i++, i++)
+            {
+                var (x, y) = Get2DCoordinate(shuffledIndices[i], _bitmap.Height, _bitmap.Width);
+
+                var done = onPixel(x, y);
+                if (done)
                 {
                     break;
                 }
             }
         }
 
-        public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
+        private Stream ConvertBitmapToStream(Drawing.Bitmap bitmap)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
-            
-            await Task.Run(() =>
-            {
-                stopwatch.Start();
-                IterateBitmap(bitmap, password, (i, r, c) =>
-                {
-                    var pixel = bitmap.GetPixel(c, r);
-
-                    var newPixel = Drawing.Color.FromArgb(
-                        pixel.A,
-                        255, 0, 0
-                        //Math.Abs(255 - pixel.R),
-                        //Math.Abs(255 - pixel.G),
-                        //Math.Abs(255 - pixel.B)
-                    );
-                    bitmap.SetPixel(c, r, newPixel);
-
-                    var percentComplete = (double)i / message.Length;
-
-                    if(stopwatch.ElapsedMilliseconds > UPDATE_RATE)
-                    {
-                        ProgressChanged?.Invoke(this, percentComplete);
-                        Thread.Sleep(0); // keep the ui thread from freezing
-                        stopwatch.Restart();
-                    }
-
-                    return i == message.Length;
-                });
-            });
-
             MemoryStream memoryStream = new MemoryStream();
             bitmap.Save(memoryStream, Drawing.Imaging.ImageFormat.Png);
             memoryStream.Position = 0;
             return memoryStream;
-        } 
+        }
+
+        private void EncodePixel(int x, int y)
+        {
+            var pixel = _bitmap.GetPixel(x, y);
+
+            var a = pixel.A;
+            var r = 255;// GetEncodedChannelValue(pixel, ColorChannel.R, _messageIndex++);
+            var g = 0;// GetEncodedChannelValue(pixel, ColorChannel.G, _messageIndex++);
+            var b = 0;// GetEncodedChannelValue(pixel, ColorChannel.B, _messageIndex++);
+
+            _messageIndex += 3; /////////////////////////////////////////////
+
+            var newPixel = Drawing.Color.FromArgb(a, r, g, b);
+            _bitmap.SetPixel(x, y, newPixel);
+        }
+
+        private int GetEncodedChannelValue(Drawing.Color color, ColorChannel colorChannel, int messageIndex)
+        {
+            var channelValue = GetColorChannelValue(color, colorChannel);
+
+            if (messageIndex >= _message.Length)
+            {
+                return channelValue;
+            }
+            else
+            {
+                var messageValue = _message[messageIndex];
+
+                var messageValueEven = messageValue % 2 == 0;
+                var channelValueEven = channelValue % 2 == 0;
+
+                var valuesMatch = messageValueEven == channelValueEven;
+                channelValue = valuesMatch ? channelValue : channelValue + 1;
+                channelValue = channelValue != 256 ? channelValue : 254;
+
+                return channelValue;
+            }
+            
+        }
+
+        private int GetColorChannelValue(Drawing.Color color, ColorChannel colorChannel)
+        {
+            switch(colorChannel)
+            {
+                case ColorChannel.R:
+                    return color.R;
+                case ColorChannel.G:
+                    return color.G;
+                case ColorChannel.B:
+                    return color.B;
+                default:
+                    return -1;
+            }
+        }
+
+        private void UpdateProgress()
+        {
+            var stopwatchNotRunning = _stopwatch.IsRunning == false;
+            var percentComplete = (double)_messageIndex / _message.Length;
+
+            if(stopwatchNotRunning)
+            {
+                _stopwatch.Start();
+            }
+
+            if (_stopwatch.ElapsedMilliseconds > UPDATE_RATE)
+            {
+                ProgressChanged?.Invoke(this, percentComplete);
+                Thread.Sleep(0); // keep the ui thread from freezing
+                _stopwatch.Restart();
+            }
+        }
     }
 
     /*

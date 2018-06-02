@@ -340,6 +340,7 @@ namespace SteganographyJr.ViewModels
         private byte[] GetSteganographyMessage()
         {
             var bytes = new List<byte>(
+                // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS
                 UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.GetBytes()
             );
 
@@ -356,7 +357,7 @@ namespace SteganographyJr.ViewModels
 
             CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
 
-            ExecutionProgress = 100;
+            ExecutionProgress = 1;
             await Task.Delay(1000);
             ExecutionProgress = 0;
         }
