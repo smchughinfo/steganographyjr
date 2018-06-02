@@ -125,7 +125,10 @@ namespace SteganographyJr.ViewModels
                 execute: async () =>
                 {
                     ChangingCarrierImage = true;
-                    CarrierImageStream = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync();
+
+                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
+                    CarrierImageStream = streamWithPath.Stream;
+
                     ChangingCarrierImage = false;
                 },
                 canExecute: () =>
@@ -173,7 +176,7 @@ namespace SteganographyJr.ViewModels
                 execute: async () =>
                 {
                     ChangingMessageFile = true;
-                    FileMessage = await DependencyService.Get<IFilePicker>().GetStreamWithPathAsync();
+                    FileMessage = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync();
                     ChangingMessageFile = false;
                     
                 },

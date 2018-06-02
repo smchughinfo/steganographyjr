@@ -92,8 +92,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Services\DependencyService\FilePickerImplementation.cs" />
-    <Compile Include="Services\DependencyService\PicturePickerImplementation.cs" />
+    <Compile Include="Services\DependencyService\FileIO.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

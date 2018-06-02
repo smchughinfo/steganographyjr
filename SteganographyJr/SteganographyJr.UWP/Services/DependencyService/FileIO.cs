@@ -12,22 +12,31 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 
-[assembly: Xamarin.Forms.Dependency(typeof(FilePickerImplementation))]
-
+[assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.UWP.Services.DependencyService.FileIO))]
 namespace SteganographyJr.UWP.Services.DependencyService
 {
-    public class FilePickerImplementation : IFilePicker
+    public class FileIO : IFileIO
     {
-        public async Task<StreamWithPath> GetStreamWithPathAsync()
+        public async Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false)
         {
             // Create and initialize the FileOpenPicker
             FileOpenPicker openPicker = new FileOpenPicker
             {
-                ViewMode = PickerViewMode.Thumbnail,
-                SuggestedStartLocation = PickerLocationId.ComputerFolder
+                ViewMode = PickerViewMode.Thumbnail
             };
 
-            openPicker.FileTypeFilter.Add("*");
+            if(imagesOnly)
+            {
+                openPicker.FileTypeFilter.Add(".jpg");
+                openPicker.FileTypeFilter.Add(".jpeg");
+                openPicker.FileTypeFilter.Add(".png");
+                openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            }
+            else
+            {
+                openPicker.FileTypeFilter.Add("*");
+                openPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+            }
 
             // Get a file and return a Stream
             StorageFile storageFile = await openPicker.PickSingleFileAsync();
@@ -44,6 +53,11 @@ namespace SteganographyJr.UWP.Services.DependencyService
                 Path = storageFile.Path,
                 Stream = raStream.AsStreamForRead()
             };
+        }
+
+        public void SaveImage(Stream image, string path)
+        {
+
         }
     }
 }
