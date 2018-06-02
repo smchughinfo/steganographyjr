@@ -371,6 +371,13 @@ namespace SteganographyJr.ViewModels
             var password = GetSteganographyPassword();
             var message = GetSteganographyMessage();
 
+            var messageFits = _steganography.MessageFits(CarrierImageStream, message);
+            if(messageFits == false)
+            {
+                SendErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
+                return;
+            }
+
             CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
 
             ExecutionProgress = 1;
@@ -388,6 +395,17 @@ namespace SteganographyJr.ViewModels
                 await Task.Delay(250);
                 ExecutionProgress = (double)i / 10;
             }
+        }
+
+        private void SendErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Encoding Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
         }
     }
 }

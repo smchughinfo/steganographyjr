@@ -27,12 +27,10 @@ namespace SteganographyJr.Services
         public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
-        public string GetFirstEncodingError(Stream imageStream)
+        public bool MessageFits(Stream imageStream, byte[] message)
         {
-            var payloadSize = GetMessageCapacity(imageStream);
-            // common sense checks like image actually has > 0 pixels
-
-            return "the payload size is " + payloadSize;
+            var messageCapacity = GetMessageCapacity(imageStream);
+            return messageCapacity >= message.Length;
         }
 
         public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
