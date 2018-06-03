@@ -2,7 +2,6 @@
 using SteganographyJr.DTOs;
 using SteganographyJr.Interfaces;
 using SteganographyJr.Models;
-using SteganographyJr.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 using SteganographyJr.Mvvm;
+using SteganographyJr.Services.Steganography;
 
 namespace SteganographyJr.ViewModels
 {
@@ -119,7 +119,7 @@ namespace SteganographyJr.ViewModels
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
             CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
-            CarrierImagePath = Path.PathSeparator + "EncodedImage.png";
+            CarrierImagePath = StaticVariables.defaultCarrierImageSaveName;
             UpdateCarrierImageSource();
 
             _changingCarrierImage = false;
@@ -153,8 +153,8 @@ namespace SteganographyJr.ViewModels
         {
             Modes = new List<Mode>()
             {
-                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode"},
-                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode"}
+                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode" },
+                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode" }
             };
             SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
         }
@@ -169,8 +169,8 @@ namespace SteganographyJr.ViewModels
         {
             Messages = new List<Message>()
             {
-                new Message() { Key=StaticVariables.Message.Text, Value="Text"},
-                new Message() { Key=StaticVariables.Message.File, Value="File"}
+                new Message() { Key=StaticVariables.Message.Text, Value="Text" },
+                new Message() { Key=StaticVariables.Message.File, Value="File" }
             };
 
             TextMessage = "Type your message here";
@@ -208,7 +208,7 @@ namespace SteganographyJr.ViewModels
 
                     if(SelectedModeIsEncode)
                     {
-                        await Encode();
+                        await Encode(); // TPDP: this occassionally throws unable to remove the file to be ...i think it said saved
                     }
                     else
                     {
@@ -367,9 +367,6 @@ namespace SteganographyJr.ViewModels
                 UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.GetBytes()
             );
 
-            var terminatingStringBytes = Encoding.UTF8.GetBytes(GetSteganographyPassword());
-            bytes.AddRange(terminatingStringBytes);
-
             return bytes.ToArray();
         }
 
@@ -379,7 +376,7 @@ namespace SteganographyJr.ViewModels
             var message = GetSteganographyMessage();
 
             CarrierImageStream.Position = 0;
-            var messageFits = _steganography.MessageFits(CarrierImageStream, message);
+            var messageFits = _steganography.MessageFits(CarrierImageStream, message, password);
             if(messageFits == false)
             {
                 SendErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
@@ -410,14 +407,11 @@ namespace SteganographyJr.ViewModels
 
         private async Task Decode()
         {
-            await Task.Delay(250);
+            var password = GetSteganographyPassword();
+            await _steganography.Decode(CarrierImageStream, password);
             ExecutionProgress = 1;
-
-            for (var i = 10; i >= 0; i--)
-            {
-                await Task.Delay(250);
-                ExecutionProgress = (double)i / 10;
-            }
+            await Task.Delay(1000);
+            ExecutionProgress = 0;
         }
 
         private void SendErrorMessage(string errorMessage)

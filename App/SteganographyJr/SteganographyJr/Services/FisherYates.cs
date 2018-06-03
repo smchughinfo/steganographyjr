@@ -6,13 +6,14 @@ namespace SteganographyJr.Services
 {
     static class FisherYates
     {
+        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
         public static int[] Shuffle(int size, string password)
         {
-            // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
             int[] source = GenerateSequentialArray(size);
 
             int[] a = new int[size];
-            var random = new Random(password.GetHashCode());
+            var hash = Cryptography.GetMd5HashAsInt(password);
+            var random = new Random(hash);
             for (int i = 0; i < size; i++)
             {
                 int j = random.Next(0, i + 1);
