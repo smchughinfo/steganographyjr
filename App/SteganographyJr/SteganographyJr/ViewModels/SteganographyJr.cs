@@ -208,7 +208,7 @@ namespace SteganographyJr.ViewModels
 
                     if(SelectedModeIsEncode)
                     {
-                        await Encode(); // TPDP: this occassionally throws unable to remove the file to be ...i think it said saved
+                        await Encode(); // TODO: this occassionally throws unable to remove the file to be ...i think it said saved
                     }
                     else
                     {
