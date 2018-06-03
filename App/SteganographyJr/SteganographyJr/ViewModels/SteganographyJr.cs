@@ -20,6 +20,7 @@ namespace SteganographyJr.ViewModels
     class SteganographyJr : ObservableObject, IViewModel
     {
         Stream _carrierImageStream;
+        string _carrierImagePath; // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
         ImageSource _carrierImageSource;
 
         List<Mode> _modes;
@@ -97,7 +98,6 @@ namespace SteganographyJr.ViewModels
                 .AlsoRaisePropertyChangedFor(() => EnablePassword)
                 .AlsoRaisePropertyChangedFor(() => DisablePassword);
 
-
             WhenPropertyChanges(() => SelectedMessageType)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
                 .AlsoRaisePropertyChangedFor(() => UsingTextMessage)
@@ -119,6 +119,7 @@ namespace SteganographyJr.ViewModels
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
             CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
+            CarrierImagePath = Path.PathSeparator + "EncodedImage.png";
             UpdateCarrierImageSource();
 
             _changingCarrierImage = false;
@@ -131,6 +132,7 @@ namespace SteganographyJr.ViewModels
                     if(streamWithPath != null)
                     {
                         CarrierImageStream = streamWithPath.Stream;
+                        CarrierImagePath = streamWithPath.Path;
                     }
 
                     ChangingCarrierImage = false;
@@ -252,6 +254,11 @@ namespace SteganographyJr.ViewModels
             }
         }
 
+        private string CarrierImagePath {
+            get { return _carrierImagePath; }
+            set { SetPropertyValue(ref _carrierImagePath, value); }
+        }
+
         private void UpdateCarrierImageSource()
         {
             var streamCopy = new MemoryStream();
@@ -371,6 +378,7 @@ namespace SteganographyJr.ViewModels
             var password = GetSteganographyPassword();
             var message = GetSteganographyMessage();
 
+            CarrierImageStream.Position = 0;
             var messageFits = _steganography.MessageFits(CarrierImageStream, message);
             if(messageFits == false)
             {
@@ -382,6 +390,21 @@ namespace SteganographyJr.ViewModels
 
             ExecutionProgress = 1;
             await Task.Delay(1000);
+
+            var encodedCarrierImage = new StreamWithPath()
+            {
+                Stream = CarrierImageStream,
+                Path = CarrierImagePath
+            };
+            encodedCarrierImage.Stream.Position = 0;
+
+            var success = await DependencyService.Get<IFileIO>().SaveImage(encodedCarrierImage);
+
+            if(success == false)
+            {
+                SendErrorMessage("Failed to save. No additional information is available.");
+            }
+
             ExecutionProgress = 0;
         }
 

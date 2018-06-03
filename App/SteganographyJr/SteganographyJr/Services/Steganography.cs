@@ -123,6 +123,7 @@ namespace SteganographyJr.Services
 
         private int GetMessageCapacity(Stream imageStream)
         {
+            // TODO: pretty sure this is right but it's letting me encode bigger images. double check capacity
             Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
             var numPixels = bitmap.Height * bitmap.Width;
             var numBits = numPixels * 3;

@@ -10,6 +10,6 @@ namespace SteganographyJr.Services.DependencyService
     public interface IFileIO
     {
         Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false);
-        void SaveImage(Stream image, string path);
+        Task<bool> SaveImage(StreamWithPath streamWithPath);
     }
 }

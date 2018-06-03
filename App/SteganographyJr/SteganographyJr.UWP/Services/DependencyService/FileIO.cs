@@ -17,6 +17,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
 {
     public class FileIO : IFileIO
     {
+        // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
         public async Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false)
         {
             // Create and initialize the FileOpenPicker
@@ -55,9 +56,40 @@ namespace SteganographyJr.UWP.Services.DependencyService
             };
         }
 
-        public void SaveImage(Stream image, string path)
+        // https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
+        public async Task<bool> SaveImage(StreamWithPath carrierImage)
         {
+            string fileName = Path.GetFileName(carrierImage.Path);
+            string fileExtension = Path.GetExtension(carrierImage.Path);
 
+            FileSavePicker savePicker = new FileSavePicker()
+            {
+                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
+            };
+
+            savePicker.FileTypeChoices.Add("Images", new List<string>() { fileExtension });
+            savePicker.SuggestedFileName = fileName;
+
+            StorageFile file = await savePicker.PickSaveFileAsync();
+            if (file != null)
+            {
+                // Prevent updates to the remote version of the file until
+                // we finish making changes and call CompleteUpdatesAsync.
+                CachedFileManager.DeferUpdates(file);
+
+                // write to file
+                await Windows.Storage.FileIO.WriteBytesAsync(file, carrierImage.GetBytes());
+                // Let Windows know that we're finished changing the file so
+                // the other app can update the remote version of the file.
+                // Completing updates may require Windows to ask for user input.
+                Windows.Storage.Provider.FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
+                if (status != Windows.Storage.Provider.FileUpdateStatus.Complete)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
