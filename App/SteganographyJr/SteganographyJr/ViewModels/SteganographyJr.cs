@@ -133,10 +133,8 @@ namespace SteganographyJr.ViewModels
                 execute: async () =>
                 {
                     ChangingCarrierImage = true;
-
-                    var x = DependencyService.Get<IFileIO>();
-                    var streamWithPath = await x.GetStreamWithPathAsync(true);
-
+                    
+                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
                     if(streamWithPath != null)
                     {
                         CarrierImageBytes = streamWithPath.Stream.ConvertToByteArray();
