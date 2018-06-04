@@ -7,11 +7,6 @@ namespace SteganographyJr.ExtensionMethods
 {
     static class ArrayByteExtensions
     {
-        public static BitArray ConvertToBitArray(this byte[] bytes)
-        {
-            return new BitArray(bytes);
-        }
-
         public static byte[] AppendString(this byte[] message, string stringToAppend)
         {
             return message.AppendString(stringToAppend, Encoding.UTF8);

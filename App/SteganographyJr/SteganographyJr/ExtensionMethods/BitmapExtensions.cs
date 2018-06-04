@@ -29,6 +29,5 @@ namespace SteganographyJr.ExtensionMethods
 
             return (x: colInt, y: rowInt);
         }
-
     }
 }
