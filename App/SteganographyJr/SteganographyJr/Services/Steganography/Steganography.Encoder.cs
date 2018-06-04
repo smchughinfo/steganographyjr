@@ -2,6 +2,7 @@
 
 using SteganographyJr.ExtensionMethods;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -12,6 +13,11 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
+        BitArray MessageBits
+        {
+            get { return new BitArray(_message); }
+        }
+
         public bool MessageFits(Stream imageStream, byte[] message, string password)
         {
             var eofLength = Encoding.UTF8.GetBytes(password).Length;

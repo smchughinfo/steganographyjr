@@ -11,26 +11,16 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        BitArray MessageBits
-        {
-            get { return new BitArray(_message); }
-        }
-
         public async Task<byte[]> Decode(Stream imageStream, string password)
         {
             InitializeFields(ExecutionType.Decode, imageStream, password);
-            var trueEof = Encoding.UTF8.GetBytes(password);
+            var eof = Encoding.UTF8.GetBytes(password);
 
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap((x, y) => {
-                    AddPixelToMessageBuilder(x, y);
-
-                    var foundEof = FoundEof(trueEof);
-                    if (foundEof)
-                    {
-                        ;
-                    }
+                    var pixelBitsAsBools = DecodePixel(x, y);
+                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 
                     UpdateProgress();
                     return foundEof;
@@ -41,44 +31,28 @@ namespace SteganographyJr.Services.Steganography
             return null;
         }
 
-        private void AddPixelToMessageBuilder(int x, int y)
+        private bool AddBitsAndCheckForEof(bool[] pixelBitsAsBools, byte[] eof)
         {
-            var pixelBits = DecodePixel(x, y);
-            _messageBuilder.AddRange(pixelBits);
+            var found = false;
+            foreach (var pBool in pixelBitsAsBools)
+            {
+                _messageBuilder.Add(pBool);        // add just this one bit to the _messageBuilder
+                var foundEof = MessageHasEof(eof); // now check if _messageBuilder ends with the eof
+                if (foundEof)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
         }
 
-        private bool FoundEof(byte[] trueEof)
+        private bool MessageHasEof(byte[] eofBytes)
         {
-            var eofCandidate = GetMessageBuilderEofCandidate(trueEof.Length);
-            if (eofCandidate == null)
-            {
-                return false;
-            }
+            var messageBuilderBytes = _messageBuilder.ConvertToByteArray();
+            var eofCandidateBytes = messageBuilderBytes.Reverse().Take(eofBytes.Length).Reverse().ToArray();
 
-            var foundEof = Array.Equals(trueEof, eofCandidate);
-
-            bool isSubset = !eofCandidate.Except(trueEof).Any();
-            bool isSubset2 = !trueEof.Except(eofCandidate).Any();
-            bool either = isSubset || isSubset2;
-
-            return foundEof; // REMOVE THIS EXTRA CODE
-        }
-
-        private byte[] GetMessageBuilderEofCandidate(int trueEofByteLength)
-        {
-            var messageBytes = _messageBuilder.ConvertToByteArray();
-
-            if (messageBytes.Length < trueEofByteLength)
-            {
-                return null;
-            }
-
-            var messageBits = messageBytes.ConvertToBitArray();
-            messageBits = messageBits.Truncate();
-            messageBits = messageBits.TakeLastBytes(trueEofByteLength);
-
-            var eofCandidate = messageBits.ConvertToByteArray();
-            return eofCandidate;
+            return eofBytes.SequenceEqual(eofCandidateBytes);
         }
 
         private bool[] DecodePixel(int x, int y)
