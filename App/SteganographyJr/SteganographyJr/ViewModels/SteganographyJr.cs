@@ -33,7 +33,7 @@ namespace SteganographyJr.ViewModels
         List<Message> _messages;      // text or file
         Message _SelectedMessageType; // text or file, whichever is selected
         string _textMessage;          // if text is selected, the text the user entered
-        StreamWithPath _fileMessage;  // if file is selected, the file the user selected
+        BytesWithPath _fileMessage;   // if file is selected, the file the user selected
 
         bool _changingCarrierImage;
         public DelegateCommand ChangeCarrierImageCommand { get; private set; }
@@ -189,7 +189,15 @@ namespace SteganographyJr.ViewModels
                 execute: async () =>
                 {
                     ChangingMessageFile = true;
-                    FileMessage = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync();
+
+                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync();
+                    FileMessage = new BytesWithPath()
+                    {
+                        Bytes = streamWithPath.Stream.ConvertToByteArray(),
+                        Path = streamWithPath.Path
+                    };
+                    streamWithPath.Stream.Dispose();
+
                     ChangingMessageFile = false;
                     
                 },
@@ -323,7 +331,7 @@ namespace SteganographyJr.ViewModels
             set { SetPropertyValue(ref _textMessage, value); }
         }
 
-        public StreamWithPath FileMessage {
+        public BytesWithPath FileMessage {
             get { return _fileMessage; }
             set { SetPropertyValue(ref _fileMessage, value); }
         }
@@ -367,7 +375,7 @@ namespace SteganographyJr.ViewModels
         {
             var bytes = new List<byte>(
                 // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS
-                UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.GetBytes()
+                UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.Bytes
             );
 
             return bytes.ToArray();
