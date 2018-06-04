@@ -14,12 +14,13 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using SteganographyJr.Mvvm;
 using SteganographyJr.Services.Steganography;
+using SteganographyJr.ExtensionMethods;
 
 namespace SteganographyJr.ViewModels
 {
     class SteganographyJr : ObservableObject, IViewModel
     {
-        Stream _carrierImageStream;
+        byte[] _carrierImageBytes;
         string _carrierImagePath; // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
         ImageSource _carrierImageSource;
 
@@ -82,7 +83,7 @@ namespace SteganographyJr.ViewModels
             WhenPropertyChanges(() => NotExecuting)
                 .AlsoRaisePropertyChangedFor(() => EnablePassword);
 
-            WhenPropertyChanges(() => CarrierImageStream)
+            WhenPropertyChanges(() => CarrierImageBytes)
                 .AlsoInvokeAction(UpdateCarrierImageSource)
                 .AlsoRaisePropertyChangedFor(() => MessageCapacity);
 
@@ -118,7 +119,12 @@ namespace SteganographyJr.ViewModels
         private void InitCarrierImage()
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
-            CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
+
+            using (var imageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource))
+            {
+                CarrierImageBytes = imageStream.ConvertToByteArray();
+            }
+
             CarrierImagePath = StaticVariables.defaultCarrierImageSaveName;
             UpdateCarrierImageSource();
 
@@ -128,11 +134,14 @@ namespace SteganographyJr.ViewModels
                 {
                     ChangingCarrierImage = true;
 
-                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
+                    var x = DependencyService.Get<IFileIO>();
+                    var streamWithPath = await x.GetStreamWithPathAsync(true);
+
                     if(streamWithPath != null)
                     {
-                        CarrierImageStream = streamWithPath.Stream;
+                        CarrierImageBytes = streamWithPath.Stream.ConvertToByteArray();
                         CarrierImagePath = streamWithPath.Path;
+                        streamWithPath.Stream.Dispose();
                     }
 
                     ChangingCarrierImage = false;
@@ -239,9 +248,9 @@ namespace SteganographyJr.ViewModels
             get { return !Executing; }
         }
 
-        public Stream CarrierImageStream {
-            get { return _carrierImageStream; }
-            set { SetPropertyValue(ref _carrierImageStream, value); }
+        public byte[] CarrierImageBytes {
+            get { return _carrierImageBytes; }
+            set { SetPropertyValue(ref _carrierImageBytes, value); }
         }
 
         public ImageSource CarrierImageSource {
@@ -261,11 +270,7 @@ namespace SteganographyJr.ViewModels
 
         private void UpdateCarrierImageSource()
         {
-            var streamCopy = new MemoryStream();
-            CarrierImageStream.CopyTo(streamCopy);
-            streamCopy.Position = 0;
-
-            CarrierImageSource = ImageSource.FromStream(() => streamCopy);
+            CarrierImageSource = ImageSource.FromStream(() => new MemoryStream(CarrierImageBytes));
         }
 
         public List<Mode> Modes {
@@ -345,7 +350,7 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                var size = _steganography.GetHumanReadableFileSize(CarrierImageStream);
+                var size = _steganography.GetHumanReadableFileSize(CarrierImageBytes);
                 return $"Message Capacity: {size}";
             }
         }
@@ -372,43 +377,54 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
+            // get encoding variables
             var password = GetSteganographyPassword();
             var message = GetSteganographyMessage();
-
-            CarrierImageStream.Position = 0;
-            var messageFits = _steganography.MessageFits(CarrierImageStream, message, password);
+            
+            // make sure we can encode
+            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
             if(messageFits == false)
             {
                 SendErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
                 return;
             }
 
-            CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
+            // do the encode
+            using (var imageStream = await _steganography.Encode(CarrierImageBytes, message, password))
+            {
+                CarrierImageBytes = imageStream.ConvertToByteArray();
+            }
 
+            // update progess
             ExecutionProgress = 1;
             await Task.Delay(1000);
 
-            var encodedCarrierImage = new StreamWithPath()
+            // save the encode
+            bool success;
+            using (var imageStream = new MemoryStream(CarrierImageBytes))
             {
-                Stream = CarrierImageStream,
-                Path = CarrierImagePath
-            };
-            encodedCarrierImage.Stream.Position = 0;
+                var encodedCarrierImage = new StreamWithPath()
+                {
+                    Stream = imageStream,
+                    Path = CarrierImagePath
+                };
+                success = await DependencyService.Get<IFileIO>().SaveImage(encodedCarrierImage);
+            }
 
-            var success = await DependencyService.Get<IFileIO>().SaveImage(encodedCarrierImage);
-
+            // notify user if save failed
             if(success == false)
             {
                 SendErrorMessage("Failed to save. No additional information is available.");
             }
 
+            // update progress
             ExecutionProgress = 0;
         }
 
         private async Task Decode()
         {
             var password = GetSteganographyPassword();
-            await _steganography.Decode(CarrierImageStream, password);
+            await _steganography.Decode(CarrierImageBytes, password);
             ExecutionProgress = 1;
             await Task.Delay(1000);
             ExecutionProgress = 0;

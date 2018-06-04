@@ -18,18 +18,21 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(Stream imageStream, byte[] message, string password)
+        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
         {
             var eofLength = Encoding.UTF8.GetBytes(password).Length;
-            var messageCapacity = GetMessageCapacity(imageStream);
+            var messageCapacity = GetMessageCapacity(imageBytes);
             return messageCapacity - eofLength >= message.Length;
         }
 
-        private int GetMessageCapacity(Stream imageStream)
+        private int GetMessageCapacity(byte[] imageBytes)
         {
             // TODO: pretty sure this is right but it's letting me encode bigger images. double check capacity
-            Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
-            return GetMessageCapacity(bitmap);
+            using (var imageStream = new MemoryStream(imageBytes))
+            {
+                Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
+                return GetMessageCapacity(bitmap);
+            }
         }
 
         private int GetMessageCapacity(Drawing.Bitmap bitmap)
@@ -39,10 +42,10 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(Stream imageStream, byte[] message, string password)
+        public async Task<Stream> Encode(byte[] imageBytes, byte[] message, string password)
         {
             message = message.AppendString(password);
-            InitializeFields(ExecutionType.Encode, imageStream, password, message);
+            InitializeFields(ExecutionType.Encode, imageBytes, password, message);
 
             await Task.Run(() => // move away from the calling thread while working
             {
@@ -61,10 +64,10 @@ namespace SteganographyJr.Services.Steganography
         }
 
         // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
-        public string GetHumanReadableFileSize(Stream imageSource)
+        public string GetHumanReadableFileSize(byte[] imageBytes)
         {
             // TODO: test this more
-            var len = GetMessageCapacity(imageSource) / 8;
+            var len = GetMessageCapacity(imageBytes) / 8;
 
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;

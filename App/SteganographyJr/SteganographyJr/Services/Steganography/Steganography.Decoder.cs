@@ -11,9 +11,9 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(Stream imageStream, string password)
+        public async Task<byte[]> Decode(byte[] imageBytes, string password)
         {
-            InitializeFields(ExecutionType.Decode, imageStream, password);
+            InitializeFields(ExecutionType.Decode, imageBytes, password);
             var eof = Encoding.UTF8.GetBytes(password);
 
             await Task.Run(() => // move away from the calling thread while working

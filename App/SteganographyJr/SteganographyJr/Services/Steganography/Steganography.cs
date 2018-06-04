@@ -31,15 +31,19 @@ namespace SteganographyJr.Services.Steganography
         public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
-        private void InitializeFields(ExecutionType executionType, Stream imageStream, string password, byte[] message = null)
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, string password, byte[] message = null)
         {
             _executionType = executionType;
-            _bitmap = new Drawing.Bitmap(imageStream);
             _message = message;
             _password = password;
             _uiStopwatch = new Stopwatch();
             _messageIndex = 0;
             _messageBuilder = new List<bool>();
+
+            using (var imageStream = new MemoryStream(imageBytes))
+            {
+                _bitmap = new Drawing.Bitmap(imageStream);
+            }
         }
 
         private void ClearFields()
