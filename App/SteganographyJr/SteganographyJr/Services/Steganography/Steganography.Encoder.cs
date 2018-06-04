@@ -55,7 +55,6 @@ namespace SteganographyJr.Services.Steganography
             });
 
             var encodedStream = _bitmap.ConvertToStream();
-            var result = encodedValues.ConvertToByteArray();
 
             ClearFields();
             return encodedStream;
@@ -100,9 +99,7 @@ namespace SteganographyJr.Services.Steganography
                 return channelValue;
             }
         }
-
-        List<bool> encodedValues = new List<bool>();
-
+        
         private void EncodePixel(int x, int y)
         {
             var pixel = _bitmap.GetPixel(x, y);
@@ -111,10 +108,6 @@ namespace SteganographyJr.Services.Steganography
             var r = GetValueToEncodeInChannel(pixel.R, _messageIndex++);
             var g = GetValueToEncodeInChannel(pixel.G, _messageIndex++);
             var b = GetValueToEncodeInChannel(pixel.B, _messageIndex++);
-
-            encodedValues.Add(r % 2 == 0);
-            encodedValues.Add(g % 2 == 0);
-            encodedValues.Add(b % 2 == 0);
 
             var newPixel = Drawing.Color.FromArgb(a, r, g, b);
             _bitmap.SetPixel(x, y, newPixel);
