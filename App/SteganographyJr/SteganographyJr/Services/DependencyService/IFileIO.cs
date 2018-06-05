@@ -1,4 +1,5 @@
-﻿using SteganographyJr.Models;
+﻿using SteganographyJr.DTOs;
+using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,7 @@ namespace SteganographyJr.Services.DependencyService
 {
     public interface IFileIO
     {
-        Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false);
-        Task<bool> SaveImage(StreamWithPath streamWithPath);
+        Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false);
+        Task SaveImage(string path, byte[] image, object nativeRepresentation = null); // TODO: does this need to return something? do exceptions actually get caught?
     }
 }

@@ -21,8 +21,9 @@ namespace SteganographyJr.ViewModels
     class SteganographyJr : ObservableObject, IViewModel
     {
         byte[] _carrierImageBytes;
-        string _carrierImagePath; // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
+        string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
         ImageSource _carrierImageSource;
+        object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
 
         List<Mode> _modes;
         Mode _selectedMode;
@@ -124,8 +125,7 @@ namespace SteganographyJr.ViewModels
             {
                 CarrierImageBytes = imageStream.ConvertToByteArray();
             }
-
-            CarrierImagePath = StaticVariables.defaultCarrierImageSaveName;
+            
             UpdateCarrierImageSource();
 
             _changingCarrierImage = false;
@@ -134,12 +134,15 @@ namespace SteganographyJr.ViewModels
                 {
                     ChangingCarrierImage = true;
                     
-                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
-                    if(streamWithPath != null)
+                    var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync(true);
+                    if(imageChooserResult != null)
                     {
-                        CarrierImageBytes = streamWithPath.Stream.ConvertToByteArray();
-                        CarrierImagePath = streamWithPath.Path;
-                        streamWithPath.Stream.Dispose();
+                        CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
+                        CarrierImagePath = imageChooserResult.Path;
+                        _carrierImageNative = imageChooserResult.NativeRepresentation;
+
+                        imageChooserResult.Stream.Dispose();
+                        
                     }
 
                     ChangingCarrierImage = false;
@@ -190,13 +193,13 @@ namespace SteganographyJr.ViewModels
                 {
                     ChangingMessageFile = true;
 
-                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync();
+                    var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync();
                     FileMessage = new BytesWithPath()
                     {
-                        Bytes = streamWithPath.Stream.ConvertToByteArray(),
-                        Path = streamWithPath.Path
+                        Bytes = imageChooserResult.Stream.ConvertToByteArray(),
+                        Path = imageChooserResult.Path
                     };
-                    streamWithPath.Stream.Dispose();
+                    imageChooserResult.Stream.Dispose();
 
                     ChangingMessageFile = false;
                     
@@ -406,22 +409,12 @@ namespace SteganographyJr.ViewModels
             await Task.Delay(1000);
 
             // save the encode
-            bool success;
-            using (var imageStream = new MemoryStream(CarrierImageBytes))
+            var encodedCarrierImage = new BytesWithPath()
             {
-                var encodedCarrierImage = new StreamWithPath()
-                {
-                    Stream = imageStream,
-                    Path = CarrierImagePath
-                };
-                success = await DependencyService.Get<IFileIO>().SaveImage(encodedCarrierImage);
-            }
-
-            // notify user if save failed
-            if(success == false)
-            {
-                SendErrorMessage("Failed to save. No additional information is available.");
-            }
+                Bytes = CarrierImageBytes,
+                Path = CarrierImagePath
+            };
+            await DependencyService.Get<IFileIO>().SaveImage(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
 
             // update progress
             ExecutionProgress = 0;

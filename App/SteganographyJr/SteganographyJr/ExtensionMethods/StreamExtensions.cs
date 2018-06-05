@@ -8,7 +8,7 @@ using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.ExtensionMethods
 {
-    static class StreamExtensions
+    public static class StreamExtensions
     {
         public static byte[] ConvertToByteArray(this Stream stream)
         {

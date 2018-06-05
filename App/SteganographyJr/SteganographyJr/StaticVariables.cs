@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SteganographyJr
 {
-    static class StaticVariables
+    public static class StaticVariables
     {
         public const string defaultCarrierImageResource = "SteganographyJr.Images.default-carrier-image.png";
         public const string defaultCarrierImageSaveName = "Encoded Image.png";

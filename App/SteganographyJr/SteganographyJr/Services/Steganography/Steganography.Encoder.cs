@@ -27,7 +27,6 @@ namespace SteganographyJr.Services.Steganography
 
         private int GetMessageCapacity(byte[] imageBytes)
         {
-            // TODO: pretty sure this is right but it's letting me encode bigger images. double check capacity
             using (var imageStream = new MemoryStream(imageBytes))
             {
                 Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
@@ -66,8 +65,7 @@ namespace SteganographyJr.Services.Steganography
         // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
         public string GetHumanReadableFileSize(byte[] imageBytes)
         {
-            // TODO: test this more
-            var len = GetMessageCapacity(imageBytes) / 8;
+            var len = imageBytes.Length;
 
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SteganographyJr.ExtensionMethods
 {
-    static class ListBoolExtensions
+    public static class ListBoolExtensions
     {
         public static BitArray ConvertToBitArray(this List<bool> bools)
         {

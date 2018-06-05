@@ -1,4 +1,5 @@
-﻿using SteganographyJr.Models;
+﻿using SteganographyJr.DTOs;
+using SteganographyJr.Models;
 using SteganographyJr.Services.DependencyService;
 using SteganographyJr.UWP.Services.DependencyService;
 using System;
@@ -18,7 +19,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
     public class FileIO : IFileIO
     {
         // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
-        public async Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false)
+        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
         {
             // Create and initialize the FileOpenPicker
             FileOpenPicker openPicker = new FileOpenPicker
@@ -49,47 +50,26 @@ namespace SteganographyJr.UWP.Services.DependencyService
             
             IRandomAccessStreamWithContentType raStream = await storageFile.OpenReadAsync();
 
-            return new StreamWithPath()
+            return new ImageChooserResult()
             {
                 Path = storageFile.Path,
-                Stream = raStream.AsStreamForRead()
+                Stream = raStream.AsStreamForRead(),
+                NativeRepresentation = storageFile   
             };
         }
 
-        // https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
-        public async Task<bool> SaveImage(StreamWithPath carrierImage)
+        public async Task SaveImage(string path, byte[] image, object nativeRepresentation = null)
         {
-            string fileName = Path.GetFileName(carrierImage.Path);
-            string fileExtension = Path.GetExtension(carrierImage.Path);
-
-            FileSavePicker savePicker = new FileSavePicker()
+            StorageFile storageFile;
+            if(string.IsNullOrEmpty(path))
             {
-                SuggestedStartLocation = PickerLocationId.PicturesLibrary,
-            };
-
-            savePicker.FileTypeChoices.Add("Images", new List<string>() { fileExtension });
-            savePicker.SuggestedFileName = fileName;
-
-            StorageFile file = await savePicker.PickSaveFileAsync();
-            if (file != null)
-            {
-                // Prevent updates to the remote version of the file until
-                // we finish making changes and call CompleteUpdatesAsync.
-                CachedFileManager.DeferUpdates(file);
-
-                // write to file
-                await Windows.Storage.FileIO.WriteBytesAsync(file, carrierImage.GetBytes());
-                // Let Windows know that we're finished changing the file so
-                // the other app can update the remote version of the file.
-                // Completing updates may require Windows to ask for user input.
-                Windows.Storage.Provider.FileUpdateStatus status = await CachedFileManager.CompleteUpdatesAsync(file);
-                if (status != Windows.Storage.Provider.FileUpdateStatus.Complete)
-                {
-                    return false;
-                }
+                storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.defaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
             }
-
-            return true;
+            else
+            {
+                storageFile = (StorageFile)nativeRepresentation;
+            }
+            await Windows.Storage.FileIO.WriteBytesAsync(storageFile, image);
         }
     }
 }

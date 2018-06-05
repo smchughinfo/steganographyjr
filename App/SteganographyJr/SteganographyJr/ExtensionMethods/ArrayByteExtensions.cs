@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SteganographyJr.ExtensionMethods
 {
-    static class ArrayByteExtensions
+    public static class ArrayByteExtensions
     {
         public static byte[] AppendString(this byte[] message, string stringToAppend)
         {

@@ -65,7 +65,7 @@ namespace SteganographyJr.Services.Steganography
             {
                 var (x, y) = _bitmap.Get2DCoordinate(shuffledIndices[i]);
 
-                var done = onPixel(x, y) || i == shuffledIndices.Length - 1;
+                var done = onPixel(x, y);
                 if (done)
                 {
                     break;
