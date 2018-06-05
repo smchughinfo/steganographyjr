@@ -381,6 +381,8 @@ namespace SteganographyJr.ViewModels
                 UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.Bytes
             );
 
+            bytes.Add(UsingTextMessage ? (byte)0 : (byte)1);
+
             return bytes.ToArray();
         }
 
