@@ -130,23 +130,7 @@ namespace SteganographyJr.ViewModels
 
             _changingCarrierImage = false;
             ChangeCarrierImageCommand = new DelegateCommand(
-                execute: async () =>
-                {
-                    ChangingCarrierImage = true;
-                    
-                    var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync(true);
-                    if(imageChooserResult != null)
-                    {
-                        CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
-                        CarrierImagePath = imageChooserResult.Path;
-                        _carrierImageNative = imageChooserResult.NativeRepresentation;
-
-                        imageChooserResult.Stream.Dispose();
-                        
-                    }
-
-                    ChangingCarrierImage = false;
-                },
+                execute: PickCarrierImage,
                 canExecute: () =>
                 {
                     return NotExecuting && !ChangingCarrierImage;
@@ -189,26 +173,57 @@ namespace SteganographyJr.ViewModels
 
             _changingMessageFile = false;
             ChangeMessageFileCommand = new DelegateCommand(
-                execute: async () =>
-                {
-                    ChangingMessageFile = true;
-
-                    var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync();
-                    FileMessage = new BytesWithPath()
-                    {
-                        Bytes = imageChooserResult.Stream.ConvertToByteArray(),
-                        Path = imageChooserResult.Path
-                    };
-                    imageChooserResult.Stream.Dispose();
-
-                    ChangingMessageFile = false;
-                    
-                },
+                execute: PickFileMessage,
                 canExecute: () =>
                 {
                     return NotExecuting && !ChangingMessageFile;
                 }
             );
+        }
+
+        private async void PickCarrierImage()
+        {
+            ChangingCarrierImage = true;
+
+            var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync(true);
+            var success = imageChooserResult != null && string.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+            if (success)
+            {
+                CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
+                CarrierImagePath = imageChooserResult.Path;
+                _carrierImageNative = imageChooserResult.NativeRepresentation;
+
+                imageChooserResult.Stream.Dispose();
+            }
+            else
+            {
+                SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+            }
+
+            ChangingCarrierImage = false;
+        }
+
+        private async void PickFileMessage()
+        {
+            ChangingMessageFile = true;
+
+            var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync();
+            var success = String.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+            if (success)
+            {
+                FileMessage = new BytesWithPath()
+                {
+                    Bytes = imageChooserResult.Stream.ConvertToByteArray(),
+                    Path = imageChooserResult.Path
+                };
+                imageChooserResult.Stream.Dispose();
+            }
+            else
+            {
+                SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+            }
+
+            ChangingMessageFile = false;
         }
 
         public bool ChangingMessageFile {
@@ -226,7 +241,7 @@ namespace SteganographyJr.ViewModels
 
                     if(SelectedModeIsEncode)
                     {
-                        await Encode(); // TODO: this occassionally throws unable to remove the file to be ...i think it said saved
+                        await Encode();
                     }
                     else
                     {
@@ -458,6 +473,17 @@ namespace SteganographyJr.ViewModels
             var alertMessage = new AlertMessage()
             {
                 Title = "Encoding Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendOpenFileErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Open File Error",
                 CancelButtonText = "Okay",
                 Message = errorMessage
             };
