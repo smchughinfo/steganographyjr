@@ -186,18 +186,21 @@ namespace SteganographyJr.ViewModels
             ChangingCarrierImage = true;
 
             var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync(true);
-            var success = imageChooserResult != null && string.IsNullOrEmpty(imageChooserResult.ErrorMessage);
-            if (success)
+            if(imageChooserResult != null)
             {
-                CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
-                CarrierImagePath = imageChooserResult.Path;
-                _carrierImageNative = imageChooserResult.NativeRepresentation;
+                var success = string.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+                if (success)
+                {
+                    CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
+                    CarrierImagePath = imageChooserResult.Path;
+                    _carrierImageNative = imageChooserResult.NativeRepresentation;
 
-                imageChooserResult.Stream.Dispose();
-            }
-            else
-            {
-                SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                    imageChooserResult.Stream.Dispose();
+                }
+                else
+                {
+                    SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                }
             }
 
             ChangingCarrierImage = false;
@@ -208,19 +211,22 @@ namespace SteganographyJr.ViewModels
             ChangingMessageFile = true;
 
             var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync();
-            var success = String.IsNullOrEmpty(imageChooserResult.ErrorMessage);
-            if (success)
+            if(imageChooserResult != null)
             {
-                FileMessage = new BytesWithPath()
+                var success = String.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+                if (success)
                 {
-                    Bytes = imageChooserResult.Stream.ConvertToByteArray(),
-                    Path = imageChooserResult.Path
-                };
-                imageChooserResult.Stream.Dispose();
-            }
-            else
-            {
-                SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                    FileMessage = new BytesWithPath()
+                    {
+                        Bytes = imageChooserResult.Stream.ConvertToByteArray(),
+                        Path = imageChooserResult.Path
+                    };
+                    imageChooserResult.Stream.Dispose();
+                }
+                else
+                {
+                    SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                }
             }
 
             ChangingMessageFile = false;
