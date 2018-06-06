@@ -396,7 +396,7 @@ namespace SteganographyJr.ViewModels
             var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
             if(messageFits == false)
             {
-                SendErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
+                SendEncodingSuccessMessage("Message is too big. Use a bigger image or write a smaller message.");
                 return;
             }
 
@@ -416,7 +416,18 @@ namespace SteganographyJr.ViewModels
                 Bytes = CarrierImageBytes,
                 Path = CarrierImagePath
             };
-            await DependencyService.Get<IFileIO>().SaveImage(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+            var imageSaveResult =  await DependencyService.Get<IFileIO>().SaveImage(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+
+            // notify the user
+            var success = string.IsNullOrEmpty(imageSaveResult.ErrorMessage);
+            if (success)
+            {
+                SendEncodingSuccessMessage(imageSaveResult.SaveLocation);
+            }
+            else
+            {
+                SendEncodingErrorMessage(imageSaveResult.ErrorMessage);
+            }
 
             // update progress
             ExecutionProgress = 0;
@@ -431,7 +442,18 @@ namespace SteganographyJr.ViewModels
             ExecutionProgress = 0;
         }
 
-        private void SendErrorMessage(string errorMessage)
+        private void SendEncodingSuccessMessage(string imagePath)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Message Encoded",
+                CancelButtonText = "Excelsior!",
+                Message = $"Image saved to {imagePath}."
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendEncodingErrorMessage(string errorMessage)
         {
             var alertMessage = new AlertMessage()
             {

@@ -103,7 +103,7 @@ namespace SteganographyJr.Services.Steganography
         
         private void EncodePixel(int x, int y)
         {
-            var pixel = _bitmap.GetPixel(x, y);
+            var pixel = _bitmap.GetPixel(x, y); // TODO: figure out how to handle jpegs. convert -> dowork -> convert back -> save with 0 compression. or only save as png. jpeg lossless compression
 
             var a = pixel.A;
             var r = GetValueToEncodeInChannel(pixel.R, _messageIndex++);

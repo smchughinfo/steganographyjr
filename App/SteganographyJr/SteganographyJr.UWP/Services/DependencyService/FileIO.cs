@@ -21,55 +21,72 @@ namespace SteganographyJr.UWP.Services.DependencyService
         // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
         public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
         {
-            // Create and initialize the FileOpenPicker
-            FileOpenPicker openPicker = new FileOpenPicker
+            try
             {
-                ViewMode = PickerViewMode.Thumbnail
-            };
+                // Create and initialize the FileOpenPicker
+                FileOpenPicker openPicker = new FileOpenPicker
+                {
+                    ViewMode = PickerViewMode.Thumbnail
+                };
 
-            if(imagesOnly)
-            {
-                openPicker.FileTypeFilter.Add(".jpg");
-                openPicker.FileTypeFilter.Add(".jpeg");
-                openPicker.FileTypeFilter.Add(".png");
-                openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+                if (imagesOnly)
+                {
+                    openPicker.FileTypeFilter.Add(".jpg");
+                    openPicker.FileTypeFilter.Add(".jpeg");
+                    openPicker.FileTypeFilter.Add(".png");
+                    openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+                }
+                else
+                {
+                    openPicker.FileTypeFilter.Add("*");
+                    openPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+                }
+
+                // Get a file and return a Stream
+                StorageFile storageFile = await openPicker.PickSingleFileAsync();
+
+                if (storageFile == null)
+                {
+                    return null;
+                }
+
+                IRandomAccessStreamWithContentType raStream = await storageFile.OpenReadAsync();
+
+                return new ImageChooserResult()
+                {
+                    Path = storageFile.Path,
+                    Stream = raStream.AsStreamForRead(),
+                    NativeRepresentation = storageFile
+                };
             }
-            else
+            catch(Exception ex)
             {
-                openPicker.FileTypeFilter.Add("*");
-                openPicker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
+                return new ImageChooserResult() { ErrorMessage = ex.Message };
             }
-
-            // Get a file and return a Stream
-            StorageFile storageFile = await openPicker.PickSingleFileAsync();
-
-            if (storageFile == null)
-            {
-                return null;
-            }
-            
-            IRandomAccessStreamWithContentType raStream = await storageFile.OpenReadAsync();
-
-            return new ImageChooserResult()
-            {
-                Path = storageFile.Path,
-                Stream = raStream.AsStreamForRead(),
-                NativeRepresentation = storageFile   
-            };
         }
 
-        public async Task SaveImage(string path, byte[] image, object nativeRepresentation = null)
+        public async Task<ImageSaveResult> SaveImage(string path, byte[] image, object nativeRepresentation = null)
         {
-            StorageFile storageFile;
-            if(string.IsNullOrEmpty(path))
+            try
             {
-                storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.defaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
+                StorageFile storageFile;
+                if (string.IsNullOrEmpty(path))
+                {
+                    storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.defaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
+                }
+                else
+                {
+                    storageFile = (StorageFile)nativeRepresentation;
+                }
+                await Windows.Storage.FileIO.WriteBytesAsync(storageFile, image);
+
+                return new ImageSaveResult() { SaveLocation = storageFile.Path };
+                //return (true, $"Image saved to {storageFile.Path}.");
             }
-            else
+            catch(Exception ex)
             {
-                storageFile = (StorageFile)nativeRepresentation;
+                return new ImageSaveResult() { ErrorMessage = ex.Message };
             }
-            await Windows.Storage.FileIO.WriteBytesAsync(storageFile, image);
         }
     }
 }
