@@ -17,7 +17,7 @@ namespace SteganographyJr.Services.Steganography
             InitializeFields(ExecutionType.Decode, imageBytes, password);
             var eofBytes = Encoding.UTF8.GetBytes(password);
 
-            byte[] decodMessage = null;
+            byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap((x, y) => {
@@ -28,11 +28,11 @@ namespace SteganographyJr.Services.Steganography
                     return foundEof;
                 });
 
-                decodMessage = GetMessageWithoutEof(eofBytes);
+                decodedMessage = GetMessageWithoutEof(eofBytes);
             });
 
             ClearFields();
-            return decodMessage;
+            return decodedMessage;
         }
 
         private bool AddBitsAndCheckForEof(bool[] pixelBitsAsBools, byte[] eof)
