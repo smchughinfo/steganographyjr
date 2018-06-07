@@ -414,10 +414,10 @@ namespace SteganographyJr.ViewModels
             var message = GetSteganographyMessage();
             
             // make sure we can encode
-            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
+            var messageFits = _steganography.MessageFits(CarrierImageBytes, message);
             if(messageFits == false)
             {
-                SendEncodingSuccessMessage("Message is too big. Use a bigger image or write a smaller message.");
+                SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
                 return;
             }
 

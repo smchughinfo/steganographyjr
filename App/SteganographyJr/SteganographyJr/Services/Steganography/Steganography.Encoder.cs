@@ -18,23 +18,22 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
+        public bool MessageFits(byte[] imageBytes, byte[] message)
         {
-            var eofLength = Encoding.UTF8.GetBytes(password).Length;
-            var messageCapacity = GetMessageCapacity(imageBytes);
-            return messageCapacity - eofLength >= message.Length;
+            var messageCapacity = GetMessageCapacityInBits(imageBytes) / 8;
+            return messageCapacity >= message.Length;
         }
 
-        private int GetMessageCapacity(byte[] imageBytes)
+        private int GetMessageCapacityInBits(byte[] imageBytes)
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
                 Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
-                return GetMessageCapacity(bitmap);
+                return GetMessageCapacityInBits(bitmap);
             }
         }
 
-        private int GetMessageCapacity(Drawing.Bitmap bitmap)
+        private int GetMessageCapacityInBits(Drawing.Bitmap bitmap)
         {
             var numPixels = bitmap.Height * bitmap.Width;
             var numBits = numPixels * 3;
@@ -65,7 +64,8 @@ namespace SteganographyJr.Services.Steganography
         // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
         public string GetHumanReadableFileSize(byte[] imageBytes)
         {
-            var len = imageBytes.Length;
+            //imageBytes
+            var len = GetMessageCapacityInBits(imageBytes) / 8;
 
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
             int order = 0;

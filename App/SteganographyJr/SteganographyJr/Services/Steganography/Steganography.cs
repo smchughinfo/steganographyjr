@@ -83,7 +83,7 @@ namespace SteganographyJr.Services.Steganography
             }
             else
             {
-                double messageCapacity = GetMessageCapacity(_bitmap);
+                double messageCapacity = GetMessageCapacityInBits(_bitmap);
                 percentComplete = _messageBuilder.Count / messageCapacity;
             }
 
