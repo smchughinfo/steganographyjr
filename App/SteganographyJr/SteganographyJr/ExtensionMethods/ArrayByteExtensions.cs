@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SteganographyJr.ExtensionMethods
@@ -22,5 +23,34 @@ namespace SteganographyJr.ExtensionMethods
 
             return arrayWithString;
         }
+
+    public static byte[][] Split(this byte[] composite, byte[] seperator)
+    {
+        int i = 0;
+        for(; i < composite.Length - seperator.Length; i++)
+        {
+            var compositeView = new byte[seperator.Length];
+            Array.Copy(composite, i, compositeView, 0, seperator.Length);
+
+            var found = compositeView.SequenceEqual(seperator);
+            if (found) break;
+        }
+
+        var component1Length = i;
+        var component1 = new byte[component1Length];
+
+        var component2Length = composite.Length - seperator.Length - component1Length;
+        var component2 = new byte[component2Length];
+        var component2Index = i + seperator.Length;
+
+        Array.Copy(composite, 0, component1, 0, component1Length);
+        Array.Copy(composite, component2Index, component2, 0, component2Length);
+
+        return new byte[][]
+        {
+            component1,
+            component2
+        };
+    }
     }
 }

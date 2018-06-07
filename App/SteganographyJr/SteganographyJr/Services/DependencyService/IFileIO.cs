@@ -11,6 +11,7 @@ namespace SteganographyJr.Services.DependencyService
     public interface IFileIO
     {
         Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false);
-        Task<ImageSaveResult> SaveImage(string path, byte[] image, object nativeRepresentation = null);
+        Task<FileSaveResult> SaveImageAsync(string path, byte[] image, object nativeRepresentation = null);
+        Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes);
     }
 }

@@ -397,12 +397,27 @@ namespace SteganographyJr.ViewModels
 
         private byte[] GetSteganographyMessage()
         {
-            var bytes = new List<byte>(
-                // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS
-                UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.Bytes
-            );
+            // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS, ALONG WITH THE EOF
+            var bytes = new List<byte>();
+            if(UsingTextMessage)
+            {
+                var textMessageBytes = Encoding.UTF8.GetBytes(TextMessage);
+                bytes.AddRange(textMessageBytes);
+            }
+            else
+            {
+                var fileNameString = Path.GetFileName(FileMessage.Path);
+                var fileNameBytes = Encoding.UTF8.GetBytes(fileNameString);
+                var fileSeperatorBytes = Encoding.UTF8.GetBytes(StaticVariables.fileSeperator);
 
-            bytes.Add(UsingTextMessage ? (byte)0 : (byte)1);
+                bytes.AddRange(fileNameBytes);
+                bytes.AddRange(fileSeperatorBytes);
+                bytes.AddRange(FileMessage.Bytes);
+            }
+
+            var zero = (byte)StaticVariables.Message.Text;
+            var one = (byte)StaticVariables.Message.File;
+            bytes.Add(UsingTextMessage ? zero : one);
 
             return bytes.ToArray();
         }
@@ -419,7 +434,7 @@ namespace SteganographyJr.ViewModels
             }
             else
             {
-                returnObject = message; // will have to save file name and type along with message
+                returnObject = message; 
             }
 
             return (type, returnObject);
@@ -455,7 +470,7 @@ namespace SteganographyJr.ViewModels
                 Bytes = CarrierImageBytes,
                 Path = CarrierImagePath
             };
-            var imageSaveResult =  await DependencyService.Get<IFileIO>().SaveImage(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+            var imageSaveResult =  await DependencyService.Get<IFileIO>().SaveImageAsync(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
 
             // notify the user
             var success = string.IsNullOrEmpty(imageSaveResult.ErrorMessage);
@@ -476,15 +491,48 @@ namespace SteganographyJr.ViewModels
         {
             var password = GetSteganographyPassword();
             byte[] message =  await _steganography.Decode(CarrierImageBytes, password);
+            await RouteDecodedMessage(message);
+            ExecutionProgress = 1;
+            await Task.Delay(1000);
+            ExecutionProgress = 0;
+        }
+
+        private async Task RouteDecodedMessage(byte[] message)
+        {
             (StaticVariables.Message messageType, object messageObj) result = ParseSteganographyMessage(message);
-            if(result.messageType == StaticVariables.Message.Text)
+            if (result.messageType == StaticVariables.Message.Text)
             {
                 var stringMessage = (string)result.messageObj;
                 SendDecodedMessage(stringMessage);
             }
-            ExecutionProgress = 1;
-            await Task.Delay(1000);
-            ExecutionProgress = 0;
+            else
+            {
+                var messageObjAsBytes = (byte[])result.messageObj;
+                var seperatorBytes = Encoding.UTF8.GetBytes(StaticVariables.fileSeperator);
+
+                var messageComponents = messageObjAsBytes.Split(seperatorBytes);
+
+                var fileName = Encoding.UTF8.GetString(messageComponents[0]);
+                var fileBytes = messageComponents[1];
+
+                var fileSaveResult = await DependencyService.Get<IFileIO>().SaveFileAsync(fileName, fileBytes);
+                var success = string.IsNullOrEmpty(fileSaveResult.ErrorMessage);
+                if (success == false)
+                {
+                    SendErrorMessage(fileSaveResult.ErrorMessage);
+                }
+            }
+        }
+
+        private void SendErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
         }
 
         private void SendDecodedMessage(string decodedMessage)
