@@ -407,6 +407,24 @@ namespace SteganographyJr.ViewModels
             return bytes.ToArray();
         }
 
+        private (StaticVariables.Message messageType, object message) ParseSteganographyMessage(byte[] message)
+        {
+            var type = (StaticVariables.Message)message.Last();
+            message = message.Take(message.Count() - 1).ToArray();
+
+            object returnObject;
+            if(type == StaticVariables.Message.Text)
+            {
+                returnObject = Encoding.UTF8.GetString(message);
+            }
+            else
+            {
+                returnObject = message; // will have to save file name and type along with message
+            }
+
+            return (type, returnObject);
+        }
+
         private async Task Encode()
         {
             // get encoding variables
@@ -457,10 +475,27 @@ namespace SteganographyJr.ViewModels
         private async Task Decode()
         {
             var password = GetSteganographyPassword();
-            await _steganography.Decode(CarrierImageBytes, password);
+            byte[] message =  await _steganography.Decode(CarrierImageBytes, password);
+            (StaticVariables.Message messageType, object messageObj) result = ParseSteganographyMessage(message);
+            if(result.messageType == StaticVariables.Message.Text)
+            {
+                var stringMessage = (string)result.messageObj;
+                SendDecodedMessage(stringMessage);
+            }
             ExecutionProgress = 1;
             await Task.Delay(1000);
             ExecutionProgress = 0;
+        }
+
+        private void SendDecodedMessage(string decodedMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Message Decoded",
+                CancelButtonText = "Okay",
+                Message = $"Decoded message: {decodedMessage}"
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
         }
 
         private void SendEncodingSuccessMessage(string imagePath)

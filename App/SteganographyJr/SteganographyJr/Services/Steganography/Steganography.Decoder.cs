@@ -1,4 +1,5 @@
 ﻿using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,21 +15,24 @@ namespace SteganographyJr.Services.Steganography
         public async Task<byte[]> Decode(byte[] imageBytes, string password)
         {
             InitializeFields(ExecutionType.Decode, imageBytes, password);
-            var eof = Encoding.UTF8.GetBytes(password);
+            var eofBytes = Encoding.UTF8.GetBytes(password);
 
+            byte[] decodMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap((x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
-                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
+                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eofBytes);
 
                     UpdateProgress();
                     return foundEof;
                 });
+
+                decodMessage = GetMessageWithoutEof(eofBytes);
             });
 
             ClearFields();
-            return null;
+            return decodMessage;
         }
 
         private bool AddBitsAndCheckForEof(bool[] pixelBitsAsBools, byte[] eof)
@@ -64,6 +68,13 @@ namespace SteganographyJr.Services.Steganography
             var b = pixel.B % 2 == 0;
 
             return new bool[] { r, g, b };
+        }
+
+        private byte[] GetMessageWithoutEof(byte[] eofBytes)
+        {
+            var messageBuilderBytes = _messageBuilder.ConvertToByteArray();
+            var messageSizeWithoutEof = messageBuilderBytes.Count() - eofBytes.Count();
+            return messageBuilderBytes.Take(messageSizeWithoutEof).ToArray();
         }
     }
 }

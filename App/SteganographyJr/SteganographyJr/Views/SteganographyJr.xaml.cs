@@ -27,6 +27,7 @@ namespace SteganographyJr.Views
 
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
+                // TODO: copy to clipboard
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
             });
         }
