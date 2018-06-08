@@ -42,6 +42,7 @@ namespace SteganographyJr.Services.Steganography
 
         public async Task<Stream> Encode(byte[] imageBytes, byte[] message, string password)
         {
+            // TODO: encrypt password
             message = message.AppendString(password);
             InitializeFields(ExecutionType.Encode, imageBytes, password, message);
 

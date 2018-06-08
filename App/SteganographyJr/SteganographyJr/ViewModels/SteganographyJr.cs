@@ -15,6 +15,7 @@ using Xamarin.Forms;
 using SteganographyJr.Mvvm;
 using SteganographyJr.Services.Steganography;
 using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Services;
 
 namespace SteganographyJr.ViewModels
 {
@@ -397,7 +398,6 @@ namespace SteganographyJr.ViewModels
 
         private byte[] GetSteganographyMessage()
         {
-            // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS, ALONG WITH THE EOF
             var bytes = new List<byte>();
             if(UsingTextMessage)
             {
@@ -445,7 +445,8 @@ namespace SteganographyJr.ViewModels
             // get encoding variables
             var password = GetSteganographyPassword();
             var message = GetSteganographyMessage();
-            
+            message = Cryptography.Encrypt(message, password);
+
             // make sure we can encode
             var messageFits = _steganography.MessageFits(CarrierImageBytes, message);
             if(messageFits == false)
@@ -491,6 +492,7 @@ namespace SteganographyJr.ViewModels
         {
             var password = GetSteganographyPassword();
             byte[] message =  await _steganography.Decode(CarrierImageBytes, password);
+            message = Cryptography.Decrypt(message, password);
             await RouteDecodedMessage(message);
             ExecutionProgress = 1;
             await Task.Delay(1000);
