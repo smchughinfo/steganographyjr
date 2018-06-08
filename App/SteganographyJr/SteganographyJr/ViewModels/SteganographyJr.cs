@@ -401,14 +401,14 @@ namespace SteganographyJr.ViewModels
             var bytes = new List<byte>();
             if(UsingTextMessage)
             {
-                var textMessageBytes = Encoding.UTF8.GetBytes(TextMessage);
+                var textMessageBytes = TextMessage.ConvertToByteArray();
                 bytes.AddRange(textMessageBytes);
             }
             else
             {
                 var fileNameString = Path.GetFileName(FileMessage.Path);
-                var fileNameBytes = Encoding.UTF8.GetBytes(fileNameString);
-                var fileSeperatorBytes = Encoding.UTF8.GetBytes(StaticVariables.fileSeperator);
+                var fileNameBytes = fileNameString.ConvertToByteArray();
+                var fileSeperatorBytes = StaticVariables.fileSeperator.ConvertToByteArray();
 
                 bytes.AddRange(fileNameBytes);
                 bytes.AddRange(fileSeperatorBytes);
@@ -430,7 +430,7 @@ namespace SteganographyJr.ViewModels
             object returnObject;
             if(type == StaticVariables.Message.Text)
             {
-                returnObject = Encoding.UTF8.GetString(message);
+                returnObject = message.ConvertToString();
             }
             else
             {
@@ -508,11 +508,11 @@ namespace SteganographyJr.ViewModels
             else
             {
                 var messageObjAsBytes = (byte[])result.messageObj;
-                var seperatorBytes = Encoding.UTF8.GetBytes(StaticVariables.fileSeperator);
+                var seperatorBytes = StaticVariables.fileSeperator.ConvertToByteArray();
 
                 var messageComponents = messageObjAsBytes.Split(seperatorBytes);
 
-                var fileName = Encoding.UTF8.GetString(messageComponents[0]);
+                var fileName = messageComponents[0].ConvertToString();
                 var fileBytes = messageComponents[1];
 
                 var fileSaveResult = await DependencyService.Get<IFileIO>().SaveFileAsync(fileName, fileBytes);
