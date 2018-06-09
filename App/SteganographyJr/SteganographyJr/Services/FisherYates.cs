@@ -12,8 +12,8 @@ namespace SteganographyJr.Services
             int[] source = GenerateSequentialArray(size);
 
             int[] a = new int[size];
-            var hash = Cryptography.GetHashAsInt(password);
-            var random = new Random(hash);
+            var seed = GetSeed(password);
+            var random = new Random(seed);
             for (int i = 0; i < size; i++)
             {
                 int j = random.Next(0, i + 1);
@@ -35,6 +35,15 @@ namespace SteganographyJr.Services
                 source[i] = i;
             }
             return source;
+        }
+
+        // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
+        static int GetSeed(string input)
+        {
+            // since we are losing bytes this is no good for cryptography. but it's fine for the purpose of generating a seed in this context.
+            var hashed = Cryptography.GetHash(input);
+            var ivalue = BitConverter.ToInt32(hashed, 0);
+            return ivalue;
         }
     }
 }

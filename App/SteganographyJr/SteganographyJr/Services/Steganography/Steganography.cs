@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Drawing = CoreCompat.System.Drawing;
 using SteganographyJr.ExtensionMethods;
+using CoreCompat::System.Drawing.Imaging;
+using SteganographyJr.Models;
 
 namespace SteganographyJr.Services.Steganography
 {
@@ -25,13 +27,20 @@ namespace SteganographyJr.Services.Steganography
         Stopwatch _uiStopwatch;
         int _messageIndex;
         List<bool> _messageBuilder;
+        CarrierImageFormat _carrierImageFormat;
         // END CLEAR THESE FIELDS
 
         enum ExecutionType { Encode, Decode };
         public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
-        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, string password, byte[] message = null)
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, string password)
+        {
+            var carrierImageFormat = new CarrierImageFormat(CarrierImageFormat.ImageFormat.png);
+            InitializeFields(executionType, imageBytes, carrierImageFormat, password, null);
+        }
+
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, CarrierImageFormat carrierImageFormat, string password, byte[] message)
         {
             _executionType = executionType;
             _message = message;
@@ -39,10 +48,15 @@ namespace SteganographyJr.Services.Steganography
             _uiStopwatch = new Stopwatch();
             _messageIndex = 0;
             _messageBuilder = new List<bool>();
+            _carrierImageFormat = carrierImageFormat;
 
             using (var imageStream = new MemoryStream(imageBytes))
             {
                 _bitmap = new Drawing.Bitmap(imageStream);
+
+                // TODO: if jpeg or gif???? {
+                _bitmap = _bitmap.ChangeFormat(CarrierImageFormat.ImageFormat.png);
+                // }
             }
         }
 
@@ -55,6 +69,7 @@ namespace SteganographyJr.Services.Steganography
             _uiStopwatch = null;
             _messageIndex = 0;
             _messageBuilder = null;
+            _carrierImageFormat = null;
         }
 
         private void IterateBitmap(Func<int, int, bool> onPixel)
@@ -94,7 +109,7 @@ namespace SteganographyJr.Services.Steganography
         {
             var stopwatchNotRunning = _uiStopwatch.IsRunning == false;
 
-            if(stopwatchNotRunning)
+            if (stopwatchNotRunning)
             {
                 _uiStopwatch.Start();
             }

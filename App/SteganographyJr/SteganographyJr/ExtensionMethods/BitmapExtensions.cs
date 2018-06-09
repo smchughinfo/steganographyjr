@@ -1,5 +1,7 @@
 ﻿extern alias CoreCompat;
 
+using CoreCompat::System.Drawing.Imaging;
+using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +30,32 @@ namespace SteganographyJr.ExtensionMethods
             int colInt = Convert.ToInt32(col);
 
             return (x: colInt, y: rowInt);
+        }
+
+        public static Drawing.Bitmap ChangeFormat(this Drawing.Bitmap bitmap, CarrierImageFormat.ImageFormat imageFormat)
+        {
+            ImageFormat bitmapImageFormat = null;
+
+            if(imageFormat == CarrierImageFormat.ImageFormat.gif) {
+                bitmapImageFormat = ImageFormat.Gif;
+            }
+            else if (imageFormat == CarrierImageFormat.ImageFormat.jpg) {
+                bitmapImageFormat = ImageFormat.Jpeg;
+            }
+            else if (imageFormat == CarrierImageFormat.ImageFormat.png) {
+                bitmapImageFormat = ImageFormat.Png;
+            }
+
+            return ChangeFormat(bitmap, bitmapImageFormat);
+        }
+
+        public static Drawing.Bitmap ChangeFormat(this Drawing.Bitmap bitmap, ImageFormat imageFormat)
+        {
+            using (var formatStream = new MemoryStream())
+            {
+                bitmap.Save(formatStream, ImageFormat.Png);
+                return new Drawing.Bitmap(formatStream);
+            }
         }
     }
 }

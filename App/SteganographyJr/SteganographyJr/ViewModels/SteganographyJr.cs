@@ -23,6 +23,7 @@ namespace SteganographyJr.ViewModels
     {
         byte[] _carrierImageBytes;
         string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
+        CarrierImageFormat _carrierImageFormat;
         ImageSource _carrierImageSource;
         object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
 
@@ -122,9 +123,10 @@ namespace SteganographyJr.ViewModels
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
 
-            using (var imageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource))
+            using (var imageStream = assembly.GetManifestResourceStream(StaticVariables.DefaultCarrierImageResource))
             {
                 CarrierImageBytes = imageStream.ConvertToByteArray();
+                _carrierImageFormat = StaticVariables.DefaultCarrierImageFormat;
             }
             
             UpdateCarrierImageSource();
@@ -195,6 +197,7 @@ namespace SteganographyJr.ViewModels
                     CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
                     CarrierImagePath = imageChooserResult.Path;
                     _carrierImageNative = imageChooserResult.NativeRepresentation;
+                    _carrierImageFormat = imageChooserResult.CarrierImageFormat;
 
                     imageChooserResult.Stream.Dispose();
                 }
@@ -393,7 +396,7 @@ namespace SteganographyJr.ViewModels
         
         private string GetSteganographyPassword()
         {
-            return UsePassword ? Password : StaticVariables.defaultPassword;
+            return UsePassword ? Password : StaticVariables.DefaultPassword;
         }
 
         private byte[] GetSteganographyMessage()
@@ -408,7 +411,7 @@ namespace SteganographyJr.ViewModels
             {
                 var fileNameString = Path.GetFileName(FileMessage.Path);
                 var fileNameBytes = fileNameString.ConvertToByteArray();
-                var fileSeperatorBytes = StaticVariables.fileSeperator.ConvertToByteArray();
+                var fileSeperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
                 bytes.AddRange(fileNameBytes);
                 bytes.AddRange(fileSeperatorBytes);
@@ -454,7 +457,7 @@ namespace SteganographyJr.ViewModels
             }
 
             // do the encode
-            using (var imageStream = await _steganography.Encode(CarrierImageBytes, message, password))
+            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password))
             {
                 CarrierImageBytes = imageStream.ConvertToByteArray();
             }
@@ -508,7 +511,7 @@ namespace SteganographyJr.ViewModels
             else
             {
                 var messageObjAsBytes = (byte[])result.messageObj;
-                var seperatorBytes = StaticVariables.fileSeperator.ConvertToByteArray();
+                var seperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
                 var messageComponents = messageObjAsBytes.Split(seperatorBytes);
 

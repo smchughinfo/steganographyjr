@@ -13,15 +13,6 @@ namespace SteganographyJr.Services
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
 
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
-        // you lose some bytes during the conversion so it's not as secure
-        public static int GetHashAsInt(string input)
-        {
-            var hashed = GetHash(input);
-            var ivalue = BitConverter.ToInt32(hashed, 0);
-            return ivalue;
-        }
-
-        // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
         // https://stackoverflow.com/questions/12416249/hashing-a-string-with-sha256
         public static byte[] GetHash(string randomString)
         {
@@ -59,14 +50,14 @@ namespace SteganographyJr.Services
                 encrypted = mstream.ToArray();
             }
 
-            encrypted = encrypted.Prepend(ivSeed);
+            encrypted = encrypted.Append(ivSeed);
 
             return encrypted;
         }
 
         public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
         {
-            (byte[] ivSeed, byte[] encrypted) = bytesToDecrypt.Shift(8);
+            (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
             (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
 
             byte[] decrypted;

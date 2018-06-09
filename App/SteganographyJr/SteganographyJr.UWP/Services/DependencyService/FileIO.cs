@@ -31,9 +31,11 @@ namespace SteganographyJr.UWP.Services.DependencyService
 
                 if (imagesOnly)
                 {
-                    openPicker.FileTypeFilter.Add(".jpg");
-                    openPicker.FileTypeFilter.Add(".jpeg");
-                    openPicker.FileTypeFilter.Add(".png");
+                    foreach(var imageType in StaticVariables.CarrierImageFormats)
+                    {
+                        openPicker.FileTypeFilter.Add(imageType.Extension);
+                    }
+                    
                     openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
                 }
                 else
@@ -56,7 +58,8 @@ namespace SteganographyJr.UWP.Services.DependencyService
                 {
                     Path = storageFile.Path,
                     Stream = raStream.AsStreamForRead(),
-                    NativeRepresentation = storageFile
+                    NativeRepresentation = storageFile,
+                    CarrierImageFormat = new CarrierImageFormat(storageFile.Path)
                 };
             }
             catch(Exception ex)
@@ -72,7 +75,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
                 StorageFile storageFile;
                 if (string.IsNullOrEmpty(path))
                 {
-                    storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.defaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
+                    storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.DefaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
                 }
                 else
                 {

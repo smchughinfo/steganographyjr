@@ -1,6 +1,7 @@
 ﻿extern alias CoreCompat;
 
 using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -41,11 +42,11 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, byte[] message, string password)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password)
         {
             var hashedPassword = Cryptography.GetHash(password);
             message = message.Append(hashedPassword);
-            InitializeFields(ExecutionType.Encode, imageBytes, password, message);
+            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
 
             await Task.Run(() => // move away from the calling thread while working
             {
