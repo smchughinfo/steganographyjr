@@ -15,7 +15,7 @@ namespace SteganographyJr.Services.Steganography
         public async Task<byte[]> Decode(byte[] imageBytes, string password)
         {
             InitializeFields(ExecutionType.Decode, imageBytes, password);
-            var eofBytes = password.ConvertToByteArray();
+            var eofBytes = Cryptography.GetHash(password);
 
             byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working

@@ -12,7 +12,7 @@ namespace SteganographyJr.Services
             int[] source = GenerateSequentialArray(size);
 
             int[] a = new int[size];
-            var hash = Cryptography.GetMd5HashAsInt(password);
+            var hash = Cryptography.GetHashAsInt(password);
             var random = new Random(hash);
             for (int i = 0; i < size; i++)
             {

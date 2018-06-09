@@ -18,10 +18,11 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message)
+        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
         {
+            var eof = Cryptography.GetHash(password);
             var messageCapacity = GetMessageCapacityInBits(imageBytes) / 8;
-            return messageCapacity >= message.Length;
+            return messageCapacity >= message.Length + eof.Length;
         }
 
         private int GetMessageCapacityInBits(byte[] imageBytes)
@@ -42,8 +43,8 @@ namespace SteganographyJr.Services.Steganography
 
         public async Task<Stream> Encode(byte[] imageBytes, byte[] message, string password)
         {
-            // TODO: encrypt password
-            message = message.Append(password);
+            var hashedPassword = Cryptography.GetHash(password);
+            message = message.Append(hashedPassword);
             InitializeFields(ExecutionType.Encode, imageBytes, password, message);
 
             await Task.Run(() => // move away from the calling thread while working

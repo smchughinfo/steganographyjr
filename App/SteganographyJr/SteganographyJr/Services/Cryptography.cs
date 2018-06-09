@@ -13,12 +13,26 @@ namespace SteganographyJr.Services
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
 
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
-        public static int GetMd5HashAsInt(string input)
+        // you lose some bytes during the conversion so it's not as secure
+        public static int GetHashAsInt(string input)
         {
-            MD5 md5Hasher = MD5.Create();
-            var hashed = md5Hasher.ComputeHash(input.ConvertToByteArray());
+            var hashed = GetHash(input);
             var ivalue = BitConverter.ToInt32(hashed, 0);
             return ivalue;
+        }
+
+        // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
+        // https://stackoverflow.com/questions/12416249/hashing-a-string-with-sha256
+        public static byte[] GetHash(string randomString)
+        {
+            var crypt = new SHA256Managed();
+            var hash = new StringBuilder();
+            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(randomString));
+            foreach (byte theByte in crypto)
+            {
+                hash.Append(theByte.ToString("x2"));
+            }
+            return hash.ToString().ConvertToByteArray();
         }
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
@@ -27,8 +41,6 @@ namespace SteganographyJr.Services
         // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
         public static byte[] Encrypt(byte[] bytesToEncrypt, string password)
         {
-            // add original message length to encryped message
-            bytesToEncrypt = bytesToEncrypt.Append(bytesToEncrypt.Length);
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
@@ -54,7 +66,7 @@ namespace SteganographyJr.Services
 
         public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
         {
-            (byte[] ivSeed, byte[] encrypted) = bytesToDecrypt.Shift(8); // get the initialization vector
+            (byte[] ivSeed, byte[] encrypted) = bytesToDecrypt.Shift(8);
             (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
 
             byte[] decrypted;

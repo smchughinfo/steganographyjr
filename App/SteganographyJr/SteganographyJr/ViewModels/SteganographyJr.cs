@@ -414,10 +414,8 @@ namespace SteganographyJr.ViewModels
                 bytes.AddRange(fileSeperatorBytes);
                 bytes.AddRange(FileMessage.Bytes);
             }
-
-            var zero = (byte)StaticVariables.Message.Text;
-            var one = (byte)StaticVariables.Message.File;
-            bytes.Add(UsingTextMessage ? zero : one);
+            
+            bytes.Add(UsingTextMessage ? (byte)0: (byte)1);
 
             return bytes.ToArray();
         }
@@ -448,7 +446,7 @@ namespace SteganographyJr.ViewModels
             message = Cryptography.Encrypt(message, password);
 
             // make sure we can encode
-            var messageFits = _steganography.MessageFits(CarrierImageBytes, message);
+            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
             if(messageFits == false)
             {
                 SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
