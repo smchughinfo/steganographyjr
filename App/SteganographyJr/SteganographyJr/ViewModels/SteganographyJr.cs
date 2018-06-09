@@ -252,7 +252,7 @@ namespace SteganographyJr.ViewModels
             ExecuteCommand = new DelegateCommand(
                 execute: async () =>
                 {
-                    if(!Executing)
+                    if (!Executing)
                     {
                         await Execute();
                     }
@@ -260,6 +260,16 @@ namespace SteganographyJr.ViewModels
                     {
                         await Cancel();
                     }
+                },
+                canExecute: () =>
+                {
+                    bool passwordOkay = !UsePassword || !string.IsNullOrEmpty(Password);
+                    bool textMessageOkay = ShowTextMessage && !string.IsNullOrEmpty(TextMessage);
+                    bool fileMessageOkay = ShowFileMessage && FileMessage != null;
+
+                    bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
+
+                    return passwordOkay && encodingOkay;
                 }
             );
         }
@@ -315,17 +325,6 @@ namespace SteganographyJr.ViewModels
                 _cancelling = false;
             }
             return cancelling;
-        }
-
-        private bool CanExecute()
-        {
-            bool passwordOkay = !UsePassword || !string.IsNullOrEmpty(Password);
-            bool textMessageOkay = ShowTextMessage && !string.IsNullOrEmpty(TextMessage);
-            bool fileMessageOkay = ShowFileMessage && FileMessage != null;
-
-            bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
-
-            return NotExecuting && passwordOkay && encodingOkay;
         }
 
         public bool Executing {
