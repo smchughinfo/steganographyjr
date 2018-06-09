@@ -10,6 +10,8 @@ namespace SteganographyJr.Services
 {
     class Cryptography
     {
+        static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
+
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
         public static int GetMd5HashAsInt(string input)
         {
@@ -21,20 +23,26 @@ namespace SteganographyJr.Services
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
+        // https://codereview.stackexchange.com/questions/196088/encrypt-a-byte-array
+        // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
         public static byte[] Encrypt(byte[] bytesToEncrypt, string password)
         {
-            byte[] ivSeed = Guid.NewGuid().ToByteArray();
+            // add original message length to encryped message
+            bytesToEncrypt = bytesToEncrypt.Append(bytesToEncrypt.Length);
+            bytesToEncrypt = bytesToEncrypt.Append(eof);
+
+            byte[] ivSeed = GetRandomNumber();
             
             var rfc = new Rfc2898DeriveBytes(password, ivSeed);
-            byte[] Key = rfc.GetBytes(16);
-            byte[] IV = rfc.GetBytes(16);
+            var key = rfc.GetBytes(16);
+            var iV = rfc.GetBytes(16);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
             {
                 using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
                 {
-                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(Key, IV), CryptoStreamMode.Write))
+                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(key, iV), CryptoStreamMode.Write))
                     {
                         cryptoStream.Write(bytesToEncrypt, 0, bytesToEncrypt.Length);
                     }
@@ -42,40 +50,47 @@ namespace SteganographyJr.Services
                 encrypted = mstream.ToArray();
             }
 
-            var messageLengthAs32Bits = Convert.ToInt32(bytesToEncrypt.Length);
-            var messageLength = BitConverter.GetBytes(messageLengthAs32Bits);
-
             encrypted = encrypted.Prepend(ivSeed);
-            encrypted = encrypted.Prepend(messageLength);
 
             return encrypted;
         }
 
         public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
         {
-            (byte[] messageLengthAs32Bits, byte[] bytesWithIv) = bytesToDecrypt.Shift(4); // get the message length
-            (byte[] ivSeed, byte[] encrypted) = bytesWithIv.Shift(16);                    // get the initialization vector
-
-            var length = BitConverter.ToInt32(messageLengthAs32Bits, 0);
+            (byte[] ivSeed, byte[] encrypted) = bytesToDecrypt.Shift(8); // get the initialization vector
 
             var rfc = new Rfc2898DeriveBytes(password, ivSeed);
-            byte[] Key = rfc.GetBytes(16);
-            byte[] IV = rfc.GetBytes(16);
+            var key = rfc.GetBytes(16);
+            var iV = rfc.GetBytes(16);
 
             byte[] decrypted;
             using (MemoryStream mStream = new MemoryStream(encrypted))
             {
                 using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
                 {
-                    aesProvider.Padding = PaddingMode.Zeros;
-                    using (CryptoStream cryptoStream = new CryptoStream(mStream,aesProvider.CreateDecryptor(Key, IV), CryptoStreamMode.Read))
+                    aesProvider.Padding = PaddingMode.None;
+                    using (CryptoStream cryptoStream = new CryptoStream(mStream,aesProvider.CreateDecryptor(key, iV), CryptoStreamMode.Read))
                     {
-                        cryptoStream.Read(encrypted, 0, length);
+                        cryptoStream.Read(encrypted, 0, encrypted.Length);
                     }
                 }
-                decrypted = mStream.ToArray().Take(length).ToArray();
+
+                // take only the number of bytes that were in the original byte[]
+                decrypted = mStream.ToArray();
+                decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
             }
             return decrypted;
+        }
+
+        private static byte[] GetRandomNumber()
+        {
+            byte[] salt1 = new byte[8];
+            using (RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider())
+            {
+                // Fill the array with a random value.
+                rngCsp.GetBytes(salt1);
+            }
+            return salt1;
         }
     }
 }

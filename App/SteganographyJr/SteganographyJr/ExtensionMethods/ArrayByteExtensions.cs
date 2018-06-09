@@ -8,20 +8,30 @@ namespace SteganographyJr.ExtensionMethods
 {
     public static class ArrayByteExtensions
     {
-        public static byte[] AppendString(this byte[] message, string stringToAppend)
+        public static byte[] Append(this byte[] bytes, int intToAppend)
         {
-            return message.AppendString(stringToAppend, Encoding.UTF8);
+            var intAsBytes = BitConverter.GetBytes(intToAppend);
+            return bytes.Append(intAsBytes);
         }
 
-        public static byte[] AppendString(this byte[] message, string stringToAppend, Encoding encoding)
+        public static byte[] Append(this byte[] bytes, string stringToAppend)
+        {
+            return bytes.Append(stringToAppend, Encoding.UTF8);
+        }
+
+        public static byte[] Append(this byte[] bytes, string stringToAppend, Encoding encoding)
         {
             var stringBytes = encoding.GetBytes(stringToAppend);
-            var arrayWithString = new byte[message.Length + stringBytes.Length];
+            return bytes.Append(stringBytes);
+        }
 
-            message.CopyTo(arrayWithString, 0);
-            stringBytes.CopyTo(arrayWithString, message.Length);
+        public static byte[] Append(this byte[] bytes, byte[] bytesToAppend)
+        {
+            var newArray = new byte[bytes.Length + bytesToAppend.Length];
+            bytes.CopyTo(newArray, 0);
+            bytesToAppend.CopyTo(newArray, bytes.Length);
 
-            return arrayWithString;
+            return newArray;
         }
 
         public static byte[][] Split(this byte[] composite, byte[] seperator)
@@ -60,10 +70,10 @@ namespace SteganographyJr.ExtensionMethods
 
         public static byte[] Prepend(this byte[] bytes, byte[] bytesToPrepend)
         {
-            var tmp = new byte[bytes.Length + bytesToPrepend.Length];
-            bytesToPrepend.CopyTo(tmp, 0);
-            bytes.CopyTo(tmp, bytesToPrepend.Length);
-            return tmp;
+            var newArray = new byte[bytes.Length + bytesToPrepend.Length];
+            bytesToPrepend.CopyTo(newArray, 0);
+            bytes.CopyTo(newArray, bytesToPrepend.Length);
+            return newArray;
         }
 
         public static (byte[] left, byte[] right) Shift(this byte[] bytes, int size)
