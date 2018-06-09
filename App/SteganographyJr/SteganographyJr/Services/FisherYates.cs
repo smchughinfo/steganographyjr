@@ -38,9 +38,10 @@ namespace SteganographyJr.Services
         }
 
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
+        // https://stackoverflow.com/questions/2351087/what-is-the-best-32bit-hash-function-for-short-strings-tag-names
         static int GetSeed(string input)
         {
-            // since we are losing bytes this is no good for cryptography. but it's fine for the purpose of generating a seed in this context.
+            // since we are losing bytes this is no good for cryptography. but it appears to be fine for the purpose of generating a 32-bit seed in this context.
             var hashed = Cryptography.GetHash(input);
             var ivalue = BitConverter.ToInt32(hashed, 0);
             return ivalue;
