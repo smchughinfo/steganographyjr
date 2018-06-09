@@ -53,7 +53,7 @@ namespace SteganographyJr.ExtensionMethods
         {
             using (var formatStream = new MemoryStream())
             {
-                bitmap.Save(formatStream, ImageFormat.Png);
+                bitmap.Save(formatStream, imageFormat);
                 return new Drawing.Bitmap(formatStream);
             }
         }
