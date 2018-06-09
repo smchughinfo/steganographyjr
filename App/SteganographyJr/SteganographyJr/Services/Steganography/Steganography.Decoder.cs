@@ -15,20 +15,20 @@ namespace SteganographyJr.Services.Steganography
         public async Task<byte[]> Decode(byte[] imageBytes, string password)
         {
             InitializeFields(ExecutionType.Decode, imageBytes, password);
-            var eofBytes = Cryptography.GetHash(password);
+            var eof = Cryptography.GetHash(password);
 
             byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap((x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
-                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eofBytes);
+                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 
                     UpdateProgress();
                     return foundEof;
                 });
 
-                decodedMessage = GetMessageWithoutEof(eofBytes);
+                decodedMessage = GetMessageWithoutEof(eof);
             });
 
             ClearFields();

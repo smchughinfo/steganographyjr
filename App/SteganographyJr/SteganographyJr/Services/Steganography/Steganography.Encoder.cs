@@ -44,8 +44,8 @@ namespace SteganographyJr.Services.Steganography
 
         public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password)
         {
-            var hashedPassword = Cryptography.GetHash(password);
-            message = message.Append(hashedPassword);
+            var eof = Cryptography.GetHash(password);
+            message = message.Append(eof);
             InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
 
             await Task.Run(() => // move away from the calling thread while working
