@@ -53,10 +53,7 @@ namespace SteganographyJr.Services.Steganography
             using (var imageStream = new MemoryStream(imageBytes))
             {
                 _bitmap = new Drawing.Bitmap(imageStream);
-
-                // TODO: if jpeg or gif???? {
                 _bitmap = _bitmap.ChangeFormat(CarrierImageFormat.ImageFormat.png);
-                // }
             }
         }
 

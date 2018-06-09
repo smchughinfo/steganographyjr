@@ -59,23 +59,32 @@ namespace SteganographyJr.Services
         {
             (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
             (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
+            
+            byte[] decrypted = null;
 
-            byte[] decrypted;
-            using (MemoryStream mStream = new MemoryStream(encrypted))
+            try
             {
-                using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
+                using (MemoryStream mStream = new MemoryStream(encrypted))
                 {
-                    aesProvider.Padding = PaddingMode.None;
-                    using (CryptoStream cryptoStream = new CryptoStream(mStream,aesProvider.CreateDecryptor(key, iv), CryptoStreamMode.Read))
+                    using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
                     {
-                        cryptoStream.Read(encrypted, 0, encrypted.Length);
+                        aesProvider.Padding = PaddingMode.None;
+                        using (CryptoStream cryptoStream = new CryptoStream(mStream, aesProvider.CreateDecryptor(key, iv), CryptoStreamMode.Read))
+                        {
+                            cryptoStream.Read(encrypted, 0, encrypted.Length);
+                        }
                     }
-                }
 
-                // take only the number of bytes that were in the original byte[]
-                decrypted = mStream.ToArray();
-                decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
+                    // take only the number of bytes that were in the original byte[]
+                    decrypted = mStream.ToArray();
+                    decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
+                }
             }
+            catch(Exception ex)
+            {
+
+            }
+            
             return decrypted;
         }
 

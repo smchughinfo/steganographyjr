@@ -12,11 +12,12 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, string password)
+        public async Task<byte[]> Decode(byte[] imageBytes, string password, Func<bool> checkCancel)
         {
             InitializeFields(ExecutionType.Decode, imageBytes, password);
             var eof = Cryptography.GetHash(password);
 
+            bool userCancelled = false;
             byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
@@ -25,14 +26,19 @@ namespace SteganographyJr.Services.Steganography
                     var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 
                     UpdateProgress();
-                    return foundEof;
-                });
 
-                decodedMessage = GetMessageWithoutEof(eof);
+                    userCancelled = checkCancel();
+                    return userCancelled || foundEof;
+                });
+                
+                if(userCancelled == false)
+                {
+                    decodedMessage = GetMessageWithoutEof(eof);
+                }
             });
 
             ClearFields();
-            return decodedMessage;
+            return userCancelled ? null : decodedMessage;
         }
 
         private bool AddBitsAndCheckForEof(bool[] pixelBitsAsBools, byte[] eof)

@@ -42,23 +42,26 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
         {
             var eof = Cryptography.GetHash(password);
             message = message.Append(eof);
             InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
 
+            bool userCancelled = false;
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap((x, y) => {
                     EncodePixel(x, y);
                     UpdateProgress();
 
-                    return _messageIndex >= _message.Length * 8;
+                    userCancelled = checkCancel();
+                    bool encodeComplete = _messageIndex >= _message.Length * 8;
+                    return userCancelled || encodeComplete;
                 });
             });
 
-            var encodedStream = _bitmap.ConvertToStream();
+            Stream encodedStream = userCancelled ? null : _bitmap.ConvertToStream();
 
             ClearFields();
             return encodedStream;

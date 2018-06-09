@@ -16,6 +16,7 @@ using SteganographyJr.Mvvm;
 using SteganographyJr.Services.Steganography;
 using SteganographyJr.ExtensionMethods;
 using SteganographyJr.Services;
+using System.Diagnostics;
 
 namespace SteganographyJr.ViewModels
 {
@@ -45,8 +46,10 @@ namespace SteganographyJr.ViewModels
         public DelegateCommand ChangeMessageFileCommand { get; private set; }
 
         bool _executing;
+        bool _cancelling;
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
+        string _executionMessage;
 
         Steganography _steganography;
 
@@ -81,7 +84,8 @@ namespace SteganographyJr.ViewModels
 
             WhenPropertyChanges(() => Executing)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
-                .AlsoRaisePropertyChangedFor(() => NotExecuting);
+                .AlsoRaisePropertyChangedFor(() => NotExecuting)
+                .AlsoRaisePropertyChangedFor(() => ExecutionMessage);
 
             WhenPropertyChanges(() => NotExecuting)
                 .AlsoRaisePropertyChangedFor(() => EnablePassword);
@@ -244,33 +248,84 @@ namespace SteganographyJr.ViewModels
         private void InitExecute()
         {
             _executing = false;
+            _cancelling = false;
             ExecuteCommand = new DelegateCommand(
                 execute: async () =>
                 {
-                    Executing = true;
-
-                    if(SelectedModeIsEncode)
+                    if(!Executing)
                     {
-                        await Encode();
+                        await Execute();
                     }
                     else
                     {
-                        await Decode();
+                        await Cancel();
                     }
-
-                    Executing = false;
-                },
-                canExecute: () =>
-                {
-                    bool passwordOkay = !UsePassword || !string.IsNullOrEmpty(Password);
-                    bool textMessageOkay = ShowTextMessage && !string.IsNullOrEmpty(TextMessage);
-                    bool fileMessageOkay = ShowFileMessage && FileMessage != null;
-
-                    bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
-
-                    return NotExecuting && passwordOkay && encodingOkay;
                 }
             );
+        }
+
+        private async Task Execute()
+        {
+            Executing = true;
+
+            if (SelectedModeIsEncode)
+            {
+                await Encode();
+            }
+            else
+            {
+                await Decode();
+            }
+
+            Executing = false;
+        }
+
+        private async Task Cancel()
+        {
+            if(_cancelling)
+            {
+                return;
+            }
+
+            _cancelling = true;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while(true)
+            {
+                // this is more a safety check than anything. it should cancel.
+                // ...but when it doesn't don't let it crash the computer.
+                if(stopwatch.ElapsedMilliseconds > 3000)
+                {
+                    SendErrorMessage("Unable to cancel. You may need to close this program manually.");
+                    return;
+                }
+                if(_cancelling == false)
+                {
+                    return;
+                }
+                await Task.Delay(100);
+            }
+        }
+
+        private bool CheckCancel()
+        {
+            bool cancelling = _cancelling;
+            if(_cancelling)
+            {
+                _cancelling = false;
+            }
+            return cancelling;
+        }
+
+        private bool CanExecute()
+        {
+            bool passwordOkay = !UsePassword || !string.IsNullOrEmpty(Password);
+            bool textMessageOkay = ShowTextMessage && !string.IsNullOrEmpty(TextMessage);
+            bool fileMessageOkay = ShowFileMessage && FileMessage != null;
+
+            bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
+
+            return NotExecuting && passwordOkay && encodingOkay;
         }
 
         public bool Executing {
@@ -280,6 +335,12 @@ namespace SteganographyJr.ViewModels
 
         public bool NotExecuting {
             get { return !Executing; }
+        }
+
+        public string ExecutionMessage {
+            get {
+                return Executing ? "Cancel" : "Execute";
+            }
         }
 
         public byte[] CarrierImageBytes {
@@ -457,22 +518,38 @@ namespace SteganographyJr.ViewModels
             }
 
             // do the encode
-            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password))
+            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
             {
-                CarrierImageBytes = imageStream.ConvertToByteArray();
+                if(imageStream == null)
+                {
+                    // the user cancelled. cleanup and return.
+                    ExecutionProgress = 0;
+                    return;
+                }
+                else
+                {
+                    var result = imageStream.ConvertToByteArray();
+                    CarrierImageBytes = result;
+                }
             }
 
-            // update progess
             ExecutionProgress = 1;
-            await Task.Delay(1000);
+            await Task.Delay(100);
 
+            await RouteEncodedMessage();
+
+            ExecutionProgress = 0;
+        }
+
+        private async Task RouteEncodedMessage()
+        {
             // save the encode
             var encodedCarrierImage = new BytesWithPath()
             {
                 Bytes = CarrierImageBytes,
                 Path = CarrierImagePath
             };
-            var imageSaveResult =  await DependencyService.Get<IFileIO>().SaveImageAsync(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+            var imageSaveResult = await DependencyService.Get<IFileIO>().SaveImageAsync(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
 
             // notify the user
             var success = string.IsNullOrEmpty(imageSaveResult.ErrorMessage);
@@ -484,24 +561,33 @@ namespace SteganographyJr.ViewModels
             {
                 SendEncodingErrorMessage(imageSaveResult.ErrorMessage);
             }
-
-            // update progress
-            ExecutionProgress = 0;
         }
 
         private async Task Decode()
         {
             var password = GetSteganographyPassword();
-            byte[] message =  await _steganography.Decode(CarrierImageBytes, password);
-            message = Cryptography.Decrypt(message, password);
-            await RouteDecodedMessage(message);
-            ExecutionProgress = 1;
-            await Task.Delay(1000);
+            byte[] message =  await _steganography.Decode(CarrierImageBytes, password, CheckCancel);
+            if(message != null)
+            {
+                message = Cryptography.Decrypt(message, password);
+                ExecutionProgress = 1;
+                await Task.Delay(100);
+
+                await RouteDecodedMessage(message);
+                
+            }
+
             ExecutionProgress = 0;
         }
 
         private async Task RouteDecodedMessage(byte[] message)
         {
+            if(message == null)
+            {
+                SendErrorMessage("No message found. Are you using the right password?");
+                return;
+            }
+
             (StaticVariables.Message messageType, object messageObj) result = ParseSteganographyMessage(message);
             if (result.messageType == StaticVariables.Message.Text)
             {
