@@ -32,17 +32,14 @@ namespace SteganographyJr.Services
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
-            
-            var rfc = new Rfc2898DeriveBytes(password, ivSeed);
-            var key = rfc.GetBytes(16);
-            var iV = rfc.GetBytes(16);
+            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
             {
                 using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
                 {
-                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(key, iV), CryptoStreamMode.Write))
+                    using (CryptoStream cryptoStream = new CryptoStream(mstream, aesProvider.CreateEncryptor(key, iv), CryptoStreamMode.Write))
                     {
                         cryptoStream.Write(bytesToEncrypt, 0, bytesToEncrypt.Length);
                     }
@@ -58,10 +55,7 @@ namespace SteganographyJr.Services
         public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
         {
             (byte[] ivSeed, byte[] encrypted) = bytesToDecrypt.Shift(8); // get the initialization vector
-
-            var rfc = new Rfc2898DeriveBytes(password, ivSeed);
-            var key = rfc.GetBytes(16);
-            var iV = rfc.GetBytes(16);
+            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
 
             byte[] decrypted;
             using (MemoryStream mStream = new MemoryStream(encrypted))
@@ -69,7 +63,7 @@ namespace SteganographyJr.Services
                 using (AesCryptoServiceProvider aesProvider = new AesCryptoServiceProvider())
                 {
                     aesProvider.Padding = PaddingMode.None;
-                    using (CryptoStream cryptoStream = new CryptoStream(mStream,aesProvider.CreateDecryptor(key, iV), CryptoStreamMode.Read))
+                    using (CryptoStream cryptoStream = new CryptoStream(mStream,aesProvider.CreateDecryptor(key, iv), CryptoStreamMode.Read))
                     {
                         cryptoStream.Read(encrypted, 0, encrypted.Length);
                     }
@@ -80,6 +74,19 @@ namespace SteganographyJr.Services
                 decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
             }
             return decrypted;
+        }
+
+        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] ivSeed, string password)
+        {
+            byte[] key = new byte[16];
+            byte[] iv = new byte[16];
+            using (var rfc = new Rfc2898DeriveBytes(password, ivSeed))
+            {
+                key = rfc.GetBytes(16);
+                iv = rfc.GetBytes(16);
+            }
+
+            return (key, iv);
         }
 
         private static byte[] GetRandomNumber()

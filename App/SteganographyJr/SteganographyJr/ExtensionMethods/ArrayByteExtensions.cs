@@ -8,6 +8,25 @@ namespace SteganographyJr.ExtensionMethods
 {
     public static class ArrayByteExtensions
     {
+        public static (byte[] left, byte[] right) Shift(this byte[] bytes, int size)
+        {
+            var left = new byte[size];
+            var right = new byte[bytes.Length - size];
+
+            Array.Copy(bytes, 0, left, 0, left.Length);
+            Array.Copy(bytes, left.Length, right, 0, right.Length);
+
+            return (left, right);
+        }
+
+        public static byte[] Prepend(this byte[] bytes, byte[] bytesToPrepend)
+        {
+            var newArray = new byte[bytes.Length + bytesToPrepend.Length];
+            bytesToPrepend.CopyTo(newArray, 0);
+            bytes.CopyTo(newArray, bytesToPrepend.Length);
+            return newArray;
+        }
+
         public static byte[] Append(this byte[] bytes, int intToAppend)
         {
             var intAsBytes = BitConverter.GetBytes(intToAppend);
@@ -66,25 +85,6 @@ namespace SteganographyJr.ExtensionMethods
         public static string ConvertToString(this byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes);
-        }
-
-        public static byte[] Prepend(this byte[] bytes, byte[] bytesToPrepend)
-        {
-            var newArray = new byte[bytes.Length + bytesToPrepend.Length];
-            bytesToPrepend.CopyTo(newArray, 0);
-            bytes.CopyTo(newArray, bytesToPrepend.Length);
-            return newArray;
-        }
-
-        public static (byte[] left, byte[] right) Shift(this byte[] bytes, int size)
-        {
-            var left = new byte[size];
-            var right = new byte[bytes.Length - size];
-
-            Array.Copy(bytes, 0, left, 0, left.Length);
-            Array.Copy(bytes, left.Length, right, 0, right.Length);
-
-            return (left, right);
         }
     }
 }
