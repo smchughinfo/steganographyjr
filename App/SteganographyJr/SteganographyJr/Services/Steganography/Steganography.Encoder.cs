@@ -44,6 +44,7 @@ namespace SteganographyJr.Services.Steganography
 
         public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
         {
+            // TODO: split password in half. use half for encryption and hash the other half for fisher yates hash
             var eof = Cryptography.GetHash(password);
             message = message.Append(eof);
             InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
