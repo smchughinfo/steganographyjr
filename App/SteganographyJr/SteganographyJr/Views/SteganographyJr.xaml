@@ -24,7 +24,7 @@
                 </Image>
 
 
-                <Label 
+                <!--<Label 
                     Text="{Binding MessageCapacity}" 
                     HorizontalOptions="Center" />
 
@@ -126,7 +126,7 @@
                         Progress="{Binding ExecutionProgress}"/>
 
                 </Grid>
-
+-->
             </StackLayout>
         </ScrollView>
         

@@ -12,6 +12,9 @@ namespace SteganographyJr
 		public MainPage()
 		{
             InitializeComponent();
+
+            Children.Add(new Views.SteganographyJr() { Title = "Encoder" });
+            Children.Add(new Views.About() { Title = "About" });
         }
 	}
 }
