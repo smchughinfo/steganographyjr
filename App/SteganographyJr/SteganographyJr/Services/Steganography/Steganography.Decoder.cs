@@ -18,7 +18,6 @@ namespace SteganographyJr.Services.Steganography
             var shuffleSeed = FisherYates.GetSeed(eof);
 
             InitializeFields(ExecutionType.Decode, imageBytes);
-            
 
             bool userCancelled = false;
             byte[] decodedMessage = null;
