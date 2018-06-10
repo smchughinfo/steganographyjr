@@ -15,7 +15,6 @@ namespace SteganographyJr.Services.Steganography
         public async Task<byte[]> Decode(byte[] imageBytes, byte[] password, Func<bool> checkCancel)
         {
             var shuffleSeed = FisherYates.GetSeed(password);
-
             InitializeFields(ExecutionType.Decode, imageBytes);
 
             bool userCancelled = false;
