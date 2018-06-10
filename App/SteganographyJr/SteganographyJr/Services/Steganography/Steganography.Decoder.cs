@@ -67,13 +67,13 @@ namespace SteganographyJr.Services.Steganography
 
         private bool[] DecodePixel(int x, int y)
         {
-            var pixel = _bitmap.GetPixel(x, y);
+            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
 
-            var r = pixel.R % 2 == 0;
-            var g = pixel.G % 2 == 0;
-            var b = pixel.B % 2 == 0;
+            var rBit = r % 2 == 0;
+            var gBit = g % 2 == 0;
+            var bBit = b % 2 == 0;
 
-            return new bool[] { r, g, b };
+            return new bool[] { rBit, gBit, bBit };
         }
 
         private byte[] GetMessageWithoutEof(byte[] eofBytes)

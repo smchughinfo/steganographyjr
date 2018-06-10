@@ -1,10 +1,7 @@
-﻿extern alias CoreCompat;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.ExtensionMethods
 {

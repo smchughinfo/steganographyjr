@@ -1,5 +1,4 @@
-﻿extern alias CoreCompat;
-
+﻿using SteganographyJr.Classes;
 using SteganographyJr.ExtensionMethods;
 using SteganographyJr.Models;
 using System;
@@ -8,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Drawing = CoreCompat.System.Drawing;
+using Xamarin.Forms;
 
 namespace SteganographyJr.Services.Steganography
 {
@@ -30,12 +29,14 @@ namespace SteganographyJr.Services.Steganography
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
-                Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
+                var bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+                bitmap.Set(imageStream);
+
                 return GetMessageCapacityInBits(bitmap);
             }
         }
 
-        private int GetMessageCapacityInBits(Drawing.Bitmap bitmap)
+        private int GetMessageCapacityInBits(Bitmap bitmap)
         {
             var numPixels = bitmap.Height * bitmap.Width;
             var numBits = numPixels * 3;
@@ -110,15 +111,13 @@ namespace SteganographyJr.Services.Steganography
         
         private void EncodePixel(int x, int y)
         {
-            var pixel = _bitmap.GetPixel(x, y); // TODO: figure out how to handle jpegs. convert -> dowork -> convert back -> save with 0 compression. or only save as png. jpeg lossless compression
+            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
 
-            var a = pixel.A;
-            var r = GetValueToEncodeInChannel(pixel.R, _messageIndex++);
-            var g = GetValueToEncodeInChannel(pixel.G, _messageIndex++);
-            var b = GetValueToEncodeInChannel(pixel.B, _messageIndex++);
+            r = GetValueToEncodeInChannel(r, _messageIndex++);
+            g = GetValueToEncodeInChannel(g, _messageIndex++);
+            b = GetValueToEncodeInChannel(b, _messageIndex++);
 
-            var newPixel = Drawing.Color.FromArgb(a, r, g, b);
-            _bitmap.SetPixel(x, y, newPixel);
+            _bitmap.SetPixel(x, y, a, r, g, b);
         }
     }
 }

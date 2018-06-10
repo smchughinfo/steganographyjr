@@ -1,6 +1,4 @@
-﻿extern alias CoreCompat;
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,10 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Drawing = CoreCompat.System.Drawing;
 using SteganographyJr.ExtensionMethods;
-using CoreCompat::System.Drawing.Imaging;
 using SteganographyJr.Models;
+using SteganographyJr.Classes;
 
 namespace SteganographyJr.Services.Steganography
 {
@@ -21,7 +18,7 @@ namespace SteganographyJr.Services.Steganography
     {
         // BEGIN CLEAR THESE FIELDS
         ExecutionType? _executionType;
-        Drawing.Bitmap _bitmap;
+        Bitmap _bitmap;
         byte[] _message;
         string _password;
         Stopwatch _uiStopwatch;
@@ -52,8 +49,10 @@ namespace SteganographyJr.Services.Steganography
 
             using (var imageStream = new MemoryStream(imageBytes))
             {
-                _bitmap = new Drawing.Bitmap(imageStream);
-                _bitmap = _bitmap.ChangeFormat(CarrierImageFormat.ImageFormat.png);
+                _bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+                _bitmap.Set(imageStream);
+
+                _bitmap.ChangeFormat(CarrierImageFormat.ImageFormat.png);
             }
         }
 
