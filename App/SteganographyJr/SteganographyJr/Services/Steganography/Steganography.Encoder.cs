@@ -46,13 +46,15 @@ namespace SteganographyJr.Services.Steganography
         public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
         {
             var eof = Cryptography.GetHash(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
+
             message = message.Append(eof);
-            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
+            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
 
             bool userCancelled = false;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap((x, y) => {
+                IterateBitmap(shuffleSeed, (x, y) => {
                     EncodePixel(x, y);
                     UpdateProgress();
 

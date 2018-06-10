@@ -12,19 +12,26 @@ namespace SteganographyJr.Services
     {
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
 
+        public static byte[] GetHash(string randomString)
+        {
+            return GetHash(randomString.ConvertToByteArray());
+        }
+
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
         // https://stackoverflow.com/questions/12416249/hashing-a-string-with-sha256
-        public static byte[] GetHash(string randomString)
+        public static byte[] GetHash(byte[] bytesToHash)
         {
             var crypt = new SHA256Managed();
             var hash = new StringBuilder();
-            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(randomString));
+            byte[] crypto = crypt.ComputeHash(bytesToHash);
             foreach (byte theByte in crypto)
             {
                 hash.Append(theByte.ToString("x2"));
             }
             return hash.ToString().ConvertToByteArray();
         }
+
+
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted

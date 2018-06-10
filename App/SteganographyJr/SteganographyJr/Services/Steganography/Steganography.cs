@@ -20,7 +20,6 @@ namespace SteganographyJr.Services.Steganography
         ExecutionType? _executionType;
         Bitmap _bitmap;
         byte[] _message;
-        string _password;
         Stopwatch _uiStopwatch;
         int _messageIndex;
         List<bool> _messageBuilder;
@@ -31,17 +30,16 @@ namespace SteganographyJr.Services.Steganography
         public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
-        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, string password)
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes)
         {
             var carrierImageFormat = new CarrierImageFormat(CarrierImageFormat.ImageFormat.png);
-            InitializeFields(executionType, imageBytes, carrierImageFormat, password, null);
+            InitializeFields(executionType, imageBytes, carrierImageFormat, null);
         }
 
-        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, CarrierImageFormat carrierImageFormat, string password, byte[] message)
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message)
         {
             _executionType = executionType;
             _message = message;
-            _password = password;
             _uiStopwatch = new Stopwatch();
             _messageIndex = 0;
             _messageBuilder = new List<bool>();
@@ -61,16 +59,15 @@ namespace SteganographyJr.Services.Steganography
             _executionType = null;
             _bitmap = null;
             _message = null;
-            _password = null;
             _uiStopwatch = null;
             _messageIndex = 0;
             _messageBuilder = null;
             _carrierImageFormat = null;
         }
 
-        private void IterateBitmap(Func<int, int, bool> onPixel)
+        private void IterateBitmap(int shuffleSeed, Func<int, int, bool> onPixel)
         {
-            var shuffledIndices = FisherYates.Shuffle(_bitmap.Height * _bitmap.Width, _password);
+            var shuffledIndices = FisherYates.Shuffle(shuffleSeed, _bitmap.Height * _bitmap.Width);
 
             for (var i = 0; i < shuffledIndices.Length; i++)
             {
