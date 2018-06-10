@@ -50,7 +50,6 @@ namespace SteganographyJr.ViewModels
         bool _cancelling;
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
-        string _executionMessage;
 
         Steganography _steganography;
 
@@ -445,7 +444,7 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                var messageCapacity = _steganography.GetMessageCapacityInBits(CarrierImageBytes) / 8;
+                var messageCapacity = _steganography.GetImageCapacityInBits(CarrierImageBytes) / 8;
                 var size = Utilities.GetHumanReadableFileSize(messageCapacity);
                 return $"Message Capacity: {size}";
             }

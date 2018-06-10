@@ -21,11 +21,11 @@ namespace SteganographyJr.Services.Steganography
         public bool MessageFits(byte[] imageBytes, byte[] message, string password)
         {
             var eof = Cryptography.GetHash(password);
-            var messageCapacity = GetMessageCapacityInBits(imageBytes) / 8;
+            var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
             return messageCapacity >= message.Length + eof.Length;
         }
 
-        public int GetMessageCapacityInBits(byte[] imageBytes)
+        public int GetImageCapacityInBits(byte[] imageBytes)
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
