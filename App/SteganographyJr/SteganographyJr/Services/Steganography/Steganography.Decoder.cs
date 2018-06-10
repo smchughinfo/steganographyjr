@@ -14,8 +14,7 @@ namespace SteganographyJr.Services.Steganography
     {
         public async Task<byte[]> Decode(byte[] imageBytes, byte[] password, Func<bool> checkCancel)
         {
-            var eof = password; // the password is the eof but callers of this function won't know what eof means.
-            var shuffleSeed = FisherYates.GetSeed(eof);
+            var shuffleSeed = FisherYates.GetSeed(password);
 
             InitializeFields(ExecutionType.Decode, imageBytes);
 
@@ -25,7 +24,7 @@ namespace SteganographyJr.Services.Steganography
             {
                 IterateBitmap(shuffleSeed, (x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
-                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
+                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, password);
 
                     UpdateProgress();
 
@@ -35,7 +34,7 @@ namespace SteganographyJr.Services.Steganography
                 
                 if(userCancelled == false)
                 {
-                    decodedMessage = GetMessageWithoutEof(eof);
+                    decodedMessage = GetMessageWithoutEof(password);
                 }
             });
 
