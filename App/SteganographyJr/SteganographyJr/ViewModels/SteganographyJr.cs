@@ -505,9 +505,8 @@ namespace SteganographyJr.ViewModels
         private async Task Encode()
         {
             // get encoding variables
-            var password = GetSteganographyPassword();
-            var message = GetSteganographyMessage();
-            message = Cryptography.Encrypt(message, password);
+            var password = Cryptography.GetHash(GetSteganographyPassword());
+            var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
 
             // make sure we can encode
             var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
@@ -565,7 +564,7 @@ namespace SteganographyJr.ViewModels
 
         private async Task Decode()
         {
-            var password = GetSteganographyPassword();
+            var password = Cryptography.GetHash(GetSteganographyPassword());
             byte[] message =  await _steganography.Decode(CarrierImageBytes, password, CheckCancel);
             if(message != null)
             {

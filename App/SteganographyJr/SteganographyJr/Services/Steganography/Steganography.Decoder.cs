@@ -12,9 +12,9 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, string password, Func<bool> checkCancel)
+        public async Task<byte[]> Decode(byte[] imageBytes, byte[] password, Func<bool> checkCancel)
         {
-            var eof = Cryptography.GetHash(password);
+            var eof = password; // the password is the eof but callers of this function won't know what eof means.
             var shuffleSeed = FisherYates.GetSeed(eof);
 
             InitializeFields(ExecutionType.Decode, imageBytes);

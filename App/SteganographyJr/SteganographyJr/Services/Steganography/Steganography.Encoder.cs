@@ -18,11 +18,10 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
+        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] password)
         {
-            var eof = Cryptography.GetHash(password);
             var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
-            return messageCapacity >= message.Length + eof.Length;
+            return messageCapacity >= message.Length + password.Length;
         }
 
         public int GetImageCapacityInBits(byte[] imageBytes)
@@ -43,12 +42,11 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] password, Func<bool> checkCancel)
         {
-            var eof = Cryptography.GetHash(password);
-            var shuffleSeed = FisherYates.GetSeed(eof);
+            var shuffleSeed = FisherYates.GetSeed(password);
+            message = message.Append(password);
 
-            message = message.Append(eof);
             InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
 
             bool userCancelled = false;

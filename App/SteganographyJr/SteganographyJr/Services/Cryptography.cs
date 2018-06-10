@@ -37,12 +37,12 @@ namespace SteganographyJr.Services
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
         // https://codereview.stackexchange.com/questions/196088/encrypt-a-byte-array
         // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
-        public static byte[] Encrypt(byte[] bytesToEncrypt, string password)
+        public static byte[] Encrypt(byte[] bytesToEncrypt, byte[] password)
         {
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
-            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
+            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
@@ -62,10 +62,10 @@ namespace SteganographyJr.Services
             return encrypted;
         }
 
-        public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
+        public static byte[] Decrypt(byte[] bytesToDecrypt, byte[] password)
         {
             (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
-            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
+            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
             
             byte[] decrypted = null;
 
@@ -95,11 +95,11 @@ namespace SteganographyJr.Services
             return decrypted;
         }
 
-        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] ivSeed, string password)
+        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] password, byte[] ivSeed)
         {
             byte[] key = new byte[16];
             byte[] iv = new byte[16];
-            using (var rfc = new Rfc2898DeriveBytes(password, ivSeed))
+            using (var rfc = new Rfc2898DeriveBytes(password, ivSeed, 1000)) // 1000 is default. google "how many iterations to use for Rfc2898DeriveBytes"
             {
                 key = rfc.GetBytes(16);
                 iv = rfc.GetBytes(16);
