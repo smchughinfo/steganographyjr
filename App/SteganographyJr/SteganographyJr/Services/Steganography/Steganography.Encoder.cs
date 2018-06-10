@@ -18,10 +18,10 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] password)
+        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] eof)
         {
             var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
-            return messageCapacity >= message.Length + password.Length;
+            return messageCapacity >= message.Length + eof.Length;
         }
 
         public int GetImageCapacityInBits(byte[] imageBytes)
