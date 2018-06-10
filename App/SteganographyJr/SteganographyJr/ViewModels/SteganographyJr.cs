@@ -304,7 +304,7 @@ namespace SteganographyJr.ViewModels
             {
                 // this is more a safety check than anything. it should cancel.
                 // ...but when it doesn't don't let it crash the computer.
-                if(stopwatch.ElapsedMilliseconds > 3000)
+                if(stopwatch.ElapsedMilliseconds > 30000)
                 {
                     SendErrorMessage("Unable to cancel. You may need to close this program manually.");
                     return;
