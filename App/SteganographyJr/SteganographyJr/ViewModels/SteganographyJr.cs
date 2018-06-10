@@ -17,6 +17,7 @@ using SteganographyJr.Services.Steganography;
 using SteganographyJr.ExtensionMethods;
 using SteganographyJr.Services;
 using System.Diagnostics;
+using SteganographyJr.Classes;
 
 namespace SteganographyJr.ViewModels
 {
@@ -444,7 +445,8 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                var size = _steganography.GetHumanReadableFileSize(CarrierImageBytes);
+                var messageCapacity = _steganography.GetMessageCapacityInBits(CarrierImageBytes) / 8;
+                var size = Utilities.GetHumanReadableFileSize(messageCapacity);
                 return $"Message Capacity: {size}";
             }
         }

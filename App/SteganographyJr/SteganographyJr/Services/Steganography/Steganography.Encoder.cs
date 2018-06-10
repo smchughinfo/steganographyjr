@@ -25,7 +25,7 @@ namespace SteganographyJr.Services.Steganography
             return messageCapacity >= message.Length + eof.Length;
         }
 
-        private int GetMessageCapacityInBits(byte[] imageBytes)
+        public int GetMessageCapacityInBits(byte[] imageBytes)
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
@@ -68,27 +68,6 @@ namespace SteganographyJr.Services.Steganography
 
             ClearFields();
             return encodedStream;
-        }
-
-        // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
-        public string GetHumanReadableFileSize(byte[] imageBytes)
-        {
-            //imageBytes
-            var len = GetMessageCapacityInBits(imageBytes) / 8;
-
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            while (len >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                len = len / 1024;
-            }
-
-            // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
-            // show a single decimal place, and no space.
-            string result = String.Format("{0:0.##} {1}", len, sizes[order]);
-
-            return result;
         }
 
         private int GetValueToEncodeInChannel(int channelValue, int messageIndex)
