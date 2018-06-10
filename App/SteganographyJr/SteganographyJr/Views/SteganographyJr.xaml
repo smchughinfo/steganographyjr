@@ -24,11 +24,11 @@
                 </Image>
 
 
-                <!--<Label 
+                <Label 
                     Text="{Binding MessageCapacity}" 
                     HorizontalOptions="Center" />
 
-                <BoxView Style="{StaticResource Seperator}" />
+                <!--<BoxView Style="{StaticResource Seperator}" />
 
                 <Label Text="Mode" />
 
