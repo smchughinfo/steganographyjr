@@ -12,9 +12,10 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, byte[] password, Func<bool> checkCancel)
+        public async Task<byte[]> Decode(byte[] imageBytes, byte[] eof, Func<bool> checkCancel)
         {
-            var shuffleSeed = FisherYates.GetSeed(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
+
             InitializeFields(ExecutionType.Decode, imageBytes);
 
             bool userCancelled = false;
@@ -23,7 +24,7 @@ namespace SteganographyJr.Services.Steganography
             {
                 IterateBitmap(shuffleSeed, (x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
-                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, password);
+                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 
                     UpdateProgress();
 
@@ -33,7 +34,7 @@ namespace SteganographyJr.Services.Steganography
                 
                 if(userCancelled == false)
                 {
-                    decodedMessage = GetMessageWithoutEof(password);
+                    decodedMessage = GetMessageWithoutEof(eof);
                 }
             });
 

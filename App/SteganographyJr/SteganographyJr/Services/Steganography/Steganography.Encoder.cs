@@ -42,10 +42,10 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] password, Func<bool> checkCancel)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
         {
-            var shuffleSeed = FisherYates.GetSeed(password);
-            message = message.Append(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
+            message = message.Append(eof);
 
             InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
 
