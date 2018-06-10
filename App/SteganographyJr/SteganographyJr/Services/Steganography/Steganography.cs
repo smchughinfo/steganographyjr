@@ -111,7 +111,7 @@ namespace SteganographyJr.Services.Steganography
             {
                 var percentComplete = GetPercentComplete();
                 ProgressChanged?.Invoke(this, percentComplete);
-                Thread.Sleep(0); // keep the ui thread from freezing
+                Thread.Sleep(0); // keep the ui thread from freezing TODO: ???????????????????
                 _uiStopwatch.Restart();
             }
         }
