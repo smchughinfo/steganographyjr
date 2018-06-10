@@ -1,16 +1,26 @@
-﻿using System;
+﻿using SteganographyJr.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SteganographyJr
 {
-    static class StaticVariables
+    public static class StaticVariables
     {
-        public const string defaultCarrierImageResource = "SteganographyJr.Images.default-carrier-image.png";
+        public const string DefaultCarrierImageResource = "SteganographyJr.Images.default-carrier-image.png";
+        public static readonly CarrierImageFormat DefaultCarrierImageFormat = new CarrierImageFormat(DefaultCarrierImageResource);
+        public const string DefaultCarrierImageSaveName = "Encoded Image.png";
         public enum Mode { Encode, Decode };
-        public const string defaultPassword = "0785AFAB-52E8-4356-A8F4-31CACB590B88";
+        public const string DefaultPassword = "0785AFAB-52E8-4356-A8F4-31CACB590B88";
+        public const string FileSeperator = "30CAD34D-6E4D-4207-BC31-AE94D68FD44D";
         public enum Message { Text, File };
         public const string DisplayAlertMessage = "DisplayAlertMessage";
-        // TODO: MAKE SURE STREAMS ALWAYS GET CLOSED. POSSIBLY JUST ADD ONE REFERENCE HERE.
+        public static readonly CarrierImageFormat[] CarrierImageFormats =
+        {
+            new CarrierImageFormat(".gif"),
+            new CarrierImageFormat(".jpg"),
+            new CarrierImageFormat(".jpeg"),
+            new CarrierImageFormat(".png")
+        };
     }
 }

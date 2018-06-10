@@ -118,7 +118,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Button 
-                        Text="Execute"
+                        Text="{Binding ExecutionMessage}"
                         Grid.Row="0" Grid.Column="0"
                         Command="{Binding ExecuteCommand}"/>
                     <ProgressBar 

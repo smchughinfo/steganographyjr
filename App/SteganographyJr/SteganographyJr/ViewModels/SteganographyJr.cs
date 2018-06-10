@@ -2,7 +2,6 @@
 using SteganographyJr.DTOs;
 using SteganographyJr.Interfaces;
 using SteganographyJr.Models;
-using SteganographyJr.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,13 +13,20 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 using SteganographyJr.Mvvm;
+using SteganographyJr.Services.Steganography;
+using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Services;
+using System.Diagnostics;
 
 namespace SteganographyJr.ViewModels
 {
     class SteganographyJr : ObservableObject, IViewModel
     {
-        Stream _carrierImageStream;
+        byte[] _carrierImageBytes;
+        string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
+        CarrierImageFormat _carrierImageFormat;
         ImageSource _carrierImageSource;
+        object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
 
         List<Mode> _modes;
         Mode _selectedMode;
@@ -31,7 +37,7 @@ namespace SteganographyJr.ViewModels
         List<Message> _messages;      // text or file
         Message _SelectedMessageType; // text or file, whichever is selected
         string _textMessage;          // if text is selected, the text the user entered
-        StreamWithPath _fileMessage;  // if file is selected, the file the user selected
+        BytesWithPath _fileMessage;   // if file is selected, the file the user selected
 
         bool _changingCarrierImage;
         public DelegateCommand ChangeCarrierImageCommand { get; private set; }
@@ -40,8 +46,10 @@ namespace SteganographyJr.ViewModels
         public DelegateCommand ChangeMessageFileCommand { get; private set; }
 
         bool _executing;
+        bool _cancelling;
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
+        string _executionMessage;
 
         Steganography _steganography;
 
@@ -76,12 +84,13 @@ namespace SteganographyJr.ViewModels
 
             WhenPropertyChanges(() => Executing)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
-                .AlsoRaisePropertyChangedFor(() => NotExecuting);
+                .AlsoRaisePropertyChangedFor(() => NotExecuting)
+                .AlsoRaisePropertyChangedFor(() => ExecutionMessage);
 
             WhenPropertyChanges(() => NotExecuting)
                 .AlsoRaisePropertyChangedFor(() => EnablePassword);
 
-            WhenPropertyChanges(() => CarrierImageStream)
+            WhenPropertyChanges(() => CarrierImageBytes)
                 .AlsoInvokeAction(UpdateCarrierImageSource)
                 .AlsoRaisePropertyChangedFor(() => MessageCapacity);
 
@@ -96,7 +105,6 @@ namespace SteganographyJr.ViewModels
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
                 .AlsoRaisePropertyChangedFor(() => EnablePassword)
                 .AlsoRaisePropertyChangedFor(() => DisablePassword);
-
 
             WhenPropertyChanges(() => SelectedMessageType)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute)
@@ -118,23 +126,18 @@ namespace SteganographyJr.ViewModels
         private void InitCarrierImage()
         {
             var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
-            CarrierImageStream = assembly.GetManifestResourceStream(StaticVariables.defaultCarrierImageResource);
+
+            using (var imageStream = assembly.GetManifestResourceStream(StaticVariables.DefaultCarrierImageResource))
+            {
+                CarrierImageBytes = imageStream.ConvertToByteArray();
+                _carrierImageFormat = StaticVariables.DefaultCarrierImageFormat;
+            }
+            
             UpdateCarrierImageSource();
 
             _changingCarrierImage = false;
             ChangeCarrierImageCommand = new DelegateCommand(
-                execute: async () =>
-                {
-                    ChangingCarrierImage = true;
-
-                    var streamWithPath = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync(true);
-                    if(streamWithPath != null)
-                    {
-                        CarrierImageStream = streamWithPath.Stream;
-                    }
-
-                    ChangingCarrierImage = false;
-                },
+                execute: PickCarrierImage,
                 canExecute: () =>
                 {
                     return NotExecuting && !ChangingCarrierImage;
@@ -151,8 +154,8 @@ namespace SteganographyJr.ViewModels
         {
             Modes = new List<Mode>()
             {
-                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode"},
-                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode"}
+                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode" },
+                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode" }
             };
             SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
         }
@@ -167,8 +170,8 @@ namespace SteganographyJr.ViewModels
         {
             Messages = new List<Message>()
             {
-                new Message() { Key=StaticVariables.Message.Text, Value="Text"},
-                new Message() { Key=StaticVariables.Message.File, Value="File"}
+                new Message() { Key=StaticVariables.Message.Text, Value="Text" },
+                new Message() { Key=StaticVariables.Message.File, Value="File" }
             };
 
             TextMessage = "Type your message here";
@@ -177,18 +180,64 @@ namespace SteganographyJr.ViewModels
 
             _changingMessageFile = false;
             ChangeMessageFileCommand = new DelegateCommand(
-                execute: async () =>
-                {
-                    ChangingMessageFile = true;
-                    FileMessage = await DependencyService.Get<IFileIO>().GetStreamWithPathAsync();
-                    ChangingMessageFile = false;
-                    
-                },
+                execute: PickFileMessage,
                 canExecute: () =>
                 {
                     return NotExecuting && !ChangingMessageFile;
                 }
             );
+        }
+
+        private async void PickCarrierImage()
+        {
+            ChangingCarrierImage = true;
+
+            var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync(true);
+            if(imageChooserResult != null)
+            {
+                var success = string.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+                if (success)
+                {
+                    CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
+                    CarrierImagePath = imageChooserResult.Path;
+                    _carrierImageNative = imageChooserResult.NativeRepresentation;
+                    _carrierImageFormat = imageChooserResult.CarrierImageFormat;
+
+                    imageChooserResult.Stream.Dispose();
+                }
+                else
+                {
+                    SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                }
+            }
+
+            ChangingCarrierImage = false;
+        }
+
+        private async void PickFileMessage()
+        {
+            ChangingMessageFile = true;
+
+            var imageChooserResult = await DependencyService.Get<IFileIO>().GetFileAsync();
+            if(imageChooserResult != null)
+            {
+                var success = String.IsNullOrEmpty(imageChooserResult.ErrorMessage);
+                if (success)
+                {
+                    FileMessage = new BytesWithPath()
+                    {
+                        Bytes = imageChooserResult.Stream.ConvertToByteArray(),
+                        Path = imageChooserResult.Path
+                    };
+                    imageChooserResult.Stream.Dispose();
+                }
+                else
+                {
+                    SendOpenFileErrorMessage(imageChooserResult.ErrorMessage);
+                }
+            }
+
+            ChangingMessageFile = false;
         }
 
         public bool ChangingMessageFile {
@@ -199,21 +248,18 @@ namespace SteganographyJr.ViewModels
         private void InitExecute()
         {
             _executing = false;
+            _cancelling = false;
             ExecuteCommand = new DelegateCommand(
                 execute: async () =>
                 {
-                    Executing = true;
-
-                    if(SelectedModeIsEncode)
+                    if (!Executing)
                     {
-                        await Encode();
+                        await Execute();
                     }
                     else
                     {
-                        await Decode();
+                        await Cancel();
                     }
-
-                    Executing = false;
                 },
                 canExecute: () =>
                 {
@@ -223,9 +269,62 @@ namespace SteganographyJr.ViewModels
 
                     bool encodingOkay = SelectedModeIsDecode || textMessageOkay || fileMessageOkay;
 
-                    return NotExecuting && passwordOkay && encodingOkay;
+                    return passwordOkay && encodingOkay;
                 }
             );
+        }
+
+        private async Task Execute()
+        {
+            Executing = true;
+
+            if (SelectedModeIsEncode)
+            {
+                await Encode();
+            }
+            else
+            {
+                await Decode();
+            }
+
+            Executing = false;
+        }
+
+        private async Task Cancel()
+        {
+            if(_cancelling)
+            {
+                return;
+            }
+
+            _cancelling = true;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while(true)
+            {
+                // this is more a safety check than anything. it should cancel.
+                // ...but when it doesn't don't let it crash the computer.
+                if(stopwatch.ElapsedMilliseconds > 3000)
+                {
+                    SendErrorMessage("Unable to cancel. You may need to close this program manually.");
+                    return;
+                }
+                if(_cancelling == false)
+                {
+                    return;
+                }
+                await Task.Delay(100);
+            }
+        }
+
+        private bool CheckCancel()
+        {
+            bool cancelling = _cancelling;
+            if(_cancelling)
+            {
+                _cancelling = false;
+            }
+            return cancelling;
         }
 
         public bool Executing {
@@ -237,9 +336,15 @@ namespace SteganographyJr.ViewModels
             get { return !Executing; }
         }
 
-        public Stream CarrierImageStream {
-            get { return _carrierImageStream; }
-            set { SetPropertyValue(ref _carrierImageStream, value); }
+        public string ExecutionMessage {
+            get {
+                return Executing ? "Cancel" : "Execute";
+            }
+        }
+
+        public byte[] CarrierImageBytes {
+            get { return _carrierImageBytes; }
+            set { SetPropertyValue(ref _carrierImageBytes, value); }
         }
 
         public ImageSource CarrierImageSource {
@@ -252,13 +357,14 @@ namespace SteganographyJr.ViewModels
             }
         }
 
+        private string CarrierImagePath {
+            get { return _carrierImagePath; }
+            set { SetPropertyValue(ref _carrierImagePath, value); }
+        }
+
         private void UpdateCarrierImageSource()
         {
-            var streamCopy = new MemoryStream();
-            CarrierImageStream.CopyTo(streamCopy);
-            streamCopy.Position = 0;
-
-            CarrierImageSource = ImageSource.FromStream(() => streamCopy);
+            CarrierImageSource = ImageSource.FromStream(() => new MemoryStream(CarrierImageBytes));
         }
 
         public List<Mode> Modes {
@@ -313,7 +419,7 @@ namespace SteganographyJr.ViewModels
             set { SetPropertyValue(ref _textMessage, value); }
         }
 
-        public StreamWithPath FileMessage {
+        public BytesWithPath FileMessage {
             get { return _fileMessage; }
             set { SetPropertyValue(ref _fileMessage, value); }
         }
@@ -338,7 +444,7 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                var size = _steganography.GetHumanReadableFileSize(CarrierImageStream);
+                var size = _steganography.GetHumanReadableFileSize(CarrierImageBytes);
                 return $"Message Capacity: {size}";
             }
         }
@@ -350,44 +456,215 @@ namespace SteganographyJr.ViewModels
         
         private string GetSteganographyPassword()
         {
-            return UsePassword ? Password : StaticVariables.defaultPassword;
+            return UsePassword ? Password : StaticVariables.DefaultPassword;
         }
 
         private byte[] GetSteganographyMessage()
         {
-            var bytes = new List<byte>(
-                // TODO: MAKE SURE YOU ACTUALLY ENCRYPT THIS
-                UsingTextMessage ? Encoding.UTF8.GetBytes(TextMessage) : FileMessage.GetBytes()
-            );
+            var bytes = new List<byte>();
+            if(UsingTextMessage)
+            {
+                var textMessageBytes = TextMessage.ConvertToByteArray();
+                bytes.AddRange(textMessageBytes);
+            }
+            else
+            {
+                var fileNameString = Path.GetFileName(FileMessage.Path);
+                var fileNameBytes = fileNameString.ConvertToByteArray();
+                var fileSeperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
-            var terminatingStringBytes = Encoding.UTF8.GetBytes(GetSteganographyPassword());
-            bytes.AddRange(terminatingStringBytes);
+                bytes.AddRange(fileNameBytes);
+                bytes.AddRange(fileSeperatorBytes);
+                bytes.AddRange(FileMessage.Bytes);
+            }
+            
+            bytes.Add(UsingTextMessage ? (byte)0: (byte)1);
 
             return bytes.ToArray();
         }
 
+        private (StaticVariables.Message messageType, object message) ParseSteganographyMessage(byte[] message)
+        {
+            var type = (StaticVariables.Message)message.Last();
+            message = message.Take(message.Count() - 1).ToArray();
+
+            object returnObject;
+            if(type == StaticVariables.Message.Text)
+            {
+                returnObject = message.ConvertToString();
+            }
+            else
+            {
+                returnObject = message; 
+            }
+
+            return (type, returnObject);
+        }
+
         private async Task Encode()
         {
+            // get encoding variables
             var password = GetSteganographyPassword();
             var message = GetSteganographyMessage();
+            message = Cryptography.Encrypt(message, password);
 
-            CarrierImageStream = await _steganography.Encode(CarrierImageStream, message, password);
+            // make sure we can encode
+            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
+            if(messageFits == false)
+            {
+                SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
+                return;
+            }
+
+            // do the encode
+            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
+            {
+                if(imageStream == null)
+                {
+                    // the user cancelled. cleanup and return.
+                    ExecutionProgress = 0;
+                    return;
+                }
+                else
+                {
+                    var result = imageStream.ConvertToByteArray();
+                    CarrierImageBytes = result;
+                }
+            }
 
             ExecutionProgress = 1;
-            await Task.Delay(1000);
+            await Task.Delay(100);
+
+            await RouteEncodedMessage();
+
             ExecutionProgress = 0;
+        }
+
+        private async Task RouteEncodedMessage()
+        {
+            // save the encode
+            var encodedCarrierImage = new BytesWithPath()
+            {
+                Bytes = CarrierImageBytes,
+                Path = CarrierImagePath
+            };
+            var imageSaveResult = await DependencyService.Get<IFileIO>().SaveImageAsync(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+
+            // notify the user
+            var success = string.IsNullOrEmpty(imageSaveResult.ErrorMessage);
+            if (success)
+            {
+                SendEncodingSuccessMessage(imageSaveResult.SaveLocation);
+            }
+            else
+            {
+                SendEncodingErrorMessage(imageSaveResult.ErrorMessage);
+            }
         }
 
         private async Task Decode()
         {
-            await Task.Delay(250);
-            ExecutionProgress = 1;
-
-            for (var i = 10; i >= 0; i--)
+            var password = GetSteganographyPassword();
+            byte[] message =  await _steganography.Decode(CarrierImageBytes, password, CheckCancel);
+            if(message != null)
             {
-                await Task.Delay(250);
-                ExecutionProgress = (double)i / 10;
+                message = Cryptography.Decrypt(message, password);
+                ExecutionProgress = 1;
+                await Task.Delay(100);
+
+                await RouteDecodedMessage(message);
+                
             }
+
+            ExecutionProgress = 0;
+        }
+
+        private async Task RouteDecodedMessage(byte[] message)
+        {
+            if(message == null)
+            {
+                SendErrorMessage("No message found. Are you using the right password?");
+                return;
+            }
+
+            (StaticVariables.Message messageType, object messageObj) result = ParseSteganographyMessage(message);
+            if (result.messageType == StaticVariables.Message.Text)
+            {
+                var stringMessage = (string)result.messageObj;
+                SendDecodedMessage(stringMessage);
+            }
+            else
+            {
+                var messageObjAsBytes = (byte[])result.messageObj;
+                var seperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
+
+                var messageComponents = messageObjAsBytes.Split(seperatorBytes);
+
+                var fileName = messageComponents[0].ConvertToString();
+                var fileBytes = messageComponents[1];
+
+                var fileSaveResult = await DependencyService.Get<IFileIO>().SaveFileAsync(fileName, fileBytes);
+                var success = string.IsNullOrEmpty(fileSaveResult.ErrorMessage);
+                if (success == false)
+                {
+                    SendErrorMessage(fileSaveResult.ErrorMessage);
+                }
+            }
+        }
+
+        private void SendErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendDecodedMessage(string decodedMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Message Decoded",
+                CancelButtonText = "Okay",
+                Message = $"Decoded message: {decodedMessage}"
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendEncodingSuccessMessage(string imagePath)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Message Encoded",
+                CancelButtonText = "Excelsior!",
+                Message = $"Image saved to {imagePath}."
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendEncodingErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Encoding Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+        }
+
+        private void SendOpenFileErrorMessage(string errorMessage)
+        {
+            var alertMessage = new AlertMessage()
+            {
+                Title = "Open File Error",
+                CancelButtonText = "Okay",
+                Message = errorMessage
+            };
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
         }
     }
 }

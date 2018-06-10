@@ -1,4 +1,5 @@
-﻿using SteganographyJr.Models;
+﻿using SteganographyJr.DTOs;
+using SteganographyJr.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,8 @@ namespace SteganographyJr.Services.DependencyService
 {
     public interface IFileIO
     {
-        Task<StreamWithPath> GetStreamWithPathAsync(bool imagesOnly = false);
-        void SaveImage(Stream image, string path);
+        Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false);
+        Task<FileSaveResult> SaveImageAsync(string path, byte[] image, object nativeRepresentation = null);
+        Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes);
     }
 }
