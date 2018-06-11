@@ -15,7 +15,7 @@ namespace SteganographyJr
         public const string FileSeperator = "30CAD34D-6E4D-4207-BC31-AE94D68FD44D";
         public enum Message { Text, File };
         public const string DisplayAlertMessage = "DisplayAlertMessage";
-        public const string AlertCompleteMessage = "AsyncOperationCompleteMessage";
+        public const string AlertCompleteMessage = "AlertCompleteMessage";
         public static readonly CarrierImageFormat[] CarrierImageFormats =
         {
             new CarrierImageFormat(".gif"),
