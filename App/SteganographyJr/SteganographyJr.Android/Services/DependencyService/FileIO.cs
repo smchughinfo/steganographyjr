@@ -37,7 +37,12 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             try
             {
-                await EnsurePermissions();
+                var havePermissions = await EnsurePermissions();
+                if(havePermissions == false)
+                {
+                    return new FileSaveResult() { ErrorMessage = StaticVariables.SaveFailedBecauseOfPermissionsMessage };
+                }
+
                 if (string.IsNullOrEmpty(path))
                 {
                     Bitmap bitmap = new Bitmap();
@@ -85,7 +90,7 @@ namespace SteganographyJr.Droid.Services.DependencyService
 
                 if(showPermissionExplanation)
                 {
-                    SendPermissionRequestMessage(StaticVariables.RequestPermissionMessage);
+                    await SendPermissionRequestMessage(StaticVariables.RequestPermissionMessage).Task;
                 }
                 
                 ActivityCompat.RequestPermissions(MainActivity.Instance, requiredPermissions, 0);
@@ -109,8 +114,10 @@ namespace SteganographyJr.Droid.Services.DependencyService
             return promise;
         }
 
-        private void SendPermissionRequestMessage(string message)
+        private TaskCompletionSource<bool> SendPermissionRequestMessage(string message)
         {
+            var promise = new TaskCompletionSource<bool>();
+
             var alertMessage = new AlertMessage()
             {
                 Title = "Permission Request Explanation",
@@ -118,6 +125,13 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 Message = message
             };
             MessagingCenter.Send<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Subscribe<object>(this, StaticVariables.AlertCompleteMessage, (sender) =>
+            {
+                MessagingCenter.Unsubscribe<object>(this, StaticVariables.AlertCompleteMessage);
+                promise.SetResult(true);
+            });
+
+            return promise;
         }
     }
 }

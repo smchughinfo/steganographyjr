@@ -31,9 +31,11 @@ namespace SteganographyJr.Views
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
             });
 
-            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
+            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, async (IViewModel, message) =>
             {
-                DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+                await DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+
+                MessagingCenter.Send<object>(this, StaticVariables.AlertCompleteMessage);
             });
         }
     }

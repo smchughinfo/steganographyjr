@@ -15,6 +15,7 @@ namespace SteganographyJr
         public const string FileSeperator = "30CAD34D-6E4D-4207-BC31-AE94D68FD44D";
         public enum Message { Text, File };
         public const string DisplayAlertMessage = "DisplayAlertMessage";
+        public const string AlertCompleteMessage = "AsyncOperationCompleteMessage";
         public static readonly CarrierImageFormat[] CarrierImageFormats =
         {
             new CarrierImageFormat(".gif"),
@@ -23,5 +24,6 @@ namespace SteganographyJr
             new CarrierImageFormat(".png")
         };
         public static string RequestPermissionMessage = "SteganographyJr needs permission to read and write files. Only the files you choose are accessed by SteganographyJr.";
+        public static string SaveFailedBecauseOfPermissionsMessage = "Unable to save.";
     }
 }

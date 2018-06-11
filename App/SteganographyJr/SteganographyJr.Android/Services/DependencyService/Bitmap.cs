@@ -56,7 +56,7 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             Android.Graphics.Bitmap.CompressFormat bitmapImageFormat = null;
 
-            if (imageFormat == CarrierImageFormat.ImageFormat.gif)
+            if (imageFormat == CarrierImageFormat.ImageFormat.gif) // TODO: ?gif???
             {
                 //bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Gi
             }
@@ -85,11 +85,6 @@ namespace SteganographyJr.Droid.Services.DependencyService
 
         public override void SetPixel(int x, int y, int a, int r, int g, int b)
         {
-            byte aByte = BitConverter.GetBytes(a)[0];
-            byte rByte = BitConverter.GetBytes(r)[0];
-            byte gByte = BitConverter.GetBytes(g)[0];
-            byte bByte = BitConverter.GetBytes(b)[0];
-
             Color color = new Color(r, g, b, a);
             platformBitmap.SetPixel(x, y, color);
         }
