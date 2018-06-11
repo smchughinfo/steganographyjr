@@ -18,14 +18,13 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
+        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] eof)
         {
-            var eof = Cryptography.GetHash(password);
-            var messageCapacity = GetMessageCapacityInBits(imageBytes) / 8;
+            var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
             return messageCapacity >= message.Length + eof.Length;
         }
 
-        private int GetMessageCapacityInBits(byte[] imageBytes)
+        public int GetImageCapacityInBits(byte[] imageBytes)
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
@@ -43,17 +42,17 @@ namespace SteganographyJr.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
         {
-            // TODO: split password in half. use half for encryption and hash the other half for fisher yates hash
-            var eof = Cryptography.GetHash(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
             message = message.Append(eof);
-            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
+
+            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
 
             bool userCancelled = false;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap((x, y) => {
+                IterateBitmap(shuffleSeed, (x, y) => {
                     EncodePixel(x, y);
                     UpdateProgress();
 
@@ -67,27 +66,6 @@ namespace SteganographyJr.Services.Steganography
 
             ClearFields();
             return encodedStream;
-        }
-
-        // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
-        public string GetHumanReadableFileSize(byte[] imageBytes)
-        {
-            //imageBytes
-            var len = GetMessageCapacityInBits(imageBytes) / 8;
-
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            while (len >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                len = len / 1024;
-            }
-
-            // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
-            // show a single decimal place, and no space.
-            string result = String.Format("{0:0.##} {1}", len, sizes[order]);
-
-            return result;
         }
 
         private int GetValueToEncodeInChannel(int channelValue, int messageIndex)

@@ -16,7 +16,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
 {
     class Bitmap : Classes.Bitmap
     {
-        Drawing.Bitmap platformBitmap;
+        public Drawing.Bitmap platformBitmap;
 
         public override void Set(Stream stream)
         {

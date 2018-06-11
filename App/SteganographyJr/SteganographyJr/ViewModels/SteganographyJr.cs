@@ -17,6 +17,7 @@ using SteganographyJr.Services.Steganography;
 using SteganographyJr.ExtensionMethods;
 using SteganographyJr.Services;
 using System.Diagnostics;
+using SteganographyJr.Classes;
 
 namespace SteganographyJr.ViewModels
 {
@@ -49,7 +50,6 @@ namespace SteganographyJr.ViewModels
         bool _cancelling;
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
-        string _executionMessage;
 
         Steganography _steganography;
 
@@ -304,7 +304,7 @@ namespace SteganographyJr.ViewModels
             {
                 // this is more a safety check than anything. it should cancel.
                 // ...but when it doesn't don't let it crash the computer.
-                if(stopwatch.ElapsedMilliseconds > 3000)
+                if(stopwatch.ElapsedMilliseconds > 30000)
                 {
                     SendErrorMessage("Unable to cancel. You may need to close this program manually.");
                     return;
@@ -444,7 +444,8 @@ namespace SteganographyJr.ViewModels
         {
             get
             {
-                var size = _steganography.GetHumanReadableFileSize(CarrierImageBytes);
+                var messageCapacity = _steganography.GetImageCapacityInBits(CarrierImageBytes) / 8;
+                var size = Utilities.GetHumanReadableFileSize(messageCapacity);
                 return $"Message Capacity: {size}";
             }
         }
@@ -503,41 +504,49 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
-            // get encoding variables
-            var password = GetSteganographyPassword();
-            var message = GetSteganographyMessage();
-            message = Cryptography.Encrypt(message, password);
-
-            // make sure we can encode
-            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
-            if(messageFits == false)
+            try
             {
-                SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
-                return;
-            }
 
-            // do the encode
-            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
-            {
-                if(imageStream == null)
+
+                // get encoding variables
+                var password = Cryptography.GetHash(GetSteganographyPassword());
+                var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
+
+                // make sure we can encode
+                var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
+                if (messageFits == false)
                 {
-                    // the user cancelled. cleanup and return.
-                    ExecutionProgress = 0;
+                    SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
                     return;
                 }
-                else
+
+                // do the encode
+                using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
                 {
-                    var result = imageStream.ConvertToByteArray();
-                    CarrierImageBytes = result;
+                    if (imageStream == null)
+                    {
+                        // the user cancelled. cleanup and return.
+                        ExecutionProgress = 0;
+                        return;
+                    }
+                    else
+                    {
+                        var result = imageStream.ConvertToByteArray();
+                        CarrierImageBytes = result;
+                    }
                 }
+
+                ExecutionProgress = 1;
+                await Task.Delay(100);
+
+                await RouteEncodedMessage();
+
+                ExecutionProgress = 0;
             }
-
-            ExecutionProgress = 1;
-            await Task.Delay(100);
-
-            await RouteEncodedMessage();
-
-            ExecutionProgress = 0;
+            catch(Exception ex)
+            {
+                ;
+            }
         }
 
         private async Task RouteEncodedMessage()
@@ -564,7 +573,7 @@ namespace SteganographyJr.ViewModels
 
         private async Task Decode()
         {
-            var password = GetSteganographyPassword();
+            var password = Cryptography.GetHash(GetSteganographyPassword());
             byte[] message =  await _steganography.Decode(CarrierImageBytes, password, CheckCancel);
             if(message != null)
             {

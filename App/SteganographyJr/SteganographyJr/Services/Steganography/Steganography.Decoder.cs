@@ -12,16 +12,17 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, string password, Func<bool> checkCancel)
+        public async Task<byte[]> Decode(byte[] imageBytes, byte[] eof, Func<bool> checkCancel)
         {
-            InitializeFields(ExecutionType.Decode, imageBytes, password);
-            var eof = Cryptography.GetHash(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
+
+            InitializeFields(ExecutionType.Decode, imageBytes);
 
             bool userCancelled = false;
             byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap((x, y) => {
+                IterateBitmap(shuffleSeed, (x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
                     var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 

@@ -30,6 +30,11 @@ namespace SteganographyJr.Views
                 // TODO: copy to clipboard
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
             });
+
+            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
+            {
+                DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+            });
         }
     }
 }

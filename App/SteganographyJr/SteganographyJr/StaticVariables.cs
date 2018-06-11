@@ -22,5 +22,6 @@ namespace SteganographyJr
             new CarrierImageFormat(".jpeg"),
             new CarrierImageFormat(".png")
         };
+        public static string RequestPermissionMessage = "SteganographyJr needs permission to read and write files. Only the files you choose are accessed by SteganographyJr.";
     }
 }

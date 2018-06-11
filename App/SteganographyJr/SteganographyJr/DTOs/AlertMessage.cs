@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SteganographyJr.DTOs
 {
-    class AlertMessage
+    public class AlertMessage
     {
         public string Title { get; set; }
         public string Message { get; set; }

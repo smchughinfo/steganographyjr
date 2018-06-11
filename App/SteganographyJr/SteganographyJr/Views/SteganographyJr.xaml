@@ -126,7 +126,7 @@
                         Progress="{Binding ExecutionProgress}"/>
 
                 </Grid>
-
+                
             </StackLayout>
         </ScrollView>
         
