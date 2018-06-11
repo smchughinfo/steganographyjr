@@ -504,40 +504,49 @@ namespace SteganographyJr.ViewModels
 
         private async Task Encode()
         {
-            // get encoding variables
-            var password = Cryptography.GetHash(GetSteganographyPassword());
-            var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
-
-            // make sure we can encode
-            var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
-            if(messageFits == false)
+            try
             {
-                SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
-                return;
-            }
 
-            // do the encode
-            using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
-            {
-                if(imageStream == null)
+
+                // get encoding variables
+                var password = Cryptography.GetHash(GetSteganographyPassword());
+                var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
+
+                // make sure we can encode
+                var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
+                if (messageFits == false)
                 {
-                    // the user cancelled. cleanup and return.
-                    ExecutionProgress = 0;
+                    SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
                     return;
                 }
-                else
+
+                // do the encode
+                using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
                 {
-                    var result = imageStream.ConvertToByteArray();
-                    CarrierImageBytes = result;
+                    if (imageStream == null)
+                    {
+                        // the user cancelled. cleanup and return.
+                        ExecutionProgress = 0;
+                        return;
+                    }
+                    else
+                    {
+                        var result = imageStream.ConvertToByteArray();
+                        CarrierImageBytes = result;
+                    }
                 }
+
+                ExecutionProgress = 1;
+                await Task.Delay(100);
+
+                await RouteEncodedMessage();
+
+                ExecutionProgress = 0;
             }
-
-            ExecutionProgress = 1;
-            await Task.Delay(100);
-
-            await RouteEncodedMessage();
-
-            ExecutionProgress = 0;
+            catch(Exception ex)
+            {
+                ;
+            }
         }
 
         private async Task RouteEncodedMessage()
