@@ -23,7 +23,7 @@ namespace SteganographyJr.Views
 		{
 			InitializeComponent ();
 
-            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+            topSeperator.IsVisible = Device.RuntimePlatform == Device.UWP;
 
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
