@@ -56,7 +56,7 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             Android.Graphics.Bitmap.CompressFormat bitmapImageFormat = null;
 
-            if (imageFormat == CarrierImageFormat.ImageFormat.gif) // TODO: ?gif???
+            if (imageFormat == CarrierImageFormat.ImageFormat.gif) // TODO: ?gif??? - possibly just dont change the format on android.
             {
                 //bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Gi
             }

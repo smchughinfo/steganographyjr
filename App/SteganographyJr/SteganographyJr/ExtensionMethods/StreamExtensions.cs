@@ -12,7 +12,7 @@ namespace SteganographyJr.ExtensionMethods
             using (var memoryStream = new MemoryStream())
             {
                 stream.CopyTo(memoryStream);
-                stream.Position = 0;
+                // stream.Position = 0; // TODO: needed? doesnt work when reading a Stream on Android. ...
                 return memoryStream.ToArray();
             }
         }

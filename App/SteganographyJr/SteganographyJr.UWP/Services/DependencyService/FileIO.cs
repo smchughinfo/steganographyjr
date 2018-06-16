@@ -19,7 +19,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
     public class FileIO : IFileIO
     {
         // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
-        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
+        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false) // TODO: image chooser result?
         {
             try
             {

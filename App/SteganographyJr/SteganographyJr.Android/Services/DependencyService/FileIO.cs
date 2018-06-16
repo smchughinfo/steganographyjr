@@ -27,9 +27,21 @@ namespace SteganographyJr.Droid.Services.DependencyService
     // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
     class FileIO : IFileIO
     {
-        public Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
+        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
         {
-            return null;
+            // Define the Intent for getting images
+            Intent intent = new Intent();
+            intent.SetType("image/*");
+            intent.SetAction(Intent.ActionGetContent);
+
+            // Start the picture-picker activity (resumes in MainActivity.cs)
+            MainActivity.Instance.StartActivityForResult(Intent.CreateChooser(intent, "Select Picture"), MainActivity.PickImageId);
+
+            // Save the TaskCompletionSource object as a MainActivity property
+            MainActivity.Instance.PickImageTaskCompletionSource = new TaskCompletionSource<ImageChooserResult>();
+
+            // Return Task object
+            return await MainActivity.Instance.PickImageTaskCompletionSource.Task;
         }
 
         // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/permissions?tabs=vswin
