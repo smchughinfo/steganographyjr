@@ -132,7 +132,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
                 return new FileSaveResult() { ErrorMessage = ex.Message };
             }
 
-            return new FileSaveResult();
+            return new FileSaveResult() { ErrorMessage = null };
         }
     }
 }

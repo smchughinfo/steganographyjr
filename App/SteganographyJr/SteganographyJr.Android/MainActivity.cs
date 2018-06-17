@@ -40,35 +40,5 @@ namespace SteganographyJr.Droid
             var havePermissions = grantResults[0] == Permission.Granted;
             MessagingCenter.Send(this, PermissionsChangedMessage, havePermissions);
         }
-
-        //https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
-        public static readonly int PickImageId = 1000; // TODO: general file
-        public TaskCompletionSource<ImageChooserResult> PickImageTaskCompletionSource { set; get; }
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent intent) // TODO: general file
-        {
-            base.OnActivityResult(requestCode, resultCode, intent);
-
-            if (requestCode == PickImageId)
-            {
-                if ((resultCode == Result.Ok) && (intent != null))
-                {
-                    Android.Net.Uri uri = intent.Data;
-                    Stream stream = ContentResolver.OpenInputStream(uri);
-                    var imageChooserResult =  new ImageChooserResult() {
-                        Path = uri.ToString(),
-                        Stream = stream
-                        //NativeRepresentation = storageFile, // TODO: needed? 
-                        //CarrierImageFormat = new CarrierImageFormat(storageFile.Path) // TODO: needed?
-                    };
-
-                    // Set the Stream as the completion of the Task
-                    PickImageTaskCompletionSource.SetResult(imageChooserResult);
-                }
-                else
-                {
-                    PickImageTaskCompletionSource.SetResult(null);
-                }
-            }
-        }
     }
 }

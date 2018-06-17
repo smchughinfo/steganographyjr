@@ -19,29 +19,39 @@ using Android.Widget;
 using SteganographyJr.DTOs;
 using SteganographyJr.Services.DependencyService;
 using Xamarin.Forms;
+using SteganographyJr.ExtensionMethods;
+using Plugin.FilePicker.Abstractions;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.FileIO))]
 namespace SteganographyJr.Droid.Services.DependencyService
 {
-    // TODO: add the code in MainActivity \n -> 
-    // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
     class FileIO : IFileIO
     {
         public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
         {
-            // Define the Intent for getting images
-            Intent intent = new Intent();
-            intent.SetType("image/*");
-            intent.SetAction(Intent.ActionGetContent);
+            try
+            {
+                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
 
-            // Start the picture-picker activity (resumes in MainActivity.cs)
-            MainActivity.Instance.StartActivityForResult(Intent.CreateChooser(intent, "Select Picture"), MainActivity.PickImageId);
-
-            // Save the TaskCompletionSource object as a MainActivity property
-            MainActivity.Instance.PickImageTaskCompletionSource = new TaskCompletionSource<ImageChooserResult>();
-
-            // Return Task object
-            return await MainActivity.Instance.PickImageTaskCompletionSource.Task;
+                string[] mimeTypes = new string[] { imagesOnly ? "image/*" : "*/*" };
+                var result = await filePicker.PickFile(mimeTypes);
+                if(result == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return new ImageChooserResult()
+                    {
+                        Stream = result.DataArray.ConvertToStream(),
+                        Path = result.FilePath
+                    };
+                }
+            }
+            catch(Exception ex)
+            {
+                return new ImageChooserResult() { ErrorMessage = ex.Message };
+            }
         }
 
         // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/permissions?tabs=vswin
@@ -63,7 +73,6 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 }
                 else
                 {
-                    // TODO: this probably doesn't work
                     File.WriteAllBytes(path, image);
                 }
 
@@ -71,13 +80,33 @@ namespace SteganographyJr.Droid.Services.DependencyService
             }
             catch (Exception ex)
             {
-                return null;//new FileSaveResult() { ErrorMessage = ex.Message };
+                return new FileSaveResult() { ErrorMessage = ex.Message };
             }
         }
 
-        public Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
+        public async Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
         {
-            return null;
+            try
+            {
+                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
+                
+                var fileData = new FileData("", fileName, () =>
+                {
+                    return fileBytes.ConvertToStream();
+                });
+
+                var success = await filePicker.SaveFile(fileData);
+                if(success == false)
+                {
+                    return new FileSaveResult() { ErrorMessage = "Error saving file. SaveFile returned false." };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new FileSaveResult() { ErrorMessage = ex.Message };
+            }
+
+            return new FileSaveResult() { ErrorMessage = null };
         }
 
         private async Task<bool> EnsurePermissions()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -85,6 +86,11 @@ namespace SteganographyJr.ExtensionMethods
         public static string ConvertToString(this byte[] bytes)
         {
             return Encoding.UTF8.GetString(bytes);
+        }
+
+        public static Stream ConvertToStream(this byte[] bytes)
+        {
+            return new MemoryStream(bytes);
         }
     }
 }
