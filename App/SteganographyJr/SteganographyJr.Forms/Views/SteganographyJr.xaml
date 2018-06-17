@@ -25,14 +25,14 @@
 
 
                 <Label 
-                    Text="{Binding MessageCapacity}" 
+                    Text="{Binding CarrierImageCapacity}" 
                     HorizontalOptions="Center" />
 
                 <BoxView Style="{StaticResource Seperator}" />
 
                 <Label Text="Mode" />
 
-                <Picker ItemsSource="{Binding Modes}"
+                <Picker ItemsSource="{Binding ModeTypes}"
                     ItemDisplayBinding="{Binding Value}"
                     SelectedItem="{Binding SelectedMode}"
                     IsEnabled="{Binding NotExecuting}" />
@@ -72,7 +72,7 @@
                     Text="Message" 
                     IsVisible="{Binding SelectedModeIsEncode}" />
 
-                <Picker ItemsSource="{Binding Messages}"
+                <Picker ItemsSource="{Binding MessageTypes}"
                     ItemDisplayBinding="{Binding Value}"
                     SelectedItem="{Binding SelectedMessageType}"
                     IsVisible="{Binding SelectedModeIsEncode}" 
