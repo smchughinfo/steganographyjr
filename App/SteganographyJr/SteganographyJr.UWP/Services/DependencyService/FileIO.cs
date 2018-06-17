@@ -1,6 +1,7 @@
-﻿using SteganographyJr.DTOs;
-using SteganographyJr.Models;
-using SteganographyJr.Services.DependencyService;
+﻿using SteganographyJr.Forms;
+using SteganographyJr.Forms.DTOs;
+using SteganographyJr.Forms.Models;
+using SteganographyJr.Forms.Services.DependencyService;
 using SteganographyJr.UWP.Services.DependencyService;
 using System;
 using System.Collections.Generic;

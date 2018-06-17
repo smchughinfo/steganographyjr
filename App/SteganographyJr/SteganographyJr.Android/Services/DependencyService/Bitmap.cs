@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -11,14 +10,14 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using SteganographyJr.Models;
-using SteganographyJr.Services.DependencyService;
+using SteganographyJr.Forms;
+using SteganographyJr.Forms.Models;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.Bitmap))]
 namespace SteganographyJr.Droid.Services.DependencyService
 {
     // https://developer.xamarin.com/api/type/Android.Graphics.Bitmap/
-    class Bitmap : Classes.Bitmap
+    class Bitmap : Forms.Classes.Bitmap
     {
         public Android.Graphics.Bitmap platformBitmap;
 

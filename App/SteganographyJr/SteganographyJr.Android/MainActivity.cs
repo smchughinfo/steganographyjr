@@ -10,7 +10,7 @@ using Xamarin.Forms;
 using Android.Content;
 using System.IO;
 using System.Threading.Tasks;
-using SteganographyJr.DTOs;
+using SteganographyJr.Forms;
 
 namespace SteganographyJr.Droid
 {

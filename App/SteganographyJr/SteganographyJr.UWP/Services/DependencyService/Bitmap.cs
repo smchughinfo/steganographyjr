@@ -1,7 +1,7 @@
 ﻿extern alias CoreCompat;
 
 using CoreCompat::System.Drawing.Imaging;
-using SteganographyJr.Models;
+using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,7 +14,7 @@ using Drawing = CoreCompat.System.Drawing;
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.UWP.Services.DependencyService.Bitmap))]
 namespace SteganographyJr.UWP.Services.DependencyService
 {
-    class Bitmap : Classes.Bitmap
+    class Bitmap : SteganographyJr.Forms.Classes.Bitmap
     {
         public Drawing.Bitmap platformBitmap;
 

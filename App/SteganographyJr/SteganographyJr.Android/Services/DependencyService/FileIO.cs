@@ -16,11 +16,12 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Views;
 using Android.Widget;
-using SteganographyJr.DTOs;
-using SteganographyJr.Services.DependencyService;
 using Xamarin.Forms;
-using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Core.ExtensionMethods;
 using Plugin.FilePicker.Abstractions;
+using SteganographyJr.Forms.Services.DependencyService;
+using SteganographyJr.Forms.DTOs;
+using SteganographyJr.Forms;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.FileIO))]
 namespace SteganographyJr.Droid.Services.DependencyService
