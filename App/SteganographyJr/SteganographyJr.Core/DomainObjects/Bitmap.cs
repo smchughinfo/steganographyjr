@@ -45,5 +45,13 @@ namespace SteganographyJr.Core.DomainObjects
                 return BitCapacity / 8;
             }
         }
+
+        public byte[] ConvertToByteArray()
+        {
+            using (var stream = ConvertToStream())
+            {
+                return stream.ConvertToByteArray();
+            }
+        }
     }
 }

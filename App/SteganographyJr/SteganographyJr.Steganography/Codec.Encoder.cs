@@ -18,20 +18,18 @@ namespace SteganographyJr.Steganography
             return carrierImage.ByteCapacity >= message.Length + eofMarker.Length;
         }
 
-        public static async Task<Stream> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
         {
             var eofMarker = _defaultEofMarker.ConvertToByteArray();
             return await Encode(carrierImage, message, eofMarker, checkCancel);
         }
 
-        public static async Task<Stream> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<double, bool> checkCancel)
         {
             var shuffleSeed = FisherYates.GetSeed(eofMarker);
             message = message.Append(eofMarker);
 
             var userCancelled = false;
-
-            Stream encodedStream = null;
 
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -49,10 +47,10 @@ namespace SteganographyJr.Steganography
                     return userCancelled || encodeComplete;
                 });
 
-                encodedStream = userCancelled ? null : carrierImage.ConvertToStream();
+                
             });
-            
-            return encodedStream;
+
+            return userCancelled ? null : carrierImage;
         }
 
         private static int GetValueToEncodeInChannel(Bitmap carrierImage, byte[] message, int channelValue, int messageIndex)
