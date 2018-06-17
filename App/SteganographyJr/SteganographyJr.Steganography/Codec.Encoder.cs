@@ -13,18 +13,18 @@ namespace SteganographyJr.Steganography
 {
     public partial class Codec
     {
-        public bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
+        public static bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
         {
             return carrierImage.ByteCapacity >= message.Length + eofMarker.Length;
         }
 
-        public async Task<Stream> Encode(Bitmap carrierImage, byte[] message, Func<bool> checkCancel)
+        public static async Task<Stream> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
         {
             var eofMarker = _defaultEofMarker.ConvertToByteArray();
             return await Encode(carrierImage, message, eofMarker, checkCancel);
         }
 
-        public async Task<Stream> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<bool> checkCancel)
+        public static async Task<Stream> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<double, bool> checkCancel)
         {
             var shuffleSeed = FisherYates.GetSeed(eofMarker);
             message = message.Append(eofMarker);
@@ -41,9 +41,8 @@ namespace SteganographyJr.Steganography
                     EncodePixel(carrierImage, message, ref bitsWritten, x, y);
 
                     var percentComplete = (double)bitsWritten / carrierImage.BitCapacity;
-                    UpdateProgress(stopwatch, percentComplete); 
+                    userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
 
-                    userCancelled = checkCancel();
                     bool encodeComplete = bitsWritten >= message.Length * 8;
                     return userCancelled || encodeComplete;
                 });
@@ -54,7 +53,7 @@ namespace SteganographyJr.Steganography
             return encodedStream;
         }
 
-        private int GetValueToEncodeInChannel(Bitmap carrierImage, byte[] message, int channelValue, int messageIndex)
+        private static int GetValueToEncodeInChannel(Bitmap carrierImage, byte[] message, int channelValue, int messageIndex)
         {
             if (messageIndex >= message.Length * 8)
             {
@@ -73,7 +72,7 @@ namespace SteganographyJr.Steganography
             }
         }
         
-        private void EncodePixel(Bitmap carrierImage, byte[] message, ref int bitsWritten, int x, int y)
+        private static void EncodePixel(Bitmap carrierImage, byte[] message, ref int bitsWritten, int x, int y)
         {
             (int a, int r, int g, int b) = carrierImage.GetPixel(x, y);
 

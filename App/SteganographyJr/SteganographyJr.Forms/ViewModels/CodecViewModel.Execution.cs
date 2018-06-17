@@ -23,18 +23,6 @@ namespace SteganographyJr.Forms.ViewModels
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
 
-        Codec _codec;
-
-        private void InitSteganography()
-        {
-            _codec = new Codec();
-
-            _codec.ProgressChanged += (object sender, double progress) =>
-            {
-                ExecutionProgress = progress;
-            };
-        }
-
         private void InitExecute()
         {
             _executing = false;
@@ -107,8 +95,10 @@ namespace SteganographyJr.Forms.ViewModels
             }
         }
 
-        private bool CheckCancel()
+        private bool CheckCancel(double percentComplete)
         {
+            ExecutionProgress = percentComplete;
+
             bool cancelling = _cancelling;
             if (_cancelling)
             {
@@ -203,7 +193,7 @@ namespace SteganographyJr.Forms.ViewModels
                 var carrierImage = GetSteganographyBitmap();
 
                 // make sure we can encode
-                var messageFits = _codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
+                var messageFits = Codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
                 if (messageFits == false)
                 {
                     SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
@@ -211,7 +201,7 @@ namespace SteganographyJr.Forms.ViewModels
                 }
 
                 // do the encode
-                using (var imageStream = await _codec.Encode(carrierImage, message, password, CheckCancel))
+                using (var imageStream = await Codec.Encode(carrierImage, message, password, CheckCancel))
                 {
                     // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
                     // TODO: prepending message length and only read when you have that many bits will probably speed up decoding by a lot.
@@ -268,7 +258,7 @@ namespace SteganographyJr.Forms.ViewModels
             var password = SHA2.GetHash(GetSteganographyPassword());
             var carrierImage = GetSteganographyBitmap();
 
-            byte[] message = await _codec.Decode(carrierImage, password, CheckCancel);
+            byte[] message = await Codec.Decode(carrierImage, password, CheckCancel);
             if (message != null)
             {
                 message = AES.Decrypt(message, password);

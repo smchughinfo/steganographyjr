@@ -13,13 +13,12 @@ using static SteganographyJr.Core.StaticVariables;
 
 namespace SteganographyJr.Steganography
 {
-    public partial class Codec
+    public static partial class Codec
     {
         private const string _defaultEofMarker = "EC951F51-B03B-4007-AAB7-746C16BE1535";
-        public event EventHandler<double> ProgressChanged;
         const int UPDATE_RATE = 100;
 
-        private void IterateBitmap(Bitmap bitmap, int shuffleSeed, Func<int, int, bool> onPixel)
+        private static void IterateBitmap(Bitmap bitmap, int shuffleSeed, Func<int, int, bool> onPixel)
         {
             var shuffledIndices = FisherYates.Shuffle(shuffleSeed, bitmap.Height * bitmap.Width);
 
@@ -35,14 +34,16 @@ namespace SteganographyJr.Steganography
             }
         }
 
-        private void UpdateProgress(Stopwatch stopwatch, double percentComplete)
+        private static bool CheckCancelAndUpdate(Stopwatch stopwatch, double percentComplete, Func<double, bool> checkCancel)
         {
             if (stopwatch.ElapsedMilliseconds > UPDATE_RATE)
             {
-                ProgressChanged?.Invoke(this, percentComplete);
-                Thread.Sleep(0); // keep the ui thread from freezing TODO: ???????????????????
+                var userCancelled = checkCancel(percentComplete);
                 stopwatch.Restart();
+                return userCancelled;
             }
+
+            return false;
         }
     }
 }
