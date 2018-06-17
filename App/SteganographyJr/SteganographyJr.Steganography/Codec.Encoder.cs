@@ -1,9 +1,10 @@
 ﻿using SteganographyJr.Core;
-using SteganographyJr.Core.Classes;
+using SteganographyJr.Core.DomainObjects;
 using SteganographyJr.Core.ExtensionMethods;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,74 +13,57 @@ namespace SteganographyJr.Steganography
 {
     public partial class Codec
     {
-        BitArray MessageBits
+        public bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
         {
-            get { return new BitArray(_message); }
+            return carrierImage.ByteCapacity >= message.Length + eofMarker.Length;
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] eof)
+        public async Task<Stream> Encode(Bitmap carrierImage, byte[] message, Func<bool> checkCancel)
         {
-            var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
-            return messageCapacity >= message.Length + eof.Length;
+            var eofMarker = _defaultEofMarker.ConvertToByteArray();
+            return await Encode(carrierImage, message, eofMarker, checkCancel);
         }
 
-        public int GetImageCapacityInBits(byte[] imageBytes)
+        public async Task<Stream> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<bool> checkCancel)
         {
-            using (var imageStream = new MemoryStream(imageBytes))
-            {
-                return 123456;
-                /* TODO: umm
-                var bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
-                bitmap.Set(imageStream);
+            var shuffleSeed = FisherYates.GetSeed(eofMarker);
+            message = message.Append(eofMarker);
 
-                return GetMessageCapacityInBits(bitmap);
-                */
-            }
-        }
+            var userCancelled = false;
 
-        private int GetMessageCapacityInBits(Bitmap bitmap)
-        {
-            var numPixels = bitmap.Height * bitmap.Width;
-            var numBits = numPixels * 3;
-            return numBits;
-        }
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-        public async Task<Stream> Encode(byte[] imageBytes, ImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
-        {
-            var shuffleSeed = FisherYates.GetSeed(eof);
-            message = message.Append(eof);
-
-            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
-
-            bool userCancelled = false;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap(shuffleSeed, (x, y) => {
-                    EncodePixel(x, y);
-                    UpdateProgress();
+                var bitsWritten = 0;
+                IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
+                    EncodePixel(carrierImage, message, ref bitsWritten, x, y);
+
+                    var percentComplete = (double)bitsWritten / carrierImage.BitCapacity;
+                    UpdateProgress(stopwatch, percentComplete); 
 
                     userCancelled = checkCancel();
-                    bool encodeComplete = _messageIndex >= _message.Length * 8;
+                    bool encodeComplete = bitsWritten >= message.Length * 8;
                     return userCancelled || encodeComplete;
                 });
             });
 
-            Stream encodedStream = userCancelled ? null : _bitmap.ConvertToStream();
-
-            ClearFields();
+            Stream encodedStream = userCancelled ? null : carrierImage.ConvertToStream();
+            
             return encodedStream;
         }
 
-        private int GetValueToEncodeInChannel(int channelValue, int messageIndex)
+        private int GetValueToEncodeInChannel(Bitmap carrierImage, byte[] message, int channelValue, int messageIndex)
         {
-            if (messageIndex >= _message.Length * 8)
+            if (messageIndex >= message.Length * 8)
             {
                 return channelValue;
             }
             else
             {
                 var channelValueEven = channelValue % 2 == 0;
-                var messageValueEven = MessageBits[messageIndex];
+                var messageValueEven = message.ConvertToBitArray()[messageIndex];
 
                 var valuesMatch = messageValueEven == channelValueEven;
                 channelValue = valuesMatch ? channelValue : channelValue + 1;
@@ -89,15 +73,15 @@ namespace SteganographyJr.Steganography
             }
         }
         
-        private void EncodePixel(int x, int y)
+        private void EncodePixel(Bitmap carrierImage, byte[] message, ref int bitsWritten, int x, int y)
         {
-            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
+            (int a, int r, int g, int b) = carrierImage.GetPixel(x, y);
 
-            r = GetValueToEncodeInChannel(r, _messageIndex++);
-            g = GetValueToEncodeInChannel(g, _messageIndex++);
-            b = GetValueToEncodeInChannel(b, _messageIndex++);
+            r = GetValueToEncodeInChannel(carrierImage, message, r, bitsWritten++);
+            g = GetValueToEncodeInChannel(carrierImage, message, g, bitsWritten++);
+            b = GetValueToEncodeInChannel(carrierImage, message, b, bitsWritten++);
 
-            _bitmap.SetPixel(x, y, a, r, g, b);
+            carrierImage.SetPixel(x, y, a, r, g, b);
         }
     }
 }

@@ -54,6 +54,7 @@ namespace SteganographyJr.Core.ExtensionMethods
             return newArray;
         }
 
+        // https://stackoverflow.com/questions/9755090/split-a-byte-array-at-a-delimiter/50732160#50732160
         public static byte[][] Split(this byte[] composite, byte[] seperator)
         {
             int i = 0;
@@ -85,12 +86,22 @@ namespace SteganographyJr.Core.ExtensionMethods
 
         public static string ConvertToString(this byte[] bytes)
         {
-            return Encoding.UTF8.GetString(bytes);
+            return ConvertToString(bytes, Encoding.UTF8);
+        }
+
+        public static string ConvertToString(this byte[] bytes, Encoding encoding)
+        {
+            return encoding.GetString(bytes);
         }
 
         public static Stream ConvertToStream(this byte[] bytes)
         {
             return new MemoryStream(bytes);
+        }
+
+        public static BitArray ConvertToBitArray(this byte[] bytes)
+        {
+            return new BitArray(bytes);
         }
     }
 }

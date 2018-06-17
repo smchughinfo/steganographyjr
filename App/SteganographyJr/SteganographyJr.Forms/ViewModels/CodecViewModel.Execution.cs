@@ -1,4 +1,5 @@
-﻿using SteganographyJr.Core.ExtensionMethods;
+﻿using SteganographyJr.Core.DomainObjects;
+using SteganographyJr.Core.ExtensionMethods;
 using SteganographyJr.Cryptography;
 using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Models;
@@ -164,6 +165,16 @@ namespace SteganographyJr.Forms.ViewModels
             return bytes.ToArray();
         }
 
+        private Bitmap GetSteganographyBitmap()
+        {
+            Bitmap bitmap = DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+            using (var carrierImageStream = CarrierImageBytes.ConvertToStream())
+            {
+                bitmap.Set(carrierImageStream);
+            }
+            return bitmap;
+        }
+
         private (StaticVariables.Message messageType, object message) ParseSteganographyMessage(byte[] message)
         {
             var type = (StaticVariables.Message)message.Last();
@@ -189,9 +200,10 @@ namespace SteganographyJr.Forms.ViewModels
                 // get encoding variables
                 var password = SHA2.GetHash(GetSteganographyPassword());
                 var message = AES.Encrypt(GetSteganographyMessage(), password);
+                var carrierImage = GetSteganographyBitmap();
 
                 // make sure we can encode
-                var messageFits = _codec.MessageFits(CarrierImageBytes, message, password);
+                var messageFits = _codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
                 if (messageFits == false)
                 {
                     SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
@@ -199,7 +211,7 @@ namespace SteganographyJr.Forms.ViewModels
                 }
 
                 // do the encode
-                using (var imageStream = await _codec.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
+                using (var imageStream = await _codec.Encode(carrierImage, message, password, CheckCancel))
                 {
                     // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
                     // TODO: prepending message length and only read when you have that many bits will probably speed up decoding by a lot.
@@ -254,7 +266,9 @@ namespace SteganographyJr.Forms.ViewModels
         private async Task Decode()
         {
             var password = SHA2.GetHash(GetSteganographyPassword());
-            byte[] message = await _codec.Decode(CarrierImageBytes, password, CheckCancel);
+            var carrierImage = GetSteganographyBitmap();
+
+            byte[] message = await _codec.Decode(carrierImage, password, CheckCancel);
             if (message != null)
             {
                 message = AES.Decrypt(message, password);

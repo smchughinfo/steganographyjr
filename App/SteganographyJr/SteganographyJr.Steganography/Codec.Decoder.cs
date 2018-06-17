@@ -1,7 +1,9 @@
-﻿using SteganographyJr.Core.ExtensionMethods;
+﻿using SteganographyJr.Core.DomainObjects;
+using SteganographyJr.Core.ExtensionMethods;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,21 +13,32 @@ namespace SteganographyJr.Steganography
 {
     public partial class Codec
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, byte[] eof, Func<bool> checkCancel)
+        public async Task<byte[]> Decode(Bitmap carrierImage, Func<bool> checkCancel)
         {
-            var shuffleSeed = FisherYates.GetSeed(eof);
+            var eofMarker = _defaultEofMarker.ConvertToByteArray();
+            return await Decode(carrierImage, eofMarker, checkCancel);
+        }
 
-            InitializeFields(ExecutionType.Decode, imageBytes);
+        public async Task<byte[]> Decode(Bitmap carrierImage, byte[] eofMarker, Func<bool> checkCancel)
+        {
+            var shuffleSeed = FisherYates.GetSeed(eofMarker);
 
             bool userCancelled = false;
+
+            List<bool> messageBuilder = new List<bool>();
             byte[] decodedMessage = null;
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap(shuffleSeed, (x, y) => {
-                    var pixelBitsAsBools = DecodePixel(x, y);
-                    var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
+                IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
+                    var pixelBitsAsBools = DecodePixel(carrierImage, x, y);
+                    var foundEof = AddBitsAndCheckForEof(messageBuilder, pixelBitsAsBools, eofMarker);
 
-                    UpdateProgress();
+                    var percentComplete = (double)messageBuilder.Count / carrierImage.BitCapacity;
+                    UpdateProgress(stopwatch, percentComplete);
 
                     userCancelled = checkCancel();
                     return userCancelled || foundEof;
@@ -33,21 +46,20 @@ namespace SteganographyJr.Steganography
                 
                 if(userCancelled == false)
                 {
-                    decodedMessage = GetMessageWithoutEof(eof);
+                    decodedMessage = GetMessageWithoutEof(messageBuilder, eofMarker);
                 }
             });
-
-            ClearFields();
+            
             return userCancelled ? null : decodedMessage;
         }
 
-        private bool AddBitsAndCheckForEof(bool[] pixelBitsAsBools, byte[] eof)
+        private bool AddBitsAndCheckForEof(List<bool> messageBuilder, bool[] pixelBitsAsBools, byte[] eofMarker)
         {
             var found = false;
             foreach (var pBool in pixelBitsAsBools)
             {
-                _messageBuilder.Add(pBool);        // add just this one bit to the _messageBuilder
-                var foundEof = MessageHasEof(eof); // now check if _messageBuilder ends with the eof
+                messageBuilder.Add(pBool);                               // add just this one bit to the _messageBuilder
+                var foundEof = MessageHasEof(messageBuilder, eofMarker); // now check if _messageBuilder ends with the eof
                 if (foundEof)
                 {
                     found = true;
@@ -57,17 +69,17 @@ namespace SteganographyJr.Steganography
             return found;
         }
 
-        private bool MessageHasEof(byte[] eofBytes)
+        private bool MessageHasEof(List<bool> messageBuilder, byte[] eofMarker)
         {
-            var messageBuilderBytes = _messageBuilder.ConvertToByteArray();
-            var eofCandidateBytes = messageBuilderBytes.Reverse().Take(eofBytes.Length).Reverse().ToArray();
+            var messageBuilderBytes = messageBuilder.ConvertToByteArray();
+            var eofCandidateBytes = messageBuilderBytes.Reverse().Take(eofMarker.Length).Reverse().ToArray();
 
-            return eofBytes.SequenceEqual(eofCandidateBytes);
+            return eofMarker.SequenceEqual(eofCandidateBytes);
         }
 
-        private bool[] DecodePixel(int x, int y)
+        private bool[] DecodePixel(Bitmap carrierImage, int x, int y)
         {
-            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
+            (int a, int r, int g, int b) = carrierImage.GetPixel(x, y);
 
             var rBit = r % 2 == 0;
             var gBit = g % 2 == 0;
@@ -76,9 +88,9 @@ namespace SteganographyJr.Steganography
             return new bool[] { rBit, gBit, bBit };
         }
 
-        private byte[] GetMessageWithoutEof(byte[] eofBytes)
+        private byte[] GetMessageWithoutEof(List<bool> messageBuilder, byte[] eofBytes)
         {
-            var messageBuilderBytes = _messageBuilder.ConvertToByteArray();
+            var messageBuilderBytes = messageBuilder.ConvertToByteArray();
             var messageSizeWithoutEof = messageBuilderBytes.Count() - eofBytes.Count();
             return messageBuilderBytes.Take(messageSizeWithoutEof).ToArray();
         }
