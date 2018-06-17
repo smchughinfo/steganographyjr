@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SteganographyJr.Forms.Classes
+namespace SteganographyJr.Core
 {
-    static class Utilities
+    public static class Utilities
     {
         // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
         public static string GetHumanReadableFileSize(int byteSize)

@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SteganographyJr.Core\SteganographyJr.Core.csproj" />
+    <ProjectReference Include="..\SteganographyJr.Cryptography\SteganographyJr.Cryptography.csproj" />
     <ProjectReference Include="..\SteganographyJr.Steganography\SteganographyJr.Steganography.csproj" />
   </ItemGroup>
 

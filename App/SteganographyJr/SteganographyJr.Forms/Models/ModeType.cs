@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SteganographyJr.Forms.Models
 {
-    class Message
+    class ModeType
     {
-        public StaticVariables.Message Key { get; set; }
+        public StaticVariables.Mode Key { get; set; }
         public string Value { get; set; }
     }
 }

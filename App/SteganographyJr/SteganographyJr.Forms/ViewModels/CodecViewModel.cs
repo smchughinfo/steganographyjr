@@ -13,12 +13,11 @@ using System.Diagnostics;
 using SteganographyJr.Forms.Mvvm;
 using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Models;
-using SteganographyJr.Forms.Classes;
-using SteganographyJr.Forms.Services;
 using SteganographyJr.Forms.DTOs;
 using SteganographyJr.Core;
 using SteganographyJr.Steganography;
 using SteganographyJr.Core.Classes;
+using SteganographyJr.Cryptography;
 
 namespace SteganographyJr.Forms.ViewModels
 {
@@ -30,16 +29,16 @@ namespace SteganographyJr.Forms.ViewModels
         ImageSource _carrierImageSource;
         object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
 
-        List<Mode> _modes;
-        Mode _selectedMode;
+        List<ModeType> _modes;
+        ModeType _selectedMode;
 
         bool _usePassword;
         string _password;
 
-        List<Message> _messages;      // text or file
-        Message _SelectedMessageType; // text or file, whichever is selected
-        string _textMessage;          // if text is selected, the text the user entered
-        BytesWithPath _fileMessage;   // if file is selected, the file the user selected
+        List<MessageType> _messages;      // text or file
+        MessageType _SelectedMessageType; // text or file, whichever is selected
+        string _textMessage;              // if text is selected, the text the user entered
+        BytesWithPath _fileMessage;       // if file is selected, the file the user selected
 
         bool _changingCarrierImage;
         public DelegateCommand ChangeCarrierImageCommand { get; private set; }
@@ -153,10 +152,10 @@ namespace SteganographyJr.Forms.ViewModels
 
         private void InitMode()
         {
-            Modes = new List<Mode>()
+            Modes = new List<ModeType>()
             {
-                new Mode() { Key=StaticVariables.Mode.Encode, Value="Encode" },
-                new Mode() { Key=StaticVariables.Mode.Decode, Value="Decode" }
+                new ModeType() { Key=StaticVariables.Mode.Encode, Value="Encode" },
+                new ModeType() { Key=StaticVariables.Mode.Decode, Value="Decode" }
             };
             SelectedMode = Modes.Single(m => m.Key == StaticVariables.Mode.Encode);
         }
@@ -169,10 +168,10 @@ namespace SteganographyJr.Forms.ViewModels
 
         private void InitMessage()
         {
-            Messages = new List<Message>()
+            Messages = new List<MessageType>()
             {
-                new Message() { Key=StaticVariables.Message.Text, Value="Text" },
-                new Message() { Key=StaticVariables.Message.File, Value="File" }
+                new MessageType() { Key=StaticVariables.Message.Text, Value="Text" },
+                new MessageType() { Key=StaticVariables.Message.File, Value="File" }
             };
 
             TextMessage = "Type your message here";
@@ -368,12 +367,12 @@ namespace SteganographyJr.Forms.ViewModels
             CarrierImageSource = ImageSource.FromStream(() => new MemoryStream(CarrierImageBytes));
         }
 
-        public List<Mode> Modes {
+        public List<ModeType> Modes {
             get { return _modes; }
             set { SetPropertyValue(ref _modes, value); }
         }
 
-        public Mode SelectedMode {
+        public ModeType SelectedMode {
             get { return _selectedMode; }
             set { SetPropertyValue(ref _selectedMode, value); }
         }
@@ -405,12 +404,12 @@ namespace SteganographyJr.Forms.ViewModels
             set { SetPropertyValue(ref _password, value); }
         }
 
-        public List<Message> Messages {
+        public List<MessageType> Messages {
             get { return _messages; }
             set { SetPropertyValue(ref _messages, value); }
         }
 
-        public Message SelectedMessageType {
+        public MessageType SelectedMessageType {
             get { return _SelectedMessageType; }
             set { SetPropertyValue(ref _SelectedMessageType, value); }
         }
@@ -510,8 +509,8 @@ namespace SteganographyJr.Forms.ViewModels
 
 
                 // get encoding variables
-                var password = Cryptography.GetHash(GetSteganographyPassword());
-                var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
+                var password = SHA2.GetHash(GetSteganographyPassword());
+                var message = AES.Encrypt(GetSteganographyMessage(), password);
 
                 // make sure we can encode
                 var messageFits = _codec.MessageFits(CarrierImageBytes, message, password);
@@ -576,11 +575,11 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task Decode()
         {
-            var password = Cryptography.GetHash(GetSteganographyPassword());
+            var password = SHA2.GetHash(GetSteganographyPassword());
             byte[] message =  await _codec.Decode(CarrierImageBytes, password, CheckCancel);
             if(message != null)
             {
-                message = Cryptography.Decrypt(message, password);
+                message = AES.Decrypt(message, password);
                 ExecutionProgress = 1;
                 await Task.Delay(100);
 

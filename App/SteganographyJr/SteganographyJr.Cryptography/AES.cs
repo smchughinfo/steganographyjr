@@ -2,36 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace SteganographyJr.Forms.Services
+namespace SteganographyJr.Cryptography
 {
-    class Cryptography
+    public static class AES
     {
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
-
-        public static byte[] GetHash(string randomString)
-        {
-            return GetHash(randomString.ConvertToByteArray());
-        }
-
-        // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
-        // https://stackoverflow.com/questions/12416249/hashing-a-string-with-sha256
-        public static byte[] GetHash(byte[] bytesToHash)
-        {
-            var crypt = new SHA256Managed();
-            var hash = new StringBuilder();
-            byte[] crypto = crypt.ComputeHash(bytesToHash);
-            foreach (byte theByte in crypto)
-            {
-                hash.Append(theByte.ToString("x2"));
-            }
-            return hash.ToString().ConvertToByteArray();
-        }
-
-
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
@@ -42,7 +20,7 @@ namespace SteganographyJr.Forms.Services
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
-            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
+            (byte[] key, byte[] iv) = GetKeyAndIv(password, ivSeed);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
@@ -65,8 +43,8 @@ namespace SteganographyJr.Forms.Services
         public static byte[] Decrypt(byte[] bytesToDecrypt, byte[] password)
         {
             (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
-            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
-            
+            (byte[] key, byte[] iv) = GetKeyAndIv(password, ivSeed);
+
             byte[] decrypted = null;
 
             try
@@ -87,15 +65,15 @@ namespace SteganographyJr.Forms.Services
                     decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
-            
+
             return decrypted;
         }
 
-        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] password, byte[] ivSeed)
+        private static (byte[] key, byte[] iv) GetKeyAndIv(byte[] password, byte[] ivSeed)
         {
             byte[] key = new byte[16];
             byte[] iv = new byte[16];
