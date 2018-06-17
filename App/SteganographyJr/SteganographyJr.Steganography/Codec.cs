@@ -38,9 +38,8 @@ namespace SteganographyJr.Steganography
         {
             if (stopwatch.ElapsedMilliseconds > UPDATE_RATE)
             {
-                var userCancelled = checkCancel(percentComplete);
                 stopwatch.Restart();
-                return userCancelled;
+                return checkCancel(percentComplete);
             }
 
             return false;
