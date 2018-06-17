@@ -1,1 +1,3 @@
 ﻿The contents of this directory are from https://github.com/Wintellect/XamarinSamples/tree/master/PropertyDependencyDemo/PropertyDependencyDemo/Mvvm
+
+See this article for more information https://www.wintellect.com/linking-property-change-notifications-in-xamarin-forms-or-wpfsilverlight/
