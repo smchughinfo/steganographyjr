@@ -1,6 +1,7 @@
-﻿using SteganographyJr.Cryptography;
+﻿using SteganographyJr.Core.ExtensionMethods;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace SteganographyJr.Steganography
@@ -41,10 +42,26 @@ namespace SteganographyJr.Steganography
         // https://stackoverflow.com/questions/2351087/what-is-the-best-32bit-hash-function-for-short-strings-tag-names
         public static int GetSeed(byte[] input)
         {
-            // since we are losing bytes this is no good for cryptography. but it appears to be fine for the purpose of generating a 32-bit seed in this context.
-            var hashed =  SHA2.GetHash(input); // TODO: would be nice to completely break the cryptography dependency
+            // use the first 4 bytes of the hashed input to create a random number that is good enough to serve as a seed.
+            var hashed =  GetHash(input);
             var seed = BitConverter.ToInt32(hashed, 0);
             return seed;
+        }
+
+        // this is a copy of the hash function in SteganographyJr.Cryptography
+        // it's copied here so that StegonagraphyJr.Steganography doesn't have a dependency on SteganographyJr.Cryptography
+        // in this context this function serves its purpose as is and is not actually being used for cryptography
+        // this function is free to evolve seperatley from any hash functions in SteganographyJr.Cryptography.
+        private static byte[] GetHash(byte[] bytesToHash)
+        {
+            var crypt = new SHA256Managed();
+            var hash = new StringBuilder();
+            byte[] crypto = crypt.ComputeHash(bytesToHash);
+            foreach (byte theByte in crypto)
+            {
+                hash.Append(theByte.ToString("x2"));
+            }
+            return hash.ToString().ConvertToByteArray();
         }
     }
 }

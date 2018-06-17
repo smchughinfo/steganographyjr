@@ -31,6 +31,8 @@ namespace SteganographyJr.Steganography
 
             var userCancelled = false;
 
+            Stream encodedStream = null;
+
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -46,9 +48,9 @@ namespace SteganographyJr.Steganography
                     bool encodeComplete = bitsWritten >= message.Length * 8;
                     return userCancelled || encodeComplete;
                 });
-            });
 
-            Stream encodedStream = userCancelled ? null : carrierImage.ConvertToStream();
+                encodedStream = userCancelled ? null : carrierImage.ConvertToStream();
+            });
             
             return encodedStream;
         }

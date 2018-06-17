@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SteganographyJr.Core\SteganographyJr.Core.csproj" />
-    <ProjectReference Include="..\SteganographyJr.Cryptography\SteganographyJr.Cryptography.csproj" />
   </ItemGroup>
 
 </Project>
