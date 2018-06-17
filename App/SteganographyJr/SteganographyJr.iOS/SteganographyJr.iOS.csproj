@@ -123,9 +123,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\SteganographyJr\SteganographyJr.csproj">
-      <Project>{178EA0D2-7050-436C-9C53-4D721DF9EEE7}</Project>
-      <Name>SteganographyJr</Name>
+    <ProjectReference Include="..\SteganographyJr.Core\SteganographyJr.Core.csproj">
+      <Project>{5fce8557-c6cd-41ee-8e0d-ebdfb42eb7a4}</Project>
+      <Name>SteganographyJr.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SteganographyJr.Forms\SteganographyJr.Forms.csproj">
+      <Project>{8AB55DF1-F7BA-44C7-857B-ECA3F32DF379}</Project>
+      <Name>SteganographyJr.Forms</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

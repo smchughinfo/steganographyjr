@@ -157,25 +157,27 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SteganographyJr\SteganographyJr.csproj">
-      <Project>{178EA0D2-7050-436C-9C53-4D721DF9EEE7}</Project>
-      <Name>SteganographyJr</Name>
+    <ProjectReference Include="..\SteganographyJr.Core\SteganographyJr.Core.csproj">
+      <Project>{5fce8557-c6cd-41ee-8e0d-ebdfb42eb7a4}</Project>
+      <Name>SteganographyJr.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SteganographyJr.Forms\SteganographyJr.Forms.csproj">
+      <Project>{8AB55DF1-F7BA-44C7-857B-ECA3F32DF379}</Project>
+      <Name>SteganographyJr.Forms</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-
   <!-- TODO: REMOVE THIS SECTION IF/WHEN YOU SWITCH TO SYSTEM.DRAWING.COMMON -->
   <!-- https://github.com/NuGet/Home/issues/4989 -->
   <!-- https://stackoverflow.com/questions/33460667/how-to-use-extern-alias-with-nuget -->
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
-      <ItemGroup>
-          <ReferencePath Condition="'%(FileName)' == 'CoreCompat.System.Drawing'">
-              <Aliases>CoreCompat</Aliases>
-          </ReferencePath>
-      </ItemGroup>
+    <ItemGroup>
+      <ReferencePath Condition="'%(FileName)' == 'CoreCompat.System.Drawing'">
+        <Aliases>CoreCompat</Aliases>
+      </ReferencePath>
+    </ItemGroup>
   </Target>
-    
 </Project>

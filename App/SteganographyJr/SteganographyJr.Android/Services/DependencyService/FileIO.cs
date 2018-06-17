@@ -16,11 +16,12 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using Android.Views;
 using Android.Widget;
-using SteganographyJr.DTOs;
-using SteganographyJr.Services.DependencyService;
 using Xamarin.Forms;
-using SteganographyJr.ExtensionMethods;
+using SteganographyJr.Core.ExtensionMethods;
 using Plugin.FilePicker.Abstractions;
+using SteganographyJr.Forms.DTOs;
+using SteganographyJr.Forms;
+using SteganographyJr.Forms.Interfaces;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.FileIO))]
 namespace SteganographyJr.Droid.Services.DependencyService
@@ -146,9 +147,9 @@ namespace SteganographyJr.Droid.Services.DependencyService
             TaskCompletionSource<bool> promise = new TaskCompletionSource<bool>();
 
             // TODO: possible extra subscription here if user denies first request?
-            MessagingCenter.Subscribe<MainActivity, bool>(this, MainActivity.PermissionsChangedMessage, (sender, havePermissions) =>
+            MessagingCenter.Subscribe<MainActivity, bool>(this, MainActivity.PermissionsChangedMessageId, (sender, havePermissions) =>
             {
-                MessagingCenter.Unsubscribe<MainActivity, bool>(this, MainActivity.PermissionsChangedMessage);
+                MessagingCenter.Unsubscribe<MainActivity, bool>(this, MainActivity.PermissionsChangedMessageId);
                 promise.SetResult(havePermissions);
             });
 
@@ -165,10 +166,10 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 CancelButtonText = "Okay",
                 Message = message
             };
-            MessagingCenter.Send<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
-            MessagingCenter.Subscribe<object>(this, StaticVariables.AlertCompleteMessage, (sender) =>
+            MessagingCenter.Send<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
+            MessagingCenter.Subscribe<object>(this, StaticVariables.AlertCompleteMessageId, (sender) =>
             {
-                MessagingCenter.Unsubscribe<object>(this, StaticVariables.AlertCompleteMessage);
+                MessagingCenter.Unsubscribe<object>(this, StaticVariables.AlertCompleteMessageId);
                 promise.SetResult(true);
             });
 

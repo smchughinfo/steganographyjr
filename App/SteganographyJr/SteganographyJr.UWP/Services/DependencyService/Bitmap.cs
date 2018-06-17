@@ -1,7 +1,7 @@
 ﻿extern alias CoreCompat;
 
 using CoreCompat::System.Drawing.Imaging;
-using SteganographyJr.Models;
+using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,7 +14,7 @@ using Drawing = CoreCompat.System.Drawing;
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.UWP.Services.DependencyService.Bitmap))]
 namespace SteganographyJr.UWP.Services.DependencyService
 {
-    class Bitmap : Classes.Bitmap
+    class Bitmap : Core.Classes.Bitmap
     {
         public Drawing.Bitmap platformBitmap;
 
@@ -39,19 +39,19 @@ namespace SteganographyJr.UWP.Services.DependencyService
             return memoryStream;
         }
 
-        public override void ChangeFormat(CarrierImageFormat.ImageFormat imageFormat)
+        public override void ChangeFormat(Core.Classes.ImageFormat.ImageFormatType imageFormat)
         {
             ImageFormat bitmapImageFormat = null;
 
-            if (imageFormat == CarrierImageFormat.ImageFormat.gif)
+            if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.gif)
             {
                 bitmapImageFormat = ImageFormat.Gif;
             }
-            else if (imageFormat == CarrierImageFormat.ImageFormat.jpg)
+            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.jpg)
             {
                 bitmapImageFormat = ImageFormat.Jpeg;
             }
-            else if (imageFormat == CarrierImageFormat.ImageFormat.png)
+            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.png)
             {
                 bitmapImageFormat = ImageFormat.Png;
             }
