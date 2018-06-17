@@ -23,7 +23,7 @@ namespace SteganographyJr.Views
 		{
 			InitializeComponent ();
 
-            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+            topSeperator.IsVisible = Device.RuntimePlatform == Device.UWP;
 
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
@@ -31,9 +31,11 @@ namespace SteganographyJr.Views
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
             });
 
-            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
+            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, async (IViewModel, message) =>
             {
-                DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+                await DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+
+                MessagingCenter.Send<object>(this, StaticVariables.AlertCompleteMessage);
             });
         }
     }

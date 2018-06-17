@@ -13,6 +13,15 @@
                 <Setter Property="Margin" Value="0,5,0,5" />
                 <Setter Property="BackgroundColor" Value="DarkGray" />
                 <Setter Property="HeightRequest" Value="1" />
+                <Setter Property="IsVisible">
+                    <Setter.Value>
+                        <OnPlatform x:TypeArguments="x:Boolean">
+                            <On Platform="UWP">true</On>
+                            <On Platform="iOS">false</On>
+                            <On Platform="Andoid">false</On>
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
             </Style>
         </ResourceDictionary>
     </Application.Resources>

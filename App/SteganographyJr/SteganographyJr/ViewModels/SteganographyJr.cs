@@ -523,6 +523,8 @@ namespace SteganographyJr.ViewModels
                 // do the encode
                 using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
                 {
+                    // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
+                    // TODO: prepending message length and only read when you have that many bits will probably speed up decoding by a lot.
                     if (imageStream == null)
                     {
                         // the user cancelled. cleanup and return.

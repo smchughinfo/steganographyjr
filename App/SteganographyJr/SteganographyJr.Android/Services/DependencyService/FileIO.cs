@@ -19,17 +19,39 @@ using Android.Widget;
 using SteganographyJr.DTOs;
 using SteganographyJr.Services.DependencyService;
 using Xamarin.Forms;
+using SteganographyJr.ExtensionMethods;
+using Plugin.FilePicker.Abstractions;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.FileIO))]
 namespace SteganographyJr.Droid.Services.DependencyService
 {
-    // TODO: add the code in MainActivity \n -> 
-    // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
     class FileIO : IFileIO
     {
-        public Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
+        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
         {
-            return null;
+            try
+            {
+                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
+
+                string[] mimeTypes = new string[] { imagesOnly ? "image/*" : "*/*" };
+                var result = await filePicker.PickFile(mimeTypes);
+                if(result == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return new ImageChooserResult()
+                    {
+                        Stream = result.DataArray.ConvertToStream(),
+                        Path = result.FilePath
+                    };
+                }
+            }
+            catch(Exception ex)
+            {
+                return new ImageChooserResult() { ErrorMessage = ex.Message };
+            }
         }
 
         // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/permissions?tabs=vswin
@@ -37,7 +59,12 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             try
             {
-                await EnsurePermissions();
+                var havePermissions = await EnsurePermissions();
+                if(havePermissions == false)
+                {
+                    return new FileSaveResult() { ErrorMessage = StaticVariables.SaveFailedBecauseOfPermissionsMessage };
+                }
+
                 if (string.IsNullOrEmpty(path))
                 {
                     Bitmap bitmap = new Bitmap();
@@ -46,7 +73,6 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 }
                 else
                 {
-                    // TODO: this probably doesn't work
                     File.WriteAllBytes(path, image);
                 }
 
@@ -54,13 +80,33 @@ namespace SteganographyJr.Droid.Services.DependencyService
             }
             catch (Exception ex)
             {
-                return null;//new FileSaveResult() { ErrorMessage = ex.Message };
+                return new FileSaveResult() { ErrorMessage = ex.Message };
             }
         }
 
-        public Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
+        public async Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
         {
-            return null;
+            try
+            {
+                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
+                
+                var fileData = new FileData("", fileName, () =>
+                {
+                    return fileBytes.ConvertToStream();
+                });
+
+                var success = await filePicker.SaveFile(fileData);
+                if(success == false)
+                {
+                    return new FileSaveResult() { ErrorMessage = "Error saving file. SaveFile returned false." };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new FileSaveResult() { ErrorMessage = ex.Message };
+            }
+
+            return new FileSaveResult() { ErrorMessage = null };
         }
 
         private async Task<bool> EnsurePermissions()
@@ -85,7 +131,7 @@ namespace SteganographyJr.Droid.Services.DependencyService
 
                 if(showPermissionExplanation)
                 {
-                    SendPermissionRequestMessage(StaticVariables.RequestPermissionMessage);
+                    await SendPermissionRequestMessage(StaticVariables.RequestPermissionMessage).Task;
                 }
                 
                 ActivityCompat.RequestPermissions(MainActivity.Instance, requiredPermissions, 0);
@@ -109,8 +155,10 @@ namespace SteganographyJr.Droid.Services.DependencyService
             return promise;
         }
 
-        private void SendPermissionRequestMessage(string message)
+        private TaskCompletionSource<bool> SendPermissionRequestMessage(string message)
         {
+            var promise = new TaskCompletionSource<bool>();
+
             var alertMessage = new AlertMessage()
             {
                 Title = "Permission Request Explanation",
@@ -118,6 +166,13 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 Message = message
             };
             MessagingCenter.Send<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Subscribe<object>(this, StaticVariables.AlertCompleteMessage, (sender) =>
+            {
+                MessagingCenter.Unsubscribe<object>(this, StaticVariables.AlertCompleteMessage);
+                promise.SetResult(true);
+            });
+
+            return promise;
         }
     }
 }

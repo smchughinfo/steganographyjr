@@ -7,6 +7,10 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 using Xamarin.Forms;
+using Android.Content;
+using System.IO;
+using System.Threading.Tasks;
+using SteganographyJr.DTOs;
 
 namespace SteganographyJr.Droid
 {
@@ -15,7 +19,6 @@ namespace SteganographyJr.Droid
     {
         // https://forums.xamarin.com/discussion/106938/context-is-obsolete-as-of-version-2-5
         internal static MainActivity Instance { get; private set; }
-        internal static string PermissionsChangedMessage = "PermissionsChanged";
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -31,6 +34,7 @@ namespace SteganographyJr.Droid
         }
 
         // https://blog.xamarin.com/requesting-runtime-permissions-in-android-marshmallow/
+        internal static string PermissionsChangedMessage = "PermissionsChanged";
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             var havePermissions = grantResults[0] == Permission.Granted;
