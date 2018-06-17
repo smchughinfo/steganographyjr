@@ -34,11 +34,11 @@ namespace SteganographyJr.Droid
         }
 
         // https://blog.xamarin.com/requesting-runtime-permissions-in-android-marshmallow/
-        internal static string PermissionsChangedMessage = "PermissionsChanged";
+        internal static string PermissionsChangedMessageId = "PermissionsChanged";
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             var havePermissions = grantResults[0] == Permission.Granted;
-            MessagingCenter.Send(this, PermissionsChangedMessage, havePermissions);
+            MessagingCenter.Send(this, PermissionsChangedMessageId, havePermissions);
         }
     }
 }

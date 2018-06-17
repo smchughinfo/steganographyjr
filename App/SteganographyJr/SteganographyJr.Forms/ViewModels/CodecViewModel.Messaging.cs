@@ -15,7 +15,7 @@ namespace SteganographyJr.Forms.ViewModels
                 CancelButtonText = "Okay",
                 Message = errorMessage
             };
-            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
         }
 
         private void SendDecodedMessage(string decodedMessage)
@@ -26,7 +26,7 @@ namespace SteganographyJr.Forms.ViewModels
                 CancelButtonText = "Okay",
                 Message = $"Decoded message: {decodedMessage}"
             };
-            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
         }
 
         private void SendEncodingSuccessMessage(string imagePath)
@@ -37,7 +37,7 @@ namespace SteganographyJr.Forms.ViewModels
                 CancelButtonText = "Excelsior!",
                 Message = $"Image saved to {imagePath}."
             };
-            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
         }
 
         private void SendEncodingErrorMessage(string errorMessage)
@@ -48,7 +48,7 @@ namespace SteganographyJr.Forms.ViewModels
                 CancelButtonText = "Okay",
                 Message = errorMessage
             };
-            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
         }
 
         private void SendOpenFileErrorMessage(string errorMessage)
@@ -59,7 +59,7 @@ namespace SteganographyJr.Forms.ViewModels
                 CancelButtonText = "Okay",
                 Message = errorMessage
             };
-            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, alertMessage);
+            MessagingCenter.Send<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, alertMessage);
         }
     }
 }

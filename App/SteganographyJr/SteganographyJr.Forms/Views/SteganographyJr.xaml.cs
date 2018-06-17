@@ -22,17 +22,17 @@ namespace SteganographyJr.Forms.Views
 
             topSeperator.IsVisible = Device.RuntimePlatform == Device.UWP;
 
-            MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
+            MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, (IViewModel, message) =>
             {
                 // TODO: copy to clipboard
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
             });
 
-            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, async (IViewModel, message) =>
+            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessageId, async (IViewModel, message) =>
             {
                 await DisplayAlert(message.Title, message.Message, message.CancelButtonText);
 
-                MessagingCenter.Send<object>(this, StaticVariables.AlertCompleteMessage);
+                MessagingCenter.Send<object>(this, StaticVariables.AlertCompleteMessageId);
             });
         }
     }

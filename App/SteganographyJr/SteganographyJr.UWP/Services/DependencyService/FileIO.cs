@@ -34,7 +34,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
 
                 if (imagesOnly)
                 {
-                    foreach(var imageType in StaticVariables.ImageFormats)
+                    foreach(var imageType in Core.StaticVariables.ImageFormats)
                     {
                         openPicker.FileTypeFilter.Add(imageType.Extension);
                     }
@@ -78,7 +78,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
                 StorageFile storageFile;
                 if (string.IsNullOrEmpty(path))
                 {
-                    storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(StaticVariables.DefaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
+                    storageFile = await KnownFolders.PicturesLibrary.CreateFileAsync(Forms.StaticVariables.DefaultCarrierImageSaveName, CreationCollisionOption.ReplaceExisting);
                 }
                 else
                 {
