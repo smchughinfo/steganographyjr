@@ -1,11 +1,9 @@
-﻿using SteganographyJr.Forms.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Xamarin.Forms;
 
-namespace SteganographyJr.Forms.Classes
+namespace SteganographyJr.Core.Classes
 {
     public abstract class Bitmap
     {
@@ -13,7 +11,7 @@ namespace SteganographyJr.Forms.Classes
         public abstract int Height { get; }
         public abstract int Width { get; }
         public abstract Stream ConvertToStream();
-        public abstract void ChangeFormat(CarrierImageFormat.ImageFormat imageFormat);
+        public abstract void ChangeFormat(ImageFormat.ImageFormatType imageFormat);
         public abstract (int a, int r, int g, int b) GetPixel(int x, int y);
         public abstract void SetPixel(int x, int y, int a, int r, int g, int b);
 

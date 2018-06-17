@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SteganographyJr.Forms.Services
+namespace SteganographyJr.Steganography
 {
     static class FisherYates
     {
@@ -41,9 +41,10 @@ namespace SteganographyJr.Forms.Services
         public static int GetSeed(byte[] input)
         {
             // since we are losing bytes this is no good for cryptography. but it appears to be fine for the purpose of generating a 32-bit seed in this context.
-            var hashed = Cryptography.GetHash(input);
-            var ivalue = BitConverter.ToInt32(hashed, 0);
-            return ivalue;
+            var hashed = 123;// Cryptography.GetHash(input);
+            throw new Exception("FIX THIS");
+            //var ivalue = BitConverter.ToInt32(hashed, 0);
+            //return ivalue;
         }
     }
 }

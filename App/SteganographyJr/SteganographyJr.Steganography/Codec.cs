@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SteganographyJr.Core;
+using SteganographyJr.Core.Classes;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,14 +9,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Xamarin.Forms;
-using SteganographyJr.Core.ExtensionMethods;
-using SteganographyJr.Forms.Classes;
-using SteganographyJr.Forms.Models;
 
-namespace SteganographyJr.Forms.Services.Steganography
+namespace SteganographyJr.Steganography
 {
-    partial class Steganography
+    public partial class Codec
     {
         // BEGIN CLEAR THESE FIELDS
         ExecutionType? _executionType;
@@ -23,7 +21,7 @@ namespace SteganographyJr.Forms.Services.Steganography
         Stopwatch _uiStopwatch;
         int _messageIndex;
         List<bool> _messageBuilder;
-        CarrierImageFormat _carrierImageFormat;
+        ImageFormat _carrierImageFormat;
         // END CLEAR THESE FIELDS
 
         enum ExecutionType { Encode, Decode };
@@ -32,11 +30,11 @@ namespace SteganographyJr.Forms.Services.Steganography
 
         private void InitializeFields(ExecutionType executionType, byte[] imageBytes)
         {
-            var carrierImageFormat = new CarrierImageFormat(CarrierImageFormat.ImageFormat.png);
+            var carrierImageFormat = new ImageFormat(ImageFormat.ImageFormatType.png);
             InitializeFields(executionType, imageBytes, carrierImageFormat, null);
         }
 
-        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message)
+        private void InitializeFields(ExecutionType executionType, byte[] imageBytes, ImageFormat carrierImageFormat, byte[] message)
         {
             _executionType = executionType;
             _message = message;
@@ -47,10 +45,11 @@ namespace SteganographyJr.Forms.Services.Steganography
 
             using (var imageStream = new MemoryStream(imageBytes))
             {
-                _bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+                // TODO: ummm
+                //_bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
                 _bitmap.Set(imageStream);
 
-                _bitmap.ChangeFormat(CarrierImageFormat.ImageFormat.png);
+                _bitmap.ChangeFormat(ImageFormat.ImageFormatType.png);
             }
         }
 

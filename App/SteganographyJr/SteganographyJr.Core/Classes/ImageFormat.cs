@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SteganographyJr.Forms.Models
+namespace SteganographyJr.Core.Classes
 {
-    public class CarrierImageFormat
+    public class ImageFormat
     {
-        public enum ImageFormat { gif, jpg, png };
-        public ImageFormat Format {get; }
+        public enum ImageFormatType { gif, jpg, png };
+        public ImageFormatType Format {get; }
         public string Extension { get; }
 
-        public CarrierImageFormat(ImageFormat imageFormat)
+        public ImageFormat(ImageFormatType imageFormat)
         {
             Format = imageFormat;
-            if(Format == ImageFormat.gif)
+            if(Format == ImageFormatType.gif)
             {
                 Extension = ".gif";
             }
-            else if(Format == ImageFormat.jpg)
+            else if(Format == ImageFormatType.jpg)
             {
                 Extension = ".jpg";
             }
-            else if(Format == ImageFormat.png)
+            else if(Format == ImageFormatType.png)
             {
                 Extension = ".png";
             }
@@ -32,20 +32,20 @@ namespace SteganographyJr.Forms.Models
         /// Takes any string, such as a file name or a file path, that ends with .gif, .jpg, .jpeg, or .png
         /// </summary>
         /// <param name="stringWithExtension">.gif, .jpg, .jpeg, or .png</param>
-        public CarrierImageFormat(string stringWithDotExtension)
+        public ImageFormat(string stringWithDotExtension)
         {
             Extension = "." + stringWithDotExtension.Split('.').Last();
             if(Extension == ".gif")
             {
-                Format = ImageFormat.gif;
+                Format = ImageFormatType.gif;
             }
             else if (Extension == ".jpg" || Extension == ".jpeg")
             {
-                Format = ImageFormat.jpg;
+                Format = ImageFormatType.jpg;
             }
             else if(Extension == ".png")
             {
-                Format = ImageFormat.png;
+                Format = ImageFormatType.png;
             }
         }
     }

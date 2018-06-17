@@ -1,4 +1,6 @@
-﻿using SteganographyJr.Forms.Models;
+﻿using SteganographyJr.Core;
+using SteganographyJr.Core.Classes;
+using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +12,7 @@ namespace SteganographyJr.Forms.DTOs
     {
         public string ErrorMessage { get; set; }
         public string Path { get; set; }
-        public CarrierImageFormat CarrierImageFormat { get; set; }
+        public ImageFormat CarrierImageFormat { get; set; }
         public Stream Stream { get; set; }
         public object NativeRepresentation { get; set; }
     }

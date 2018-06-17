@@ -1,4 +1,6 @@
-﻿using SteganographyJr.Forms.Models;
+﻿using SteganographyJr.Core;
+using SteganographyJr.Core.Classes;
+using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,8 +9,9 @@ namespace SteganographyJr.Forms
 {
     public static class StaticVariables
     {
+        // TODO: move as much into .Core as possible
         public const string DefaultCarrierImageResource = "SteganographyJr.Forms.Images.default-carrier-image.png";
-        public static readonly CarrierImageFormat DefaultCarrierImageFormat = new CarrierImageFormat(DefaultCarrierImageResource);
+        public static readonly ImageFormat DefaultCarrierImageFormat = new ImageFormat(DefaultCarrierImageResource);
         public const string DefaultCarrierImageSaveName = "Encoded Image.png";
         public enum Mode { Encode, Decode };
         public const string DefaultPassword = "0785AFAB-52E8-4356-A8F4-31CACB590B88";
@@ -16,12 +19,12 @@ namespace SteganographyJr.Forms
         public enum Message { Text, File };
         public const string DisplayAlertMessage = "DisplayAlertMessage";
         public const string AlertCompleteMessage = "AlertCompleteMessage";
-        public static readonly CarrierImageFormat[] CarrierImageFormats =
+        public static readonly ImageFormat[] ImageFormats =
         {
-            new CarrierImageFormat(".gif"),
-            new CarrierImageFormat(".jpg"),
-            new CarrierImageFormat(".jpeg"),
-            new CarrierImageFormat(".png")
+            new ImageFormat(".gif"),
+            new ImageFormat(".jpg"),
+            new ImageFormat(".jpeg"),
+            new ImageFormat(".png")
         };
         public static string RequestPermissionMessage = "SteganographyJr needs permission to read and write files. Only the files you choose are accessed by SteganographyJr.";
         public static string SaveFailedBecauseOfPermissionsMessage = "Unable to save.";

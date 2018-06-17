@@ -1,6 +1,5 @@
 ﻿using SteganographyJr.Forms.DTOs;
 using SteganographyJr.Forms.Interfaces;
-using SteganographyJr.Forms.Services.DependencyService;
 using System;
 using System.Collections.Generic;
 using System.IO;

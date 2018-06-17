@@ -1,7 +1,9 @@
-﻿using SteganographyJr.Forms;
+﻿using SteganographyJr.Core;
+using SteganographyJr.Core.Classes;
+using SteganographyJr.Forms;
 using SteganographyJr.Forms.DTOs;
+using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Models;
-using SteganographyJr.Forms.Services.DependencyService;
 using SteganographyJr.UWP.Services.DependencyService;
 using System;
 using System.Collections.Generic;
@@ -32,7 +34,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
 
                 if (imagesOnly)
                 {
-                    foreach(var imageType in StaticVariables.CarrierImageFormats)
+                    foreach(var imageType in StaticVariables.ImageFormats)
                     {
                         openPicker.FileTypeFilter.Add(imageType.Extension);
                     }
@@ -60,7 +62,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
                     Path = storageFile.Path,
                     Stream = raStream.AsStreamForRead(),
                     NativeRepresentation = storageFile,
-                    CarrierImageFormat = new CarrierImageFormat(storageFile.Path)
+                    CarrierImageFormat = new ImageFormat(storageFile.Path)
                 };
             }
             catch(Exception ex)

@@ -13,19 +13,20 @@ using System.Diagnostics;
 using SteganographyJr.Forms.Mvvm;
 using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Models;
-using SteganographyJr.Forms.Services.Steganography;
-using SteganographyJr.Forms.Services.DependencyService;
 using SteganographyJr.Forms.Classes;
 using SteganographyJr.Forms.Services;
 using SteganographyJr.Forms.DTOs;
+using SteganographyJr.Core;
+using SteganographyJr.Steganography;
+using SteganographyJr.Core.Classes;
 
 namespace SteganographyJr.Forms.ViewModels
 {
-    class SteganographyJr : ObservableObject, IViewModel
+    class CodecViewModel : ObservableObject, IViewModel
     {
         byte[] _carrierImageBytes;
         string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
-        CarrierImageFormat _carrierImageFormat;
+        ImageFormat _carrierImageFormat;
         ImageSource _carrierImageSource;
         object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
 
@@ -51,9 +52,9 @@ namespace SteganographyJr.Forms.ViewModels
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
 
-        Steganography _steganography;
+        Codec _codec;
 
-        public SteganographyJr()
+        public CodecViewModel()
         {
             InitSteganography();
             InitCarrierImage();
@@ -66,9 +67,9 @@ namespace SteganographyJr.Forms.ViewModels
 
         private void InitSteganography()
         {
-            _steganography = new Steganography();
+            _codec = new Codec();
 
-            _steganography.ProgressChanged += (object sender, double progress) =>
+            _codec.ProgressChanged += (object sender, double progress) =>
             {
                 ExecutionProgress = progress;
             };
@@ -125,7 +126,7 @@ namespace SteganographyJr.Forms.ViewModels
 
         private void InitCarrierImage()
         {
-            var assembly = (typeof(SteganographyJr)).GetTypeInfo().Assembly;
+            var assembly = (typeof(Encoder)).GetTypeInfo().Assembly;
 
             using (var imageStream = assembly.GetManifestResourceStream(StaticVariables.DefaultCarrierImageResource))
             {
@@ -444,7 +445,7 @@ namespace SteganographyJr.Forms.ViewModels
         {
             get
             {
-                var messageCapacity = _steganography.GetImageCapacityInBits(CarrierImageBytes) / 8;
+                var messageCapacity = _codec.GetImageCapacityInBits(CarrierImageBytes) / 8;
                 var size = Utilities.GetHumanReadableFileSize(messageCapacity);
                 return $"Message Capacity: {size}";
             }
@@ -513,7 +514,7 @@ namespace SteganographyJr.Forms.ViewModels
                 var message = Cryptography.Encrypt(GetSteganographyMessage(), password);
 
                 // make sure we can encode
-                var messageFits = _steganography.MessageFits(CarrierImageBytes, message, password);
+                var messageFits = _codec.MessageFits(CarrierImageBytes, message, password);
                 if (messageFits == false)
                 {
                     SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
@@ -521,7 +522,7 @@ namespace SteganographyJr.Forms.ViewModels
                 }
 
                 // do the encode
-                using (var imageStream = await _steganography.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
+                using (var imageStream = await _codec.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
                 {
                     // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
                     // TODO: prepending message length and only read when you have that many bits will probably speed up decoding by a lot.
@@ -576,7 +577,7 @@ namespace SteganographyJr.Forms.ViewModels
         private async Task Decode()
         {
             var password = Cryptography.GetHash(GetSteganographyPassword());
-            byte[] message =  await _steganography.Decode(CarrierImageBytes, password, CheckCancel);
+            byte[] message =  await _codec.Decode(CarrierImageBytes, password, CheckCancel);
             if(message != null)
             {
                 message = Cryptography.Decrypt(message, password);

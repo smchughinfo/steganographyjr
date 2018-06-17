@@ -4,7 +4,7 @@
              xmlns:ViewModels="clr-namespace:SteganographyJr.Forms.ViewModels"
              x:Class="SteganographyJr.Forms.Views.SteganographyJr">
     <ContentPage.BindingContext>
-        <ViewModels:SteganographyJr />
+        <ViewModels:CodecViewModel />
     </ContentPage.BindingContext>
     <ContentPage.Content>
         <ScrollView>

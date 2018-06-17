@@ -1,17 +1,16 @@
-﻿using SteganographyJr.Core.ExtensionMethods;
-using SteganographyJr.Forms.Classes;
-using SteganographyJr.Forms.Models;
+﻿using SteganographyJr.Core;
+using SteganographyJr.Core.Classes;
+using SteganographyJr.Core.ExtensionMethods;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 
-namespace SteganographyJr.Forms.Services.Steganography
+namespace SteganographyJr.Steganography
 {
-    partial class Steganography
+    public partial class Codec
     {
         BitArray MessageBits
         {
@@ -28,10 +27,13 @@ namespace SteganographyJr.Forms.Services.Steganography
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
+                return 123456;
+                /* TODO: umm
                 var bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
                 bitmap.Set(imageStream);
 
                 return GetMessageCapacityInBits(bitmap);
+                */
             }
         }
 
@@ -42,7 +44,7 @@ namespace SteganographyJr.Forms.Services.Steganography
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
+        public async Task<Stream> Encode(byte[] imageBytes, ImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
         {
             var shuffleSeed = FisherYates.GetSeed(eof);
             message = message.Append(eof);

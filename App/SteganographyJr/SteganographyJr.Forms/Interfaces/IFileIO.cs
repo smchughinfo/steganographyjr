@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SteganographyJr.Forms.Services.DependencyService
+namespace SteganographyJr.Forms.Interfaces
 {
     public interface IFileIO
     {

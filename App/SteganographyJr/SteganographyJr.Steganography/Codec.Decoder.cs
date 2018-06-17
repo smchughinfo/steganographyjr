@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SteganographyJr.Forms.Services.Steganography
+namespace SteganographyJr.Steganography
 {
-    partial class Steganography
+    public partial class Codec
     {
         public async Task<byte[]> Decode(byte[] imageBytes, byte[] eof, Func<bool> checkCancel)
         {
