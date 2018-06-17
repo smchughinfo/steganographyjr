@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -11,14 +10,13 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using SteganographyJr.Models;
-using SteganographyJr.Services.DependencyService;
+using SteganographyJr.Forms;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.Bitmap))]
 namespace SteganographyJr.Droid.Services.DependencyService
 {
     // https://developer.xamarin.com/api/type/Android.Graphics.Bitmap/
-    class Bitmap : Classes.Bitmap
+    class Bitmap : Core.Classes.Bitmap
     {
         public Android.Graphics.Bitmap platformBitmap;
 
@@ -52,19 +50,19 @@ namespace SteganographyJr.Droid.Services.DependencyService
             return memoryStream;
         }
 
-        public override void ChangeFormat(CarrierImageFormat.ImageFormat imageFormat)
+        public override void ChangeFormat(Core.Classes.ImageFormat.ImageFormatType imageFormat)
         {
             Android.Graphics.Bitmap.CompressFormat bitmapImageFormat = null;
 
-            if (imageFormat == CarrierImageFormat.ImageFormat.gif) // TODO: ?gif??? - possibly just dont change the format on android.
+            if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.gif) // TODO: ?gif??? - possibly just dont change the format on android.
             {
                 //bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Gi
             }
-            else if (imageFormat == CarrierImageFormat.ImageFormat.jpg)
+            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.jpg)
             {
                 bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Jpeg;
             }
-            else if (imageFormat == CarrierImageFormat.ImageFormat.png)
+            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.png)
             {
                 bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Png;
             }

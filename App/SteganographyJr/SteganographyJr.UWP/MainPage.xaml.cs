@@ -21,7 +21,7 @@ namespace SteganographyJr.UWP
         {
             this.InitializeComponent();
 
-            LoadApplication(new SteganographyJr.App());
+            LoadApplication(new Forms.App());
         }
     }
 }

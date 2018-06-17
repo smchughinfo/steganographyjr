@@ -10,7 +10,7 @@ using Xamarin.Forms;
 using Android.Content;
 using System.IO;
 using System.Threading.Tasks;
-using SteganographyJr.DTOs;
+using SteganographyJr.Forms;
 
 namespace SteganographyJr.Droid
 {
@@ -34,11 +34,11 @@ namespace SteganographyJr.Droid
         }
 
         // https://blog.xamarin.com/requesting-runtime-permissions-in-android-marshmallow/
-        internal static string PermissionsChangedMessage = "PermissionsChanged";
+        internal static string PermissionsChangedMessageId = "PermissionsChanged";
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             var havePermissions = grantResults[0] == Permission.Granted;
-            MessagingCenter.Send(this, PermissionsChangedMessage, havePermissions);
+            MessagingCenter.Send(this, PermissionsChangedMessageId, havePermissions);
         }
     }
 }

@@ -1,1 +1,0 @@
-﻿The contents of this directory are from https://github.com/Wintellect/XamarinSamples/tree/master/PropertyDependencyDemo/PropertyDependencyDemo/Mvvm
