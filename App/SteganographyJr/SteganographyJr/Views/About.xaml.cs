@@ -16,7 +16,7 @@ namespace SteganographyJr.Views
 		{
 			InitializeComponent ();
 
-            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+            topSeperator.IsVisible = Device.RuntimePlatform == Device.UWP;
         }
 	}
 }

@@ -23,12 +23,19 @@ namespace SteganographyJr.Views
 		{
 			InitializeComponent ();
 
-            topSeperator.IsVisible = Device.RuntimePlatform != Device.iOS;
+            topSeperator.IsVisible = Device.RuntimePlatform == Device.UWP;
 
             MessagingCenter.Subscribe<IViewModel, AlertMessage>(this, StaticVariables.DisplayAlertMessage, (IViewModel, message) =>
             {
                 // TODO: copy to clipboard
                 DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+            });
+
+            MessagingCenter.Subscribe<IFileIO, AlertMessage>(this, StaticVariables.DisplayAlertMessage, async (IViewModel, message) =>
+            {
+                await DisplayAlert(message.Title, message.Message, message.CancelButtonText);
+
+                MessagingCenter.Send<object>(this, StaticVariables.AlertCompleteMessage);
             });
         }
     }

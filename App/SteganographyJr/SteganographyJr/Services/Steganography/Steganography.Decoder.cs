@@ -12,16 +12,17 @@ namespace SteganographyJr.Services.Steganography
 {
     partial class Steganography
     {
-        public async Task<byte[]> Decode(byte[] imageBytes, string password, Func<bool> checkCancel)
+        public async Task<byte[]> Decode(byte[] imageBytes, byte[] eof, Func<bool> checkCancel)
         {
-            InitializeFields(ExecutionType.Decode, imageBytes, password);
-            var eof = Cryptography.GetHash(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
+
+            InitializeFields(ExecutionType.Decode, imageBytes);
 
             bool userCancelled = false;
             byte[] decodedMessage = null;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap((x, y) => {
+                IterateBitmap(shuffleSeed, (x, y) => {
                     var pixelBitsAsBools = DecodePixel(x, y);
                     var foundEof = AddBitsAndCheckForEof(pixelBitsAsBools, eof);
 
@@ -67,13 +68,13 @@ namespace SteganographyJr.Services.Steganography
 
         private bool[] DecodePixel(int x, int y)
         {
-            var pixel = _bitmap.GetPixel(x, y);
+            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
 
-            var r = pixel.R % 2 == 0;
-            var g = pixel.G % 2 == 0;
-            var b = pixel.B % 2 == 0;
+            var rBit = r % 2 == 0;
+            var gBit = g % 2 == 0;
+            var bBit = b % 2 == 0;
 
-            return new bool[] { r, g, b };
+            return new bool[] { rBit, gBit, bBit };
         }
 
         private byte[] GetMessageWithoutEof(byte[] eofBytes)

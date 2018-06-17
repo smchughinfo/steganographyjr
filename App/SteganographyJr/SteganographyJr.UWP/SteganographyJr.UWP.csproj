@@ -92,6 +92,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Services\DependencyService\Bitmap.cs" />
     <Compile Include="Services\DependencyService\FileIO.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -149,6 +150,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CoreCompat.System.Drawing">
+      <Version>1.0.0-beta006</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.280555" />
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.0.1" />
   </ItemGroup>
@@ -162,4 +166,16 @@
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+
+  <!-- TODO: REMOVE THIS SECTION IF/WHEN YOU SWITCH TO SYSTEM.DRAWING.COMMON -->
+  <!-- https://github.com/NuGet/Home/issues/4989 -->
+  <!-- https://stackoverflow.com/questions/33460667/how-to-use-extern-alias-with-nuget -->
+  <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
+      <ItemGroup>
+          <ReferencePath Condition="'%(FileName)' == 'CoreCompat.System.Drawing'">
+              <Aliases>CoreCompat</Aliases>
+          </ReferencePath>
+      </ItemGroup>
+  </Target>
+    
 </Project>

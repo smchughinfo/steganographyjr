@@ -1,10 +1,7 @@
-﻿extern alias CoreCompat;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Drawing = CoreCompat.System.Drawing;
 
 namespace SteganographyJr.ExtensionMethods
 {
@@ -15,7 +12,7 @@ namespace SteganographyJr.ExtensionMethods
             using (var memoryStream = new MemoryStream())
             {
                 stream.CopyTo(memoryStream);
-                stream.Position = 0;
+                // stream.Position = 0; // TODO: needed? doesnt work when reading a Stream on Android. ...
                 return memoryStream.ToArray();
             }
         }

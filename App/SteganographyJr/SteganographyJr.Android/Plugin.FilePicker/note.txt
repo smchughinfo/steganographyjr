@@ -1,0 +1,9 @@
+The code in this directory is from https://github.com/jfversluis/FilePicker-Plugin-for-Xamarin-and-Windows.
+
+at the time i tried using it the code didn't allow selecting files by type. making that happen was currently in progress but not fully implemented. i managed to get the not fully implemented code to build but it threw an error when I tried calling it.
+
+i eventually just ripped the relevent code out of that project and into this one. that's far from ideal but it was the only way i could get it to work. fortunately there are only a few classes.
+
+also, you still have to pack Plugin.FilePicker.Abstractions and include it as a nuget package. it's currently using https://www.nuget.org/packages/SteganograpyJr.Plugin.FilePicker.Abstractions/
+
+...in the future you might be able to delete this directory and get the whole thing off nuget.

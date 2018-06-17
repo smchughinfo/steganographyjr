@@ -12,13 +12,18 @@ namespace SteganographyJr.Services
     {
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
 
+        public static byte[] GetHash(string randomString)
+        {
+            return GetHash(randomString.ConvertToByteArray());
+        }
+
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
         // https://stackoverflow.com/questions/12416249/hashing-a-string-with-sha256
-        public static byte[] GetHash(string randomString)
+        public static byte[] GetHash(byte[] bytesToHash)
         {
             var crypt = new SHA256Managed();
             var hash = new StringBuilder();
-            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(randomString));
+            byte[] crypto = crypt.ComputeHash(bytesToHash);
             foreach (byte theByte in crypto)
             {
                 hash.Append(theByte.ToString("x2"));
@@ -26,16 +31,18 @@ namespace SteganographyJr.Services
             return hash.ToString().ConvertToByteArray();
         }
 
+
+
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
         // https://codereview.stackexchange.com/questions/196088/encrypt-a-byte-array
         // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
-        public static byte[] Encrypt(byte[] bytesToEncrypt, string password)
+        public static byte[] Encrypt(byte[] bytesToEncrypt, byte[] password)
         {
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
-            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
+            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
@@ -55,10 +62,10 @@ namespace SteganographyJr.Services
             return encrypted;
         }
 
-        public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
+        public static byte[] Decrypt(byte[] bytesToDecrypt, byte[] password)
         {
             (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
-            (byte[] key, byte[] iv) = GetSymmetricKey(ivSeed, password);
+            (byte[] key, byte[] iv) = GetSymmetricKey(password, ivSeed);
             
             byte[] decrypted = null;
 
@@ -88,11 +95,11 @@ namespace SteganographyJr.Services
             return decrypted;
         }
 
-        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] ivSeed, string password)
+        private static (byte[] key, byte[] iv) GetSymmetricKey(byte[] password, byte[] ivSeed)
         {
             byte[] key = new byte[16];
             byte[] iv = new byte[16];
-            using (var rfc = new Rfc2898DeriveBytes(password, ivSeed))
+            using (var rfc = new Rfc2898DeriveBytes(password, ivSeed, 1000)) // 1000 is default. google "how many iterations to use for Rfc2898DeriveBytes"
             {
                 key = rfc.GetBytes(16);
                 iv = rfc.GetBytes(16);

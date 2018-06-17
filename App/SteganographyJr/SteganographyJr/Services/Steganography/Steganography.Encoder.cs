@@ -1,5 +1,4 @@
-﻿extern alias CoreCompat;
-
+﻿using SteganographyJr.Classes;
 using SteganographyJr.ExtensionMethods;
 using SteganographyJr.Models;
 using System;
@@ -8,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Drawing = CoreCompat.System.Drawing;
+using Xamarin.Forms;
 
 namespace SteganographyJr.Services.Steganography
 {
@@ -19,40 +18,41 @@ namespace SteganographyJr.Services.Steganography
             get { return new BitArray(_message); }
         }
 
-        public bool MessageFits(byte[] imageBytes, byte[] message, string password)
+        public bool MessageFits(byte[] imageBytes, byte[] message, byte[] eof)
         {
-            var eof = Cryptography.GetHash(password);
-            var messageCapacity = GetMessageCapacityInBits(imageBytes) / 8;
+            var messageCapacity = GetImageCapacityInBits(imageBytes) / 8;
             return messageCapacity >= message.Length + eof.Length;
         }
 
-        private int GetMessageCapacityInBits(byte[] imageBytes)
+        public int GetImageCapacityInBits(byte[] imageBytes)
         {
             using (var imageStream = new MemoryStream(imageBytes))
             {
-                Drawing.Bitmap bitmap = new Drawing.Bitmap(imageStream);
+                var bitmap = Xamarin.Forms.DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+                bitmap.Set(imageStream);
+
                 return GetMessageCapacityInBits(bitmap);
             }
         }
 
-        private int GetMessageCapacityInBits(Drawing.Bitmap bitmap)
+        private int GetMessageCapacityInBits(Bitmap bitmap)
         {
             var numPixels = bitmap.Height * bitmap.Width;
             var numBits = numPixels * 3;
             return numBits;
         }
 
-        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, string password, Func<bool> checkCancel)
+        public async Task<Stream> Encode(byte[] imageBytes, CarrierImageFormat carrierImageFormat, byte[] message, byte[] eof, Func<bool> checkCancel)
         {
-            // TODO: split password in half. use half for encryption and hash the other half for fisher yates hash
-            var eof = Cryptography.GetHash(password);
+            var shuffleSeed = FisherYates.GetSeed(eof);
             message = message.Append(eof);
-            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, password, message);
+
+            InitializeFields(ExecutionType.Encode, imageBytes, carrierImageFormat, message);
 
             bool userCancelled = false;
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap((x, y) => {
+                IterateBitmap(shuffleSeed, (x, y) => {
                     EncodePixel(x, y);
                     UpdateProgress();
 
@@ -66,27 +66,6 @@ namespace SteganographyJr.Services.Steganography
 
             ClearFields();
             return encodedStream;
-        }
-
-        // https://stackoverflow.com/questions/281640/how-do-i-get-a-human-readable-file-size-in-bytes-abbreviation-using-net
-        public string GetHumanReadableFileSize(byte[] imageBytes)
-        {
-            //imageBytes
-            var len = GetMessageCapacityInBits(imageBytes) / 8;
-
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            while (len >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                len = len / 1024;
-            }
-
-            // Adjust the format string to your preferences. For example "{0:0.#}{1}" would
-            // show a single decimal place, and no space.
-            string result = String.Format("{0:0.##} {1}", len, sizes[order]);
-
-            return result;
         }
 
         private int GetValueToEncodeInChannel(int channelValue, int messageIndex)
@@ -110,15 +89,13 @@ namespace SteganographyJr.Services.Steganography
         
         private void EncodePixel(int x, int y)
         {
-            var pixel = _bitmap.GetPixel(x, y); // TODO: figure out how to handle jpegs. convert -> dowork -> convert back -> save with 0 compression. or only save as png. jpeg lossless compression
+            (int a, int r, int g, int b) = _bitmap.GetPixel(x, y);
 
-            var a = pixel.A;
-            var r = GetValueToEncodeInChannel(pixel.R, _messageIndex++);
-            var g = GetValueToEncodeInChannel(pixel.G, _messageIndex++);
-            var b = GetValueToEncodeInChannel(pixel.B, _messageIndex++);
+            r = GetValueToEncodeInChannel(r, _messageIndex++);
+            g = GetValueToEncodeInChannel(g, _messageIndex++);
+            b = GetValueToEncodeInChannel(b, _messageIndex++);
 
-            var newPixel = Drawing.Color.FromArgb(a, r, g, b);
-            _bitmap.SetPixel(x, y, newPixel);
+            _bitmap.SetPixel(x, y, a, r, g, b);
         }
     }
 }
