@@ -36,7 +36,7 @@ namespace SteganographyJr.Steganography
 
         private static bool CheckCancelAndUpdate(Stopwatch stopwatch, double percentComplete, Func<double, bool> checkCancel)
         {
-            if (stopwatch.ElapsedMilliseconds > UPDATE_RATE)
+            if (stopwatch.ElapsedMilliseconds > UPDATE_RATE) // the purpose of this is to avoid spamming the caller with updates
             {
                 stopwatch.Restart();
                 return checkCancel(percentComplete);
