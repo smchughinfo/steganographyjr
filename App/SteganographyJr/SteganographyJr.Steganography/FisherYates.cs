@@ -42,7 +42,7 @@ namespace SteganographyJr.Steganography
         // https://stackoverflow.com/questions/2351087/what-is-the-best-32bit-hash-function-for-short-strings-tag-names
         public static int GetSeed(byte[] input)
         {
-            // use the first 4 bytes of the hashed input to create a random number that is good enough to serve as a seed.
+            // use the first 4 bytes of the hashed input to create a pseudo-random number that is good enough to serve as a seed.
             var hashed =  GetHash(input);
             var seed = BitConverter.ToInt32(hashed, 0);
             return seed;
