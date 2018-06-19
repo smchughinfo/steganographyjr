@@ -62,7 +62,7 @@ namespace SteganographyJr.Cryptography
 
                     // take only the number of bytes that were in the original byte[]
                     decrypted = mStream.ToArray();
-                    decrypted = decrypted.Split(eof.ConvertToByteArray())[0];
+                    decrypted = decrypted.SplitOnce(eof.ConvertToByteArray())[0];
                 }
             }
             catch (Exception ex)

@@ -6,7 +6,7 @@ namespace SteganographyJr.Forms.Models
 {
     class ModeType
     {
-        public StaticVariables.Mode Key { get; set; }
+        public Core.StaticVariables.ExecutionType Key { get; set; }
         public string Value { get; set; }
     }
 }

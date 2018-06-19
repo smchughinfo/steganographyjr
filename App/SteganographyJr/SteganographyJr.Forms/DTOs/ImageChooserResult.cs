@@ -1,5 +1,5 @@
 ﻿using SteganographyJr.Core;
-using SteganographyJr.Core.Classes;
+using SteganographyJr.Core.DomainObjects;
 using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;

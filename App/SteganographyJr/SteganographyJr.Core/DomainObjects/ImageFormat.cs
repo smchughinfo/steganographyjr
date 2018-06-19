@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SteganographyJr.Core.Classes
+namespace SteganographyJr.Core.DomainObjects
 {
     public class ImageFormat
     {

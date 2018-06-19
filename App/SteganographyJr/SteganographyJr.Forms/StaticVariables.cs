@@ -1,5 +1,5 @@
 ﻿using SteganographyJr.Core;
-using SteganographyJr.Core.Classes;
+using SteganographyJr.Core.DomainObjects;
 using SteganographyJr.Forms.Models;
 using System;
 using System.Collections.Generic;
@@ -12,8 +12,7 @@ namespace SteganographyJr.Forms
         public const string DefaultCarrierImageResource = "SteganographyJr.Forms.Images.default-carrier-image.png";
         public static readonly ImageFormat DefaultCarrierImageFormat = new ImageFormat(DefaultCarrierImageResource);
         public const string DefaultCarrierImageSaveName = "Encoded Image.png";
-
-        public enum Mode { Encode, Decode };
+        
         public enum Message { Text, File };
 
         public const string DefaultPassword = "0785AFAB-52E8-4356-A8F4-31CACB590B88";

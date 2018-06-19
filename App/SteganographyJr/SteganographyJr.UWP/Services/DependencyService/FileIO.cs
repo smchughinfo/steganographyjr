@@ -1,5 +1,5 @@
 ﻿using SteganographyJr.Core;
-using SteganographyJr.Core.Classes;
+using SteganographyJr.Core.DomainObjects;
 using SteganographyJr.Forms;
 using SteganographyJr.Forms.DTOs;
 using SteganographyJr.Forms.Interfaces;

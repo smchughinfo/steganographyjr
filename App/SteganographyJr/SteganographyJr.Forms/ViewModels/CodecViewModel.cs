@@ -7,7 +7,6 @@ namespace SteganographyJr.Forms.ViewModels
     {
         public CodecViewModel()
         {
-            InitSteganography();
             InitCarrierImage();
             InitMode();
             InitMessage();

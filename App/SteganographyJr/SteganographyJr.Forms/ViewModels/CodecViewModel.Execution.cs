@@ -1,4 +1,5 @@
-﻿using SteganographyJr.Core.ExtensionMethods;
+﻿using SteganographyJr.Core.DomainObjects;
+using SteganographyJr.Core.ExtensionMethods;
 using SteganographyJr.Cryptography;
 using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Models;
@@ -21,18 +22,6 @@ namespace SteganographyJr.Forms.ViewModels
 
         public DelegateCommand ExecuteCommand { get; private set; }
         double _executionProgress;
-
-        Codec _codec;
-
-        private void InitSteganography()
-        {
-            _codec = new Codec();
-
-            _codec.ProgressChanged += (object sender, double progress) =>
-            {
-                ExecutionProgress = progress;
-            };
-        }
 
         private void InitExecute()
         {
@@ -106,8 +95,10 @@ namespace SteganographyJr.Forms.ViewModels
             }
         }
 
-        private bool CheckCancel()
+        private bool CheckCancel(double percentComplete)
         {
+            ExecutionProgress = percentComplete;
+
             bool cancelling = _cancelling;
             if (_cancelling)
             {
@@ -164,6 +155,16 @@ namespace SteganographyJr.Forms.ViewModels
             return bytes.ToArray();
         }
 
+        private Bitmap GetSteganographyBitmap()
+        {
+            Bitmap bitmap = DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
+            using (var carrierImageStream = CarrierImageBytes.ConvertToStream())
+            {
+                bitmap.Set(carrierImageStream);
+            }
+            return bitmap;
+        }
+
         private (StaticVariables.Message messageType, object message) ParseSteganographyMessage(byte[] message)
         {
             var type = (StaticVariables.Message)message.Last();
@@ -189,9 +190,10 @@ namespace SteganographyJr.Forms.ViewModels
                 // get encoding variables
                 var password = SHA2.GetHash(GetSteganographyPassword());
                 var message = AES.Encrypt(GetSteganographyMessage(), password);
+                var carrierImage = GetSteganographyBitmap();
 
                 // make sure we can encode
-                var messageFits = _codec.MessageFits(CarrierImageBytes, message, password);
+                var messageFits = Codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
                 if (messageFits == false)
                 {
                     SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
@@ -199,21 +201,19 @@ namespace SteganographyJr.Forms.ViewModels
                 }
 
                 // do the encode
-                using (var imageStream = await _codec.Encode(CarrierImageBytes, _carrierImageFormat, message, password, CheckCancel))
+                carrierImage = await Codec.Encode(carrierImage, message, password, CheckCancel);
+
+                // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
+                // TODO: on decode only check for eof every nth bit. prepending length seems like a vulnerability.
+                if (carrierImage == null)
                 {
-                    // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
-                    // TODO: prepending message length and only read when you have that many bits will probably speed up decoding by a lot.
-                    if (imageStream == null)
-                    {
-                        // the user cancelled. cleanup and return.
-                        ExecutionProgress = 0;
-                        return;
-                    }
-                    else
-                    {
-                        var result = imageStream.ConvertToByteArray();
-                        CarrierImageBytes = result;
-                    }
+                    // the user cancelled. cleanup and return.
+                    ExecutionProgress = 0;
+                    return;
+                }
+                else
+                {
+                        CarrierImageBytes = carrierImage.ConvertToByteArray();
                 }
 
                 ExecutionProgress = 1;
@@ -254,7 +254,9 @@ namespace SteganographyJr.Forms.ViewModels
         private async Task Decode()
         {
             var password = SHA2.GetHash(GetSteganographyPassword());
-            byte[] message = await _codec.Decode(CarrierImageBytes, password, CheckCancel);
+            var carrierImage = GetSteganographyBitmap();
+
+            byte[] message = await Codec.Decode(carrierImage, password, CheckCancel);
             if (message != null)
             {
                 message = AES.Decrypt(message, password);
@@ -287,7 +289,7 @@ namespace SteganographyJr.Forms.ViewModels
                 var messageObjAsBytes = (byte[])result.messageObj;
                 var seperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
-                var messageComponents = messageObjAsBytes.Split(seperatorBytes);
+                var messageComponents = messageObjAsBytes.SplitOnce(seperatorBytes);
 
                 var fileName = messageComponents[0].ConvertToString();
                 var fileBytes = messageComponents[1];
