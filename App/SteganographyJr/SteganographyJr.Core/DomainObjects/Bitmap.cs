@@ -1,10 +1,12 @@
-﻿using System;
+﻿using SteganographyJr.Core.ExtensionMethods;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace SteganographyJr.Core.Classes
+namespace SteganographyJr.Core.DomainObjects
 {
+    // TODO: think about this. any special methods will prevent system.drawing.common from being plug and play
     public abstract class Bitmap
     {
         public abstract void Set(Stream stream);
@@ -24,6 +26,32 @@ namespace SteganographyJr.Core.Classes
             int colInt = Convert.ToInt32(col);
 
             return (x: colInt, y: rowInt);
+        }
+
+        public int BitCapacity
+        {
+            get
+            {
+                var numPixels = Height * Width;
+                var numBits = numPixels * 3;
+                return numBits;
+            }
+        }
+
+        public int ByteCapacity
+        {
+            get
+            {
+                return BitCapacity / 8;
+            }
+        }
+
+        public byte[] ConvertToByteArray()
+        {
+            using (var stream = ConvertToStream())
+            {
+                return stream.ConvertToByteArray();
+            }
         }
     }
 }

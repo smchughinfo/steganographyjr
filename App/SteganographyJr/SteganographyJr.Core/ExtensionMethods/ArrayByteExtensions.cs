@@ -54,16 +54,24 @@ namespace SteganographyJr.Core.ExtensionMethods
             return newArray;
         }
 
-        public static byte[][] Split(this byte[] composite, byte[] seperator)
+        // https://stackoverflow.com/questions/9755090/split-a-byte-array-at-a-delimiter/50732160#50732160
+        public static byte[][] SplitOnce(this byte[] composite, byte[] seperator)
         {
+            bool found = false;
+
             int i = 0;
-            for(; i < composite.Length - seperator.Length; i++)
+            for (; i < composite.Length - seperator.Length; i++)
             {
                 var compositeView = new byte[seperator.Length];
                 Array.Copy(composite, i, compositeView, 0, seperator.Length);
 
-                var found = compositeView.SequenceEqual(seperator);
+                found = compositeView.SequenceEqual(seperator);
                 if (found) break;
+            }
+
+            if (found == false)
+            {
+                return null;
             }
 
             var component1Length = i;
@@ -85,12 +93,22 @@ namespace SteganographyJr.Core.ExtensionMethods
 
         public static string ConvertToString(this byte[] bytes)
         {
-            return Encoding.UTF8.GetString(bytes);
+            return ConvertToString(bytes, Encoding.UTF8);
+        }
+
+        public static string ConvertToString(this byte[] bytes, Encoding encoding)
+        {
+            return encoding.GetString(bytes);
         }
 
         public static Stream ConvertToStream(this byte[] bytes)
         {
             return new MemoryStream(bytes);
+        }
+
+        public static BitArray ConvertToBitArray(this byte[] bytes)
+        {
+            return new BitArray(bytes);
         }
     }
 }
