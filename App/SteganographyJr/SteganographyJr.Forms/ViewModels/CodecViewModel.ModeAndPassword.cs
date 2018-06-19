@@ -1,6 +1,7 @@
 ﻿using SteganographyJr.Forms.Models;
 using System.Collections.Generic;
 using System.Linq;
+using static SteganographyJr.Core.StaticVariables;
 
 namespace SteganographyJr.Forms.ViewModels
 {
@@ -17,10 +18,10 @@ namespace SteganographyJr.Forms.ViewModels
         {
             ModeTypes = new List<ModeType>()
             {
-                new ModeType() { Key=StaticVariables.Mode.Encode, Value="Encode" },
-                new ModeType() { Key=StaticVariables.Mode.Decode, Value="Decode" }
+                new ModeType() { Key=ExecutionType.Encode, Value="Encode" },
+                new ModeType() { Key=ExecutionType.Decode, Value="Decode" }
             };
-            SelectedMode = ModeTypes.Single(m => m.Key == StaticVariables.Mode.Encode);
+            SelectedMode = ModeTypes.Single(m => m.Key == ExecutionType.Encode);
         }
 
         private void InitPassword()
@@ -43,12 +44,12 @@ namespace SteganographyJr.Forms.ViewModels
 
         public bool SelectedModeIsEncode
         {
-            get { return SelectedMode.Key == StaticVariables.Mode.Encode; }
+            get { return SelectedMode.Key == ExecutionType.Encode; }
         }
 
         public bool SelectedModeIsDecode
         {
-            get { return SelectedMode.Key == StaticVariables.Mode.Decode; }
+            get { return SelectedMode.Key == ExecutionType.Decode; }
         }
 
         public bool UsePassword

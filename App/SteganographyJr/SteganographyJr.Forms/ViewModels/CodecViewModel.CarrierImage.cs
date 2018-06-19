@@ -1,4 +1,4 @@
-﻿using SteganographyJr.Core.Classes;
+﻿using SteganographyJr.Core.DomainObjects;
 using SteganographyJr.Core.ExtensionMethods;
 using SteganographyJr.Forms.Interfaces;
 using SteganographyJr.Forms.Mvvm;
@@ -108,8 +108,8 @@ namespace SteganographyJr.Forms.ViewModels
         {
             get
             {
-                var messageCapacity = _codec.GetImageCapacityInBits(CarrierImageBytes) / 8;
-                var size = Utilities.GetHumanReadableFileSize(messageCapacity);
+                var carrierImage = GetSteganographyBitmap();
+                var size = Utilities.GetHumanReadableFileSize(carrierImage.ByteCapacity);
                 return $"Message Capacity: {size}";
             }
         }

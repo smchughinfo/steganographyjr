@@ -16,7 +16,7 @@ using SteganographyJr.Forms;
 namespace SteganographyJr.Droid.Services.DependencyService
 {
     // https://developer.xamarin.com/api/type/Android.Graphics.Bitmap/
-    class Bitmap : Core.Classes.Bitmap
+    class Bitmap : Core.DomainObjects.Bitmap
     {
         public Android.Graphics.Bitmap platformBitmap;
 
@@ -50,19 +50,19 @@ namespace SteganographyJr.Droid.Services.DependencyService
             return memoryStream;
         }
 
-        public override void ChangeFormat(Core.Classes.ImageFormat.ImageFormatType imageFormat)
+        public override void ChangeFormat(Core.DomainObjects.ImageFormat.ImageFormatType imageFormat)
         {
             Android.Graphics.Bitmap.CompressFormat bitmapImageFormat = null;
 
-            if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.gif) // TODO: ?gif??? - possibly just dont change the format on android.
+            if (imageFormat == Core.DomainObjects.ImageFormat.ImageFormatType.gif) // TODO: ?gif??? - possibly just dont change the format on android.
             {
                 //bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Gi
             }
-            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.jpg)
+            else if (imageFormat == Core.DomainObjects.ImageFormat.ImageFormatType.jpg)
             {
                 bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Jpeg;
             }
-            else if (imageFormat == Core.Classes.ImageFormat.ImageFormatType.png)
+            else if (imageFormat == Core.DomainObjects.ImageFormat.ImageFormatType.png)
             {
                 bitmapImageFormat = Android.Graphics.Bitmap.CompressFormat.Png;
             }

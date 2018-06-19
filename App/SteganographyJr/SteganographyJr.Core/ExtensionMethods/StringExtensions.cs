@@ -8,7 +8,12 @@ namespace SteganographyJr.Core.ExtensionMethods
     {
         public static byte[] ConvertToByteArray(this string theString)
         {
-            return Encoding.UTF8.GetBytes(theString);
+            return ConvertToByteArray(theString, Encoding.UTF8);
+        }
+
+        public static byte[] ConvertToByteArray(this string theString, Encoding encoding)
+        {
+            return encoding.GetBytes(theString);
         }
     }
 }
