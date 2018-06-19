@@ -289,7 +289,7 @@ namespace SteganographyJr.Forms.ViewModels
                 var messageObjAsBytes = (byte[])result.messageObj;
                 var seperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
-                var messageComponents = messageObjAsBytes.Split(seperatorBytes);
+                var messageComponents = messageObjAsBytes.SplitOnce(seperatorBytes);
 
                 var fileName = messageComponents[0].ConvertToString();
                 var fileBytes = messageComponents[1];

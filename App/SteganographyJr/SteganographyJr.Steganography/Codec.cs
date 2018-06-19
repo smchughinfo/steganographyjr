@@ -16,7 +16,7 @@ namespace SteganographyJr.Steganography
     public static partial class Codec
     {
         private const string _defaultEofMarker = "EC951F51-B03B-4007-AAB7-746C16BE1535";
-        const int UPDATE_RATE = 100;
+        const int USER_UPDATE_RATE = 100;
 
         private static void IterateBitmap(Bitmap bitmap, int shuffleSeed, Func<int, int, bool> onPixel)
         {
@@ -36,7 +36,7 @@ namespace SteganographyJr.Steganography
 
         private static bool CheckCancelAndUpdate(Stopwatch stopwatch, double percentComplete, Func<double, bool> checkCancel)
         {
-            if (stopwatch.ElapsedMilliseconds > UPDATE_RATE) // the purpose of this is to avoid spamming the caller with updates
+            if (stopwatch.ElapsedMilliseconds > USER_UPDATE_RATE) // the purpose of this is to avoid spamming the caller with updates
             {
                 stopwatch.Restart();
                 return checkCancel(percentComplete);

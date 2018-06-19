@@ -55,16 +55,23 @@ namespace SteganographyJr.Core.ExtensionMethods
         }
 
         // https://stackoverflow.com/questions/9755090/split-a-byte-array-at-a-delimiter/50732160#50732160
-        public static byte[][] Split(this byte[] composite, byte[] seperator)
+        public static byte[][] SplitOnce(this byte[] composite, byte[] seperator)
         {
+            bool found = false;
+
             int i = 0;
-            for(; i < composite.Length - seperator.Length; i++)
+            for (; i < composite.Length - seperator.Length; i++)
             {
                 var compositeView = new byte[seperator.Length];
                 Array.Copy(composite, i, compositeView, 0, seperator.Length);
 
-                var found = compositeView.SequenceEqual(seperator);
+                found = compositeView.SequenceEqual(seperator);
                 if (found) break;
+            }
+
+            if (found == false)
+            {
+                return null;
             }
 
             var component1Length = i;

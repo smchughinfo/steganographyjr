@@ -13,6 +13,8 @@ namespace SteganographyJr.Steganography
 {
     public static partial class Codec
     {
+        const int  EOF_CHECK_RATE = 100;
+
         public static async Task<byte[]> Decode(Bitmap carrierImage, Func<double, bool> checkCancel)
         {
             var eofMarker = _defaultEofMarker.ConvertToByteArray();
@@ -23,57 +25,48 @@ namespace SteganographyJr.Steganography
         {
             var shuffleSeed = FisherYates.GetSeed(eofMarker);
 
+            bool foundEof = false;
             bool userCancelled = false;
 
             List<bool> messageBuilder = new List<bool>();
             byte[] decodedMessage = null;
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            var userUpdateStopwatch = new Stopwatch();
+            var eofStopwatch = new Stopwatch();
+            userUpdateStopwatch.Start();
+            eofStopwatch.Start();
 
             await Task.Run(() => // move away from the calling thread while working
             {
                 IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
                     var pixelBitsAsBools = DecodePixel(carrierImage, x, y);
-                    var foundEof = AddBitsAndCheckForEof(messageBuilder, pixelBitsAsBools, eofMarker);
+                    messageBuilder.AddRange(pixelBitsAsBools);
+                    
+                    if(eofStopwatch.ElapsedTicks > EOF_CHECK_RATE)
+                    {
+                        eofStopwatch.Reset();
+                        foundEof = MessageBuilderHasEof(messageBuilder, eofMarker);
+                    }
 
                     var percentComplete = (double)messageBuilder.Count / carrierImage.BitCapacity;
-                    userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
+                    userCancelled = CheckCancelAndUpdate(userUpdateStopwatch, percentComplete, checkCancel);
 
                     return userCancelled || foundEof;
                 });
-                
-                if(userCancelled == false)
+
+                foundEof = MessageBuilderHasEof(messageBuilder, eofMarker); // check for eof again in case the IterateBitmap loop completed since the last time we checked.
+                if (foundEof)
                 {
                     decodedMessage = GetMessageWithoutEof(messageBuilder, eofMarker);
                 }
             });
             
-            return userCancelled ? null : decodedMessage;
+            return userCancelled || !foundEof ? null : decodedMessage;
         }
 
-        private static bool AddBitsAndCheckForEof(List<bool> messageBuilder, bool[] pixelBitsAsBools, byte[] eofMarker)
+        private static bool MessageBuilderHasEof(List<bool> messageBuilder, byte[] eofMarker)
         {
-            var found = false;
-            foreach (var pBool in pixelBitsAsBools)
-            {
-                messageBuilder.Add(pBool);                               // add just this one bit to the _messageBuilder
-                var foundEof = MessageHasEof(messageBuilder, eofMarker); // now check if _messageBuilder ends with the eof
-                if (foundEof)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            return found;
-        }
-
-        private static bool MessageHasEof(List<bool> messageBuilder, byte[] eofMarker)
-        {
-            var messageBuilderBytes = messageBuilder.ConvertToByteArray();
-            var eofCandidateBytes = messageBuilderBytes.Reverse().Take(eofMarker.Length).Reverse().ToArray();
-
-            return eofMarker.SequenceEqual(eofCandidateBytes);
+            return messageBuilder.ConvertToByteArray().SplitOnce(eofMarker) != null;
         }
 
         private static bool[] DecodePixel(Bitmap carrierImage, int x, int y)
@@ -90,8 +83,7 @@ namespace SteganographyJr.Steganography
         private static byte[] GetMessageWithoutEof(List<bool> messageBuilder, byte[] eofBytes)
         {
             var messageBuilderBytes = messageBuilder.ConvertToByteArray();
-            var messageSizeWithoutEof = messageBuilderBytes.Count() - eofBytes.Count();
-            return messageBuilderBytes.Take(messageSizeWithoutEof).ToArray();
+            return messageBuilderBytes.SplitOnce(eofBytes)[0];
         }
     }
 }
