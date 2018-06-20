@@ -66,7 +66,7 @@ namespace SteganographyJr.Steganography
 
         private static bool MessageBuilderHasEof(List<bool> messageBuilder, byte[] eofMarker)
         {
-            return messageBuilder.ConvertToByteArray().SplitOnce(eofMarker) != null;
+            return messageBuilder.ConvertToByteArray().Contains(eofMarker);
         }
 
         private static bool[] DecodePixel(Bitmap carrierImage, int x, int y)

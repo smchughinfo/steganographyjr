@@ -91,6 +91,11 @@ namespace SteganographyJr.Core.ExtensionMethods
             };
         }
 
+        public static bool Contains(this byte[] bytes, byte[] subBytes)
+        {
+            return bytes.SplitOnce(subBytes) != null;
+        }
+
         public static string ConvertToString(this byte[] bytes)
         {
             return ConvertToString(bytes, Encoding.UTF8);
