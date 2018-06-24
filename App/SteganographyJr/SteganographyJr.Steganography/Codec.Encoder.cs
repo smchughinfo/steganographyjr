@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace SteganographyJr.Steganography
 {
+    // TODO: doesnt calculate messageFits correctly on android
+    // TODO: cant encode large files. just sits there.
     public partial class Codec
     {
         public static bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
