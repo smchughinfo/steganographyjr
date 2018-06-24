@@ -13,7 +13,6 @@ namespace SteganographyJr.Droid.Plugin.FilePicker
     /// <summary>
     /// Implementation for Feature
     /// </summary>
-    ///
     [Preserve (AllMembers = true)]
     public class FilePickerImplementation : IFilePicker
     {
@@ -102,7 +101,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker
         public Task<bool> SaveFile (FileData fileToSave)
         {
             try {
-                var myFile = new File (Android.OS.Environment.ExternalStorageDirectory, fileToSave.FileName);
+                var myFile = new File (fileToSave.FilePath, fileToSave.FileName);
 
                 if (myFile.Exists ())
                     return Task.FromResult(true);

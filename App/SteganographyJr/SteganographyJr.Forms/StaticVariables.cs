@@ -23,5 +23,6 @@ namespace SteganographyJr.Forms
 
         public static string RequestPermissionMessage = "SteganographyJr needs permission to read and write files. Only the files you choose are accessed by SteganographyJr.";
         public static string SaveFailedBecauseOfPermissionsMessage = "Unable to save.";
+        public static string ReadFailedBecauseOfPermissionsMessage = "Unable to read file.";
     }
 }

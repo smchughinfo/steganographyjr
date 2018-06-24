@@ -32,6 +32,11 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             try
             {
+                var havePermissions = await EnsurePermissions();
+                if(havePermissions == false)
+                {
+                    return new ImageChooserResult() { ErrorMessage = StaticVariables.ReadFailedBecauseOfPermissionsMessage };
+                }
                 var filePicker = new Plugin.FilePicker.FilePickerImplementation();
 
                 string[] mimeTypes = new string[] { imagesOnly ? "image/*" : "*/*" };
@@ -84,22 +89,17 @@ namespace SteganographyJr.Droid.Services.DependencyService
                 return new FileSaveResult() { ErrorMessage = ex.Message };
             }
         }
-
+        
         public async Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
         {
             try
             {
-                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
-                
-                var fileData = new FileData("", fileName, () =>
+                var savePicker = new Plugin.FilePicker.SavePicker.SavePickerImplementation();
+                var errorMessage = await savePicker.SaveFile(fileName, fileBytes);
+                var hasError = string.IsNullOrEmpty(errorMessage) == false;
+                if(hasError)
                 {
-                    return fileBytes.ConvertToStream();
-                });
-
-                var success = await filePicker.SaveFile(fileData);
-                if(success == false)
-                {
-                    return new FileSaveResult() { ErrorMessage = "Error saving file. SaveFile returned false." };
+                    return new FileSaveResult() { ErrorMessage = errorMessage };
                 }
             }
             catch (Exception ex)

@@ -40,14 +40,12 @@ namespace SteganographyJr.Steganography
                 IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
                     EncodePixel(carrierImage, message, ref bitsWritten, x, y);
 
-                    var percentComplete = (double)bitsWritten / carrierImage.BitCapacity;
+                    var percentComplete = ((double)bitsWritten / message.Length);
                     userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
 
                     bool encodeComplete = bitsWritten >= message.Length * 8;
                     return userCancelled || encodeComplete;
                 });
-
-                
             });
 
             return userCancelled ? null : carrierImage;
