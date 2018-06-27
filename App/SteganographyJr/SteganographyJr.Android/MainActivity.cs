@@ -24,7 +24,7 @@ namespace SteganographyJr.Droid
         protected override void OnCreate(Bundle bundle)
         {
             var io = new IO();
-            var result = io.Add(5, 98); // TODO: what is /unsafe? // TODO: have to double check MCW version of android now too.
+            var result = io.Add(5, 98); // TODO: what is /unsafe? // TODO: have to double check MCW version of android now too. //TODO: include dll or add it as nuget... add it as nuget and include in answer
 
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
