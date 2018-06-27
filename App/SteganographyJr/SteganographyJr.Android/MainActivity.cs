@@ -11,6 +11,7 @@ using Android.Content;
 using System.IO;
 using System.Threading.Tasks;
 using SteganographyJr.Forms;
+using Utilities;
 
 namespace SteganographyJr.Droid
 {
@@ -22,6 +23,9 @@ namespace SteganographyJr.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
+            var io = new IO();
+            var result = io.Add(5, 98); // TODO: what is /unsafe? // TODO: have to double check MCW version of android now too.
+
             TabLayoutResource = Resource.Layout.Tabbar;
             ToolbarResource = Resource.Layout.Toolbar;
 

@@ -62,6 +62,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker
                     tcs?.SetResult (new FileData (e.FilePath, e.FileName,
                         () =>
                         {
+                            // TODO: it fails here sometimes. i believe on the 0 byte files it created. just catch it and return an error string or something.
                             if (IOUtil.isMediaStore(e.FilePath))
                                 return new System.IO.MemoryStream(e.FileByte);
                             else
