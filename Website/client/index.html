@@ -5,17 +5,84 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <meta name="robots" content="index/follow">
     <meta name="description" content="A Steganography application for iOS, Android, and UWP.">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Bangers" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 2px;
+            max-width: 940px;
+            margin-left: auto;
+            margin-right: auto;
+            outline: 1px solid black;
+        }
+
+        h1 {
+            background-size: cover;
+            display: inline-block;
+            font-size: 100px;
+            letter-spacing: 6px;
+            margin-bottom: 0;
+        }
+
+
+        .sparkle-rainbow {
+            background-image: url(images/color-spectrum.png);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: rgba(255,255,255,0);
+
+            -webkit-text-stroke: 1px rgb(50, 50, 50);
+        }
+
+        h1.sparkle-rainbow {
+            /* because it doesn't render how you would expect (cuts off the right edge of the r in jr) */
+            padding-right:5px;
+        }
+
+        body-text-sparkle-rainbow {
+
+        }
+
+        .autological-color {
+            -webkit-text-stroke: 1px rgb(50, 50, 50);
+        }
+        .autological-color :nth-child(1) { color: red; }
+        .autological-color :nth-child(2) { color: orange; }
+        .autological-color :nth-child(3) { color: yellow; }
+        .autological-color :nth-child(4) { color: green; }
+        .autological-color :nth-child(5) { color: blue; }
+        .autological-color :nth-child(6) { color: violet; }
+
+        .what-it-do {
+            text-decoration: underline;
+        }
+    </style>
     <body>
-        <div class="jumbotron">
-            <h1 class="display-4">SteganographyJr</h1>
-            <p class="lead">Hide text or files inside an images colors.</p>
-            <hr class="my-4">
-            <img src="/images/default-carrier-image.png" class="img-fluid">
-            <hr class="my-4">
-            <a href="https://github.com/smchughinfo/steganographyjr">source</a>
-        </div>
+        <header>
+            <h1 class="sparkle-rainbow">Steganography <sub>Jr</sub></h1>
+            <h2>
+                Hide your data in
+                <span class="autological-color">
+                    <span>C</span><span>o</span><span>l</span><span>o</span><span>r</span><span>!</span>
+                </span>
+            </h2>
+            <h2 class="what-it-do">What it do?</h2>
+            <p>
+                Each pixel in an image contains a value for 
+                red
+                ,
+                green
+                , and 
+                blue 
+                between 0 and 255. 
+                Steganography <sub>Jr</sub> 
+                just moves those values up or down by one to form a binary message.
+            </p>
+        </header>
+        <!-- <section></section> -->
+        <!-- <section></section> -->
+        <!-- <section></section> -->
     </body>
 </html>
  
