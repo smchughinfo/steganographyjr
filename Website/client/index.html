@@ -15,24 +15,29 @@
             margin-left: auto;
             margin-right: auto;
             outline: 1px solid black;
+            font-size: 28px;
         }
 
         h1 {
-            background-size: cover;
             display: inline-block;
             font-size: 100px;
             letter-spacing: 6px;
+            margin-top: 0;
             margin-bottom: 0;
         }
 
-
-        .sparkle-rainbow {
-            background-image: url(images/color-spectrum.png);
+        .clip-text {
             background-clip: text;
             -webkit-background-clip: text;
             color: rgba(255,255,255,0);
+            background-size: cover;
+        }
 
-            -webkit-text-stroke: 1px rgb(50, 50, 50);
+        .sparkle-rainbow {
+            background-image: url(images/color-spectrum.png);
+        }
+        .galaxy {
+            background-image: url(images/galaxy.png);
         }
 
         h1.sparkle-rainbow {
@@ -44,9 +49,10 @@
 
         }
 
-        .autological-color {
+        .stroke-text {
             -webkit-text-stroke: 1px rgb(50, 50, 50);
         }
+
         .autological-color :nth-child(1) { color: red; }
         .autological-color :nth-child(2) { color: orange; }
         .autological-color :nth-child(3) { color: yellow; }
@@ -57,26 +63,29 @@
         .what-it-do {
             text-decoration: underline;
         }
+
+        .red { color:red; }
+        .green { color:green; }
+        .blue { color:blue; }
     </style>
     <body>
         <header>
-            <h1 class="sparkle-rainbow">Steganography <sub>Jr</sub></h1>
+            <h1 class="clip-text sparkle-rainbow stroke-text">Steganography <sub>Jr</sub></h1>
             <h2>
                 Hide your data in
-                <span class="autological-color">
+                <span class="autological-color stroke-text">
                     <span>C</span><span>o</span><span>l</span><span>o</span><span>r</span><span>!</span>
                 </span>
             </h2>
             <h2 class="what-it-do">What it do?</h2>
             <p>
                 Each pixel in an image contains a value for 
-                red
-                ,
-                green
-                , and 
-                blue 
-                between 0 and 255. 
-                Steganography <sub>Jr</sub> 
+                <span class="red ">red</span>,
+                <span class="green">green</span>, and
+                <span class="blue">blue</span>
+                between 0 and 255.
+                <span class="clip-text galaxy stroke-text">Steganography <sub>Jr</sub></span>
+                
                 just moves those values up or down by one to form a binary message.
             </p>
         </header>
