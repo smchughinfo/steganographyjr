@@ -86,16 +86,24 @@
 
         .available-on {
             width: 100%;
-            background: url(images/scribbles.svg);
+            background: url(images/scribbles-green.svg);
             background-size: cover;
         }
-        .available-on > h2 {
+        .or-online {
+            width: 100%;
+            background: url(images/scribbles-blue.svg);
+            background-size: cover;
+        }
+
+        .available-on > h2,
+        .or-online > h2 {
             text-align: center;
             color:white;
             font-size:70px;
             letter-spacing: 4px;
             margin-bottom: 0;
         }
+        
         .available-ons {
             display: flex;
             justify-content: space-between;
@@ -207,7 +215,9 @@
                 <h3>or for an even better experience</h3>
             </a>
         </section>
-        <!-- <section></section> -->
+        <section class="or-online">
+            <h2>Or Online!</h2>
+        </section>
         <!-- <section></section> -->
     </body>
 </html>
