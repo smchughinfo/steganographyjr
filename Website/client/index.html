@@ -76,23 +76,75 @@
             border: 1px solid rgb(30, 30, 30);
         }
 
+        section {
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+        section h2 {
+            margin-top: 0;
+        }
+
         .available-on {
             width: 100%;
-            height:1200px;
             background: url(images/scribbles.svg);
             background-size: cover;
         }
         .available-on > h2 {
-            padding-top: 50px;
             text-align: center;
             color:white;
             font-size:70px;
             letter-spacing: 4px;
+            margin-bottom: 0;
+        }
+        .available-ons {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+        .available-on {
+            color:white;
+        }
+        .available-on a:visited {
+            color:white;
+        }
+        .platform {
+            width: 225px;
+        }
+        .platform img {
+            width: 100%;
+        }
+        .platform h3 {
+            text-align: center;
+            margin-bottom: 0;
+            font-size:25px;
+            white-space: nowrap;
+        }
+        .manual-install a {
+            display: block;
+            text-align: center;
+        }
+        .md5 {
+            font-size: 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .md5 > input {
+            flex-grow: 1;
+            background-color:rgb(103,204,149);
+            color:white;
+            border: 1px ridge white;
+        }
+        .steg-daddy-link h3 {
+            display: block;
+            text-align: center;
+            margin-bottom: 0;
         }
     </style>
     <body>
         <header>
-            <h1 class="clip-text sparkle-rainbow stroke-text">Steganography <sub>Jr</sub></h1>
+            <h1 class="clip-text sparkle-rainbow stroke-text">Steganography<sub>Jr</sub></h1>
             <h2>
                 Hide your data in
                 <span class="autological-color stroke-text">
@@ -106,7 +158,7 @@
                 <span class="green">green</span>, and
                 <span class="blue">blue</span>
                 between 0 and 255.
-                <span class="clip-text galaxy stroke-text">Steganography <sub>Jr</sub></span>
+                <span class="clip-text galaxy stroke-text">Steganography<sub>Jr</sub></span>
                 
                 just moves those values up or down by one to form a binary message.
             </p>
@@ -115,7 +167,45 @@
             <iframe style="float:right;margin-right:25px;" class="explanation-in-media" width="320" height="254" src="https://www.youtube-nocookie.com/embed/nxAzP-OjSDk" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </header>
         <section class="available-on">
-            <h2>Available On!</h2>
+            <h2>Available On</h2>
+            <div class="available-ons">
+                <div class="platform">
+                    <h3>The App Store</h3>
+                    <img src="images/iphone.png" />
+                    <div class="manual-install">
+                        <a href="">.ipa</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="platform">
+                    <h3>Goolge Play</h3>
+                    <img src="images/android.png" />
+                    <div class="manual-install">
+                        <a href="">.apk</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="platform">
+                    <h3>The Microsoft Store</h3>
+                    <img src="images/uwp.png" />
+                    <div class="manual-install">
+                        <a href="">.exe</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="steg-daddy-link" href="">
+                <h3>or for an even better experience</h3>
+            </a>
         </section>
         <!-- <section></section> -->
         <!-- <section></section> -->
