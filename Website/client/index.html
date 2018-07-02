@@ -19,6 +19,7 @@
             font-size: 28px;
             padding-left:25px;
             padding-right:25px;
+            margin-bottom: 50px;
         }
 
         h1 {
@@ -119,9 +120,16 @@
             background: url(images/scribbles-blue.svg);
             background-size: cover;
         }
+        .developers {
+            width: 100%;
+            height: 500px;
+            background: url(images/scribbles-red.svg);
+            background-size: cover;
+        }
 
         .available-on > h2,
-        .or-online > h2 {
+        .or-online > h2,
+        .developers > h2 {
             text-align: center;
             color:white;
             font-size:70px;
@@ -314,11 +322,42 @@
                                 </div>
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <label for="mode">Password&nbsp;</label>
+                            </td>
+                            <td>
+                                <div class="control">
+                                    <input class="input" type="text" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="mode">Message&nbsp;</label>
+                            </td>
+                            <td>
+                                <div class="control">
+                                    <textarea class="textarea" placeholder="Write your message here."></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-top:6px;"> <!-- TODO: MAKE SURE TO REMOVE ALL THESE STYLES -->
+                                <button class="button">Execute</button>
+                            </td>
+                            <td style="padding-top:6px;">
+                                <progress value=".5" style="height:35px;"></progress>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </form>
         </section>
-        <!-- <section></section> -->
+        <section class="developers">
+            <h2>Developers</h2>
+            <p>developers developers developers</p>
+        </section>
     </body>
 </html>
  
