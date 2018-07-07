@@ -1,0 +1,59 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <style>
+            html {
+                padding:50px;
+            }
+            button {
+                float:right;
+            }
+            .btn-light {
+                border: 1px solid rgb(90,98,104);
+                margin-right:1em;
+            }
+            .input-group-prepend > * {
+                width: 82px;
+            }
+            .attachment {
+                height:18px;
+                width:18px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="alert alert-danger">
+            <strong style="margin-right: .5em;">Error!</strong> Sorry, but that file type is not allowed.
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">To:</span>
+            </div>
+            <input type="text" class="form-control" value="personal@email.com" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">Subject:</span>
+            </div>
+            <input type="text" class="form-control" value="program backup" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+            
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Body:</span>
+            </div>
+            <textarea class="form-control" aria-label="With textarea">attached is a copy of the program i spent six months working on</textarea>
+        </div>
+            innocent_program.exe <img class="attachment" src="paperclip-solid.svg" />
+        <div>
+
+        </div>
+
+        <div class="button-container">
+            <button type="button" class="btn btn-primary">Send</button>
+            <button type="button" class="btn btn-light">Cancel</button>
+        </div>
+    </body>
+</html>
