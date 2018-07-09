@@ -359,7 +359,97 @@
         </section>
         <section class="developers">
             <h2>Developers</h2>
-            <p>developers developers developers</p>
+                <style>
+                    .developer-links {
+                        margin-left:auto;
+                        margin-right: auto;
+                        width: 80%;
+                        color:black;
+                    }
+                    .developer-links h3:first-child {
+                        margin-top: .5em; /* TODO: make sure all top items in each section have the same top margin (visually, not literally). also, reminder, bulma is screwing things up (adds styles to body)*/
+                    }
+                    .developer-links h3:not(:first-child) {
+                        margin-top: 1.5em;
+                    }
+                    .developer-links h3 {
+                        line-height: 10px;
+                    }
+                    .developer-links p {
+                        line-height: initial;
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size:14px;
+                    }
+
+                    .developer-links textarea,
+                    .developer-links input {
+                        background-color:turquoise;
+                        width: 100%;
+                        padding-left:.25em;
+                    }
+
+                    .selected-tab {
+                        display: block;
+                    }
+                </style>
+                <div class="developer-links">
+                    <h3>Nuget</h3>
+
+                    <div class="tabs">
+                        <ul>
+                            <li class="is-active"><a href="#installNuget">Install</a></li>
+                            <li><a href="#encodeNuget">Encode</a></li>
+                            <li><a href="#decodeNuget">Decode</a></li>
+                            <li><a href="#encryptionNuget">Encryption</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-container">
+                        <div id="installNuget">
+                            INSTALL NUGET
+                        </div>
+                        <div id="encodeNuget">
+                            ENCODE NUGET
+                        </div>
+                    </div>
+                    
+                    <script>
+                            document.querySelector(".tabs").addEventListener("click", function(event) {
+                            var href = event.target.href;
+                            var selctedTabId = href.split("#")[1];
+                            
+                            var selectedTab = document.getElementById(selctedTabId);
+                            selectedTab.className = selectedTab.className + " selected-tab";
+                        });
+                    </script>
+
+                    <div class="control">
+                        <textarea class="textarea"
+>PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1
+
+using SteganographyJr.Steganography;
+using SteganographyJr.Cryptography;
+// ...
+var password = SHA2.GetHash(userPassword);
+var message = AES.Encrypt(userMessage, password);
+var messageFits = Codec.MessageFits(carrierImage, message, password);
+if(messageFits) {
+    var encodedImage = await Codec.Encode(carrierImage, message, password, percentComplete => {
+        return false; // return true to cancel
+    });
+    var encodedBytes = encodedImage.ConvertToByteArray();
+    // and you would take it from here...
+}
+else {
+    // alert user or take appropriate action
+}
+                        </textarea>
+                    </div>
+                    <p>Package is coded in .NET Standard. Includes the SteganographyJr steganography and cryptography libraries.</p>
+                    <h3>Github</h3>
+                    <input value="https://github.com/smchughinfo/steganographyjr.git" />
+                    <p><a href="https://github.com/smchughinfo/steganographyjr">https://github.com/smchughinfo/steganographyjr</a></p>
+                </div>
         </section>
     </body>
 </html>
