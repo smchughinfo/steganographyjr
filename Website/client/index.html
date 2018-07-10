@@ -388,7 +388,10 @@
                         padding-left:.25em;
                     }
 
-                    .selected-tab {
+                    .tab-container > * {
+                        display: none;
+                    }
+                    .tab-container > .selected-tab {
                         display: block;
                     }
                 </style>
@@ -397,54 +400,58 @@
 
                     <div class="tabs">
                         <ul>
-                            <li class="is-active"><a href="#installNuget">Install</a></li>
-                            <li><a href="#encodeNuget">Encode</a></li>
-                            <li><a href="#decodeNuget">Decode</a></li>
-                            <li><a href="#encryptionNuget">Encryption</a></li>
+                            <li class="is-active"><a href="#nuget-install">Install</a></li>
+                            <li><a href="#nuget-encode">Encode</a></li>
+                            <li><a href="#nuget-decode">Decode</a></li>
                         </ul>
                     </div>
 
                     <div class="tab-container">
-                        <div id="installNuget">
-                            INSTALL NUGET
+                        <div id="nuget-install" class="selected-tab">
+                            <div class="control">
+                                <input class="input" type="text" value="PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1" />
+                            </div>
                         </div>
-                        <div id="encodeNuget">
-                            ENCODE NUGET
+                        <div id="nuget-encode">
+                            <div class="control">
+                                <textarea class="textarea"></textarea>
+                            </div>
+                        </div>
+                        <div id="nuget-decode">
+                            DECODE NUGET
                         </div>
                     </div>
                     
                     <script>
-                            document.querySelector(".tabs").addEventListener("click", function(event) {
-                            var href = event.target.href;
-                            var selctedTabId = href.split("#")[1];
-                            
-                            var selectedTab = document.getElementById(selctedTabId);
-                            selectedTab.className = selectedTab.className + " selected-tab";
+                        function getTab(tabAnchorElm) {
+                            var href = tabAnchorElm.href;
+                            var tabId = href.split("#")[1];
+
+                            return document.getElementById(tabId);
+                        }
+                        function showTab(tabAnchorElm) {
+                            var tabElm = getTab(tabAnchorElm);
+                            tabElm.className = tabElm.className + " selected-tab";
+                        }
+                        function hideTab(tabAnchorElm) {
+                            var tabElm = getTab(tabAnchorElm);
+                            tabElm.className = tabElm.className.replace(/\bselected-tab\b/g, "");
+                        }
+
+                        document.querySelector(".tabs").addEventListener("click", function(event) {
+                            if(event.target.tagName.toLowerCase() !== "a") {
+                                return;
+                            }
+
+                            var allTabs = this.querySelectorAll("a");
+                            for(var i = 0; i < allTabs.length; i++) {
+                                hideTab(allTabs[i]);
+                            }
+                            showTab(event.target);
                         });
                     </script>
 
-                    <div class="control">
-                        <textarea class="textarea"
->PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1
-
-using SteganographyJr.Steganography;
-using SteganographyJr.Cryptography;
-// ...
-var password = SHA2.GetHash(userPassword);
-var message = AES.Encrypt(userMessage, password);
-var messageFits = Codec.MessageFits(carrierImage, message, password);
-if(messageFits) {
-    var encodedImage = await Codec.Encode(carrierImage, message, password, percentComplete => {
-        return false; // return true to cancel
-    });
-    var encodedBytes = encodedImage.ConvertToByteArray();
-    // and you would take it from here...
-}
-else {
-    // alert user or take appropriate action
-}
-                        </textarea>
-                    </div>
+                    
                     <p>Package is coded in .NET Standard. Includes the SteganographyJr steganography and cryptography libraries.</p>
                     <h3>Github</h3>
                     <input value="https://github.com/smchughinfo/steganographyjr.git" />
