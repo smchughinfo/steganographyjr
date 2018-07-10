@@ -8,6 +8,10 @@
     <link rel="shortcut icon" type="image/png" href="favicon.png" />
     <link href="https://fonts.googleapis.com/css?family=Bangers" rel="stylesheet">
     <link href="bulma-0.7.1/css/bulma.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="lib/codemirror/codemirror.css" />
+    <link rel="stylesheet" href="lib/codemirror/theme/icecoder.css" />
+    <script src="lib/codemirror/codemirror.js"></script>
+    <script src="lib/codemirror/mode/clike/clike.js"></script>
     <style>
         body {
             font-family: 'Bangers', cursive;
@@ -48,11 +52,7 @@
             /* because it doesn't render how you would expect (cuts off the right edge of the r in jr) */
             padding-right:5px;
         }
-
-        body-text-sparkle-rainbow {
-
-        }
-
+        
         .stroke-text {
             -webkit-text-stroke: 1px rgb(50, 50, 50);
         }
@@ -122,7 +122,6 @@
         }
         .developers {
             width: 100%;
-            height: 500px;
             background: url(images/scribbles-red.svg);
             background-size: cover;
         }
@@ -360,6 +359,7 @@
         <section class="developers">
             <h2>Developers</h2>
                 <style>
+                    /* TODO: a lot of these styles are no good or not in use */
                     .developer-links {
                         margin-left:auto;
                         margin-right: auto;
@@ -394,6 +394,10 @@
                     .tab-container > .selected-tab {
                         display: block;
                     }
+
+                    #nuget-encode  {
+                        font-size: initial;
+                    }
                 </style>
                 <div class="developer-links">
                     <h3>Nuget</h3>
@@ -414,11 +418,26 @@
                         </div>
                         <div id="nuget-encode">
                             <div class="control">
-                                <textarea class="textarea"></textarea>
+                                <textarea class="textarea"
+>using SteganographyJr.Steganography;
+using SteganographyJr.Cryptography;
+// ...
+var password = SHA2.GetHash(userPassword);
+var message = AES.Encrypt(userMessage, password);
+var messageFits = Codec.MessageFits(carrierImage, message, password);
+if(messageFits) {
+    var encodedImage = await Codec.Encode(carrierImage, message, password, percentComplete => {
+        return false; // return true to cancel
+    });
+    var encodedBytes = encodedImage.ConvertToByteArray();
+    // and you would take it from here...
+}
+else {
+    // alert user or take appropriate action
+}</textarea>
                             </div>
                         </div>
                         <div id="nuget-decode">
-                            DECODE NUGET
                         </div>
                     </div>
                     
@@ -432,6 +451,10 @@
                         function showTab(tabAnchorElm) {
                             var tabElm = getTab(tabAnchorElm);
                             tabElm.className = tabElm.className + " selected-tab";
+
+                            if(tabElm.id === "nuget-encode") {
+                                encodeCodeMirror.refresh();
+                            }
                         }
                         function hideTab(tabAnchorElm) {
                             var tabElm = getTab(tabAnchorElm);
@@ -451,6 +474,14 @@
                         });
                     </script>
 
+                    <script>
+                        var encodeTextArea = document.querySelector("#nuget-encode textarea");
+                        var encodeCodeMirror = CodeMirror.fromTextArea(encodeTextArea, {
+                            lineNumbers: true,
+                            mode: "clike",
+                            theme: "icecoder"
+                        });
+                    </script>
                     
                     <p>Package is coded in .NET Standard. Includes the SteganographyJr steganography and cryptography libraries.</p>
                     <h3>Github</h3>
