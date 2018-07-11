@@ -8,10 +8,6 @@
     <link rel="shortcut icon" type="image/png" href="favicon.png" />
     <link href="https://fonts.googleapis.com/css?family=Bangers" rel="stylesheet">
     <link href="bulma-0.7.1/css/bulma.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="lib/codemirror/codemirror.css" />
-    <link rel="stylesheet" href="lib/codemirror/theme/icecoder.css" />
-    <script src="lib/codemirror/codemirror.js"></script>
-    <script src="lib/codemirror/mode/clike/clike.js"></script>
     <style>
         body {
             font-family: 'Bangers', cursive;
@@ -359,15 +355,21 @@
         <section class="developers">
             <h2>Developers</h2>
                 <style>
-                    /* TODO: a lot of these styles are no good or not in use */
+                    /* TODO: a lot of these styles are no good or not in use. bulma is causing a lot of pain everywhere. */
                     .developer-links {
                         margin-left:auto;
                         margin-right: auto;
                         width: 80%;
                         color:black;
                     }
-                    .developer-links h3:first-child {
-                        margin-top: .5em; /* TODO: make sure all top items in each section have the same top margin (visually, not literally). also, reminder, bulma is screwing things up (adds styles to body)*/
+                    .developer-links h3 {
+                        /* TODO: make sure all top items in each section have the same top margin (visually, not literally). also, reminder, bulma is screwing things up (adds styles to body)*/
+                        margin-top: 28px;
+                        margin-bottom: 28px;
+                    }
+                    .developer-links p {
+                        margin-top: 14px;
+                        margin-bottom: 14px;
                     }
                     .developer-links h3:not(:first-child) {
                         margin-top: 1.5em;
@@ -401,92 +403,23 @@
                 </style>
                 <div class="developer-links">
                     <h3>Nuget</h3>
-
-                    <div class="tabs">
-                        <ul>
-                            <li class="is-active"><a href="#nuget-install">Install</a></li>
-                            <li><a href="#nuget-encode">Encode</a></li>
-                            <li><a href="#nuget-decode">Decode</a></li>
-                        </ul>
+                    <p>The steganography and cryptography packages used by Steganography<sub>Jr</sub> are available for use in your own applications. Code samples are available on GitHub.</p>
+                    <div class="control">
+                        <input class="input" type="text" value="PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1" />
                     </div>
 
-                    <div class="tab-container">
-                        <div id="nuget-install" class="selected-tab">
-                            <div class="control">
-                                <input class="input" type="text" value="PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1" />
-                            </div>
-                        </div>
-                        <div id="nuget-encode">
-                            <div class="control">
-                                <textarea class="textarea"
->using SteganographyJr.Steganography;
-using SteganographyJr.Cryptography;
-// ...
-var password = SHA2.GetHash(userPassword);
-var message = AES.Encrypt(userMessage, password);
-var messageFits = Codec.MessageFits(carrierImage, message, password);
-if(messageFits) {
-    var encodedImage = await Codec.Encode(carrierImage, message, password, percentComplete => {
-        return false; // return true to cancel
-    });
-    var encodedBytes = encodedImage.ConvertToByteArray();
-    // and you would take it from here...
-}
-else {
-    // alert user or take appropriate action
-}</textarea>
-                            </div>
-                        </div>
-                        <div id="nuget-decode">
-                        </div>
-                    </div>
-                    
-                    <script>
-                        function getTab(tabAnchorElm) {
-                            var href = tabAnchorElm.href;
-                            var tabId = href.split("#")[1];
-
-                            return document.getElementById(tabId);
-                        }
-                        function showTab(tabAnchorElm) {
-                            var tabElm = getTab(tabAnchorElm);
-                            tabElm.className = tabElm.className + " selected-tab";
-
-                            if(tabElm.id === "nuget-encode") {
-                                encodeCodeMirror.refresh();
-                            }
-                        }
-                        function hideTab(tabAnchorElm) {
-                            var tabElm = getTab(tabAnchorElm);
-                            tabElm.className = tabElm.className.replace(/\bselected-tab\b/g, "");
-                        }
-
-                        document.querySelector(".tabs").addEventListener("click", function(event) {
-                            if(event.target.tagName.toLowerCase() !== "a") {
-                                return;
-                            }
-
-                            var allTabs = this.querySelectorAll("a");
-                            for(var i = 0; i < allTabs.length; i++) {
-                                hideTab(allTabs[i]);
-                            }
-                            showTab(event.target);
-                        });
-                    </script>
-
-                    <script>
-                        var encodeTextArea = document.querySelector("#nuget-encode textarea");
-                        var encodeCodeMirror = CodeMirror.fromTextArea(encodeTextArea, {
-                            lineNumbers: true,
-                            mode: "clike",
-                            theme: "icecoder"
-                        });
-                    </script>
-                    
-                    <p>Package is coded in .NET Standard. Includes the SteganographyJr steganography and cryptography libraries.</p>
                     <h3>Github</h3>
-                    <input value="https://github.com/smchughinfo/steganographyjr.git" />
-                    <p><a href="https://github.com/smchughinfo/steganographyjr">https://github.com/smchughinfo/steganographyjr</a></p>
+                    <p>Steganography<sub>Jr</sub>, StegDaddy, and the Steganography<sub>Jr</sub> steganography and cryptography packagages are located at
+                        <a href="https://github.com/smchughinfo/steganographyjr">this</a> repository.
+                    </p>
+                    <input value="git clone https://github.com/smchughinfo/steganographyjr.git" />
+
+                    <h3>WebSocket API</h3>
+                    <p>
+                        You can use the WebSocket API to encode and decode images from a web page. Click <a href="">here</a> to get started.
+                        <br>
+                        *<small>Note - when using the WebSocket API you are limitted to 1000 requests per IP address per month.</small>
+                    </p>
                 </div>
         </section>
     </body>
