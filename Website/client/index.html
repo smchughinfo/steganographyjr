@@ -121,6 +121,12 @@
             background: url(images/scribbles-red.svg);
             background-size: cover;
         }
+        footer {
+            width: 100%;
+            background: url(images/scribbles-black.svg);
+            background-size: cover;
+            color:white
+        }
 
         .available-on > h2,
         .or-online > h2,
@@ -379,7 +385,7 @@
                     }
                     .developer-links p {
                         line-height: initial;
-                        font-family: Arial, Helvetica, sans-serif;
+                        font-family: Arial, Helvetica, sans-serif; /* TODO: get fonts situated. make one serious font for non-bangers. should be only like ...2 fonts + fonts used in images? */
                         font-size:14px;
                     }
 
@@ -412,7 +418,9 @@
                     <p>Steganography<sub>Jr</sub>, StegDaddy, and the Steganography<sub>Jr</sub> steganography and cryptography packagages are located at
                         <a href="https://github.com/smchughinfo/steganographyjr">this</a> repository.
                     </p>
-                    <input value="git clone https://github.com/smchughinfo/steganographyjr.git" />
+                    <div class="control">
+                        <input class="input" type="text" value="git clone https://github.com/smchughinfo/steganographyjr.git" />
+                    </div>
 
                     <h3>WebSocket API</h3>
                     <p>
@@ -422,6 +430,54 @@
                     </p>
                 </div>
         </section>
+        <style>
+            footer {
+                /*font-family: Arial, Helvetica, sans-serif; TODO: footer doesn't look right*/
+                font-size:14px;
+
+                /* TODO: pretty much all these styles are temp! for example all these paddings will change when you switch the background image. */
+                /* TODO: these footer styles are no good. they need to be rewritten properly. */
+                padding-top:20px;
+                padding-bottom: 5px;
+            }
+            footer > * {
+                
+                display: inline-block;
+            }
+            footer > *:nth-child(1) {
+                padding-left: 25px;
+                width: calc(33.3333333% - 25px);
+            }
+            footer > *:nth-child(2) {
+                width: 33.3333333%;
+                text-align: center;
+            }
+            footer > *:nth-child(3) {
+                text-align: right;
+                padding-right: 25px;
+                width: calc(33.3333333%);
+            }
+        </style>
+        <footer>
+            <div>
+                Check out my math website
+                <br>
+                <br>
+                Donate
+            </div>
+            <div>
+                <br>
+                <br>
+                License
+            </div>
+            <div>
+                Contact
+                <br>
+                <br>
+                ❤️Special Thanks❤️
+            </div>
+
+        </footer>
     </body>
 </html>
  
