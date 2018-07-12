@@ -1,0 +1,24 @@
+<!-- https://css-tricks.com/the-css-paint-api/ -->
+<!-- https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Getting_started_with_WebGL -->
+<!-- https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Creating_3D_objects_using_WebGL -->
+
+<html>
+    <style>
+    </style>
+    <body>
+        <canvas width="800" height="800"></canvas>
+    </body>
+    <script>
+        var canvas = document.querySelector("canvas");
+        var gl = canvas.getContext("webgl");
+
+        if(gl == null) {
+            alert("TODO: .....");
+        }
+
+        // Set clear color to black, fully opaque
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        // Clear the color buffer with specified clear color
+        gl.clear(gl.COLOR_BUFFER_BIT);
+    </script>
+</html>
