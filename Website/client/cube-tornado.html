@@ -23,7 +23,8 @@
         <canvas width="800" height="800"></canvas>
         <div id="uiContainer">
             <div id="ui">
-                <div id="fudgeFactor"></div>
+                <!--<div id="fudgeFactor"></div>-->
+                <div id="fieldOfView"></div>
                 <div id="x"></div>
                 <div id="y"></div>
                 <div id="z"></div>
@@ -39,24 +40,17 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 a_position;
         attribute vec4 a_color;
-        
+
         uniform mat4 u_matrix;
-        uniform float u_fudgeFactor;
-        
+
         varying vec4 v_color;
-        
+
         void main() {
-          // Multiply the position by the matrix.
-          vec4 position = u_matrix * a_position;
-        
-          // Adjust the z to divide by
-          float zToDivideBy = 1.0 + position.z * u_fudgeFactor;
-        
-          // Divide x and y by z.
-          gl_Position = vec4(position.xy / zToDivideBy, position.zw);
-        
-          // Pass the color to the fragment shader.
-          v_color = a_color;
+        // Multiply the position by the matrix.
+        gl_Position = u_matrix * a_position;
+
+        // Pass the color to the fragment shader.
+        v_color = a_color;
         }
     </script>
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -184,7 +178,7 @@
                 ];
             },
 
-              orthographic: function(left, right, bottom, top, near, far) {
+            orthographic: function(left, right, bottom, top, near, far) {
                 return [
                     2 / (right - left), 0, 0, 0,
                     0, 2 / (top - bottom), 0, 0,
@@ -194,6 +188,18 @@
                     (bottom + top) / (bottom - top),
                     (near + far) / (near - far),
                     1,
+                ];
+            },
+
+            perspective: function(fieldOfViewInRadians, aspect, near, far) {
+                var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+                var rangeInv = 1.0 / (near - far);
+            
+                return [
+                    f / aspect, 0, 0, 0,
+                    0, f, 0, 0,
+                    0, 0, (near + far) * rangeInv, -1,
+                    0, 0, near * far * rangeInv * 2, 0
                 ];
             },
 
@@ -258,6 +264,15 @@
         function degToRad(d) {
             return d * Math.PI / 180;
         }
+
+        function makeZToWMatrix(fudgeFactor) {
+            return [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, fudgeFactor,
+                0, 0, 0, 1,
+            ];
+        }
     </script>
     <script id=init>
         var canvas = document.querySelector("canvas");
@@ -274,11 +289,12 @@
 
         var program = createProgram(gl, vertexShader, fragmentShader);
 
-        var translation = [45, 150, 0];
+        var translation = [-150, 0, -360];
         var rotation = [degToRad(40), degToRad(25), degToRad(325)];
         var scale = [1, 1, 1];
         var color = [Math.random(), Math.random(), Math.random(), 1];
-        var fudgeFactor = 1;
+        //var fudgeFactor = 1;
+        var fieldOfViewRadians = degToRad(60);
     </script>
     <script id="data">
         // VERTICES
@@ -573,7 +589,7 @@
         // UNIFORMS
         var colorLocation = gl.getUniformLocation(program, "u_color");
         var matrixLocation = gl.getUniformLocation(program, "u_matrix");
-        var fudgeLocation = gl.getUniformLocation(program, "u_fudgeFactor");
+        //var fudgeLocation = gl.getUniformLocation(program, "u_fudgeFactor");
     </script>
     <script id="drawScene">
         // Draw the scene.
@@ -616,15 +632,12 @@
             gl.uniform4fv(colorLocation, color);
 
             // Compute the matrices
-            //var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 400);
-            var left = 0;
-            var right = gl.canvas.clientWidth;
-            var bottom = gl.canvas.clientHeight;
-            var top = 0;
-            var near = 400;
-            var far = -400;
-            var matrix = m4.orthographic(left, right, bottom, top, near, far);
 
+            var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+            var zNear = 1;
+            var zFar = 2000;
+            var matrix = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
+            matrix = m4.multiply(matrix, m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 400));
             matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
             matrix = m4.xRotate(matrix, rotation[0]);
             matrix = m4.yRotate(matrix, rotation[1]);
@@ -635,7 +648,7 @@
             gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
             // Set the fudgeFactor
-            gl.uniform1f(fudgeLocation, fudgeFactor);
+            //gl.uniform1f(fudgeLocation, fudgeFactor);
 
             // Draw the geometry.
             var primitiveType = gl.TRIANGLES;
@@ -646,18 +659,24 @@
     </script>
     <script id="controls">
         // Setup a ui.
-        webglLessonsUI.setupSlider("#fudgeFactor", {value: fudgeFactor, slide: updateFudgeFactor, max: 2, step: 0.001, precision: 3 });
-  webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
-  webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
-        webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
-        webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
-        webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: gl.canvas.height});
+        webglLessonsUI.setupSlider("#fieldOfView", {value: radToDeg(fieldOfViewRadians), slide: updateFieldOfView, min: 1, max: 179});
+        //webglLessonsUI.setupSlider("#fudgeFactor", {value: fudgeFactor, slide: updateFudgeFactor, max: 2, step: 0.001, precision: 3 });
+        webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), min: gl.canvas.width * -1, max: gl.canvas.width });
+        webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), min: gl.canvas.height * -1, max: gl.canvas.height});
+        webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), min: gl.canvas.width * -1, max: gl.canvas.width });
+        webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), min: gl.canvas.height * -1, max: gl.canvas.height});
+        webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), min: gl.canvas.height * -1,max: gl.canvas.height});
         webglLessonsUI.setupSlider("#angleX", {value: radToDeg(rotation[0]), slide: updateRotation(0), max: 360});
         webglLessonsUI.setupSlider("#angleY", {value: radToDeg(rotation[1]), slide: updateRotation(1), max: 360});
         webglLessonsUI.setupSlider("#angleZ", {value: radToDeg(rotation[2]), slide: updateRotation(2), max: 360});
         webglLessonsUI.setupSlider("#scaleX", {value: scale[0], slide: updateScale(0), min: -5, max: 5, step: 0.01, precision: 2});
         webglLessonsUI.setupSlider("#scaleY", {value: scale[1], slide: updateScale(1), min: -5, max: 5, step: 0.01, precision: 2});
         webglLessonsUI.setupSlider("#scaleZ", {value: scale[2], slide: updateScale(2), min: -5, max: 5, step: 0.01, precision: 2});
+
+        function updateFieldOfView(event, ui) {
+            fieldOfViewRadians = degToRad(ui.value);
+            drawScene();
+        }
 
         function updateFudgeFactor(event, ui) {
             fudgeFactor = ui.value;
