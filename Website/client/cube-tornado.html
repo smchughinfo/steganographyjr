@@ -1,6 +1,6 @@
 <!-- https://css-tricks.com/the-css-paint-api/ -->
 <!-- https://webglfundamentals.org/ -->
-
+<!-- The cube tornado is blatantly plagarized from real life wizards w1 and w2. -->
 <html>
     <head>
         <style>
@@ -23,6 +23,7 @@
         <canvas width="800" height="800"></canvas>
         <div id="uiContainer">
             <div id="ui">
+                <div id="fudgeFactor"></div>
                 <div id="x"></div>
                 <div id="y"></div>
                 <div id="z"></div>
@@ -38,15 +39,22 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 a_position;
         attribute vec4 a_color;
-         
+        
         uniform mat4 u_matrix;
-         
+        uniform float u_fudgeFactor;
+        
         varying vec4 v_color;
-         
+        
         void main() {
           // Multiply the position by the matrix.
-          gl_Position = u_matrix * a_position;
-         
+          vec4 position = u_matrix * a_position;
+        
+          // Adjust the z to divide by
+          float zToDivideBy = 1.0 + position.z * u_fudgeFactor;
+        
+          // Divide x and y by z.
+          gl_Position = vec4(position.xy / zToDivideBy, position.zw);
+        
           // Pass the color to the fragment shader.
           v_color = a_color;
         }
@@ -270,6 +278,7 @@
         var rotation = [degToRad(40), degToRad(25), degToRad(325)];
         var scale = [1, 1, 1];
         var color = [Math.random(), Math.random(), Math.random(), 1];
+        var fudgeFactor = 1;
     </script>
     <script id="data">
         // VERTICES
@@ -564,6 +573,7 @@
         // UNIFORMS
         var colorLocation = gl.getUniformLocation(program, "u_color");
         var matrixLocation = gl.getUniformLocation(program, "u_matrix");
+        var fudgeLocation = gl.getUniformLocation(program, "u_fudgeFactor");
     </script>
     <script id="drawScene">
         // Draw the scene.
@@ -624,6 +634,9 @@
             // Set the matrix.
             gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
+            // Set the fudgeFactor
+            gl.uniform1f(fudgeLocation, fudgeFactor);
+
             // Draw the geometry.
             var primitiveType = gl.TRIANGLES;
             var offset = 0;
@@ -633,6 +646,9 @@
     </script>
     <script id="controls">
         // Setup a ui.
+        webglLessonsUI.setupSlider("#fudgeFactor", {value: fudgeFactor, slide: updateFudgeFactor, max: 2, step: 0.001, precision: 3 });
+  webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
+  webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
         webglLessonsUI.setupSlider("#x", {value: translation[0], slide: updatePosition(0), max: gl.canvas.width });
         webglLessonsUI.setupSlider("#y", {value: translation[1], slide: updatePosition(1), max: gl.canvas.height});
         webglLessonsUI.setupSlider("#z", {value: translation[2], slide: updatePosition(2), max: gl.canvas.height});
@@ -642,6 +658,11 @@
         webglLessonsUI.setupSlider("#scaleX", {value: scale[0], slide: updateScale(0), min: -5, max: 5, step: 0.01, precision: 2});
         webglLessonsUI.setupSlider("#scaleY", {value: scale[1], slide: updateScale(1), min: -5, max: 5, step: 0.01, precision: 2});
         webglLessonsUI.setupSlider("#scaleZ", {value: scale[2], slide: updateScale(2), min: -5, max: 5, step: 0.01, precision: 2});
+
+        function updateFudgeFactor(event, ui) {
+            fudgeFactor = ui.value;
+            drawScene();
+        }
 
         function updatePosition(index) {
             return function(event, ui) {
