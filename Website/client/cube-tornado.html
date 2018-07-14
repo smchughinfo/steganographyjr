@@ -176,6 +176,19 @@
                 ];
             },
 
+              orthographic: function(left, right, bottom, top, near, far) {
+                return [
+                    2 / (right - left), 0, 0, 0,
+                    0, 2 / (top - bottom), 0, 0,
+                    0, 0, 2 / (near - far), 0,
+                
+                    (left + right) / (left - right),
+                    (bottom + top) / (bottom - top),
+                    (near + far) / (near - far),
+                    1,
+                ];
+            },
+
             multiply: function(a, b) {
                 var a00 = a[0 * 4 + 0];
                 var a01 = a[0 * 4 + 1];
@@ -593,7 +606,15 @@
             gl.uniform4fv(colorLocation, color);
 
             // Compute the matrices
-            var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 400);
+            //var matrix = m4.projection(gl.canvas.clientWidth, gl.canvas.clientHeight, 400);
+            var left = 0;
+            var right = gl.canvas.clientWidth;
+            var bottom = gl.canvas.clientHeight;
+            var top = 0;
+            var near = 400;
+            var far = -400;
+            var matrix = m4.orthographic(left, right, bottom, top, near, far);
+
             matrix = m4.translate(matrix, translation[0], translation[1], translation[2]);
             matrix = m4.xRotate(matrix, rotation[0]);
             matrix = m4.yRotate(matrix, rotation[1]);
