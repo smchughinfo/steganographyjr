@@ -9,7 +9,7 @@ namespace SteganographyJr.Cryptography
 {
     public static class AES
     {
-        static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E";
+        static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E"; // TODO: prepend message length as first 8 bytes instead of checking for the position of this string.
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
         // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
