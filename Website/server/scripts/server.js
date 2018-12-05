@@ -64,7 +64,7 @@ const handleFileRequest = (req, res) => {
     if(urn === "/") {
         filePath = `${process.env.publicDir}/index.html`;
     }
-
+    
     console.log(filePath);
     serveFile(filePath, req, res);
 }

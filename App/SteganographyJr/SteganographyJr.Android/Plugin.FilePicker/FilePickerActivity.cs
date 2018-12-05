@@ -16,6 +16,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker
     {
         private Context context;
 
+        // TODO: double check android positions. if you encode a message first vs changing carrier image vs save default vs etc. make sure all paths to requesting permissions are covered
         protected override void OnCreate (Bundle savedInstanceState)
         {
             base.OnCreate (savedInstanceState);

@@ -5,17 +5,489 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
     <meta name="robots" content="index/follow">
     <meta name="description" content="A Steganography application for iOS, Android, and UWP.">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <link href="https://fonts.googleapis.com/css?family=Bangers" rel="stylesheet">
+    <link href="bulma-0.7.1/css/bulma.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 2px;
+            max-width: 940px;
+            margin-left: auto;
+            margin-right: auto;
+            outline: 1px solid black;
+            font-size: 28px;
+            padding-left:25px;
+            padding-right:25px;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            display: inline-block;
+            font-size: 100px;
+            letter-spacing: 6px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .clip-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: rgba(255,255,255,0);
+            background-size: cover;
+        }
+
+        .sparkle-rainbow {
+            background-image: url(images/color-spectrum.png);
+        }
+        .galaxy {
+            background-image: url(images/galaxy.png);
+        }
+
+        h1.sparkle-rainbow {
+            /* because it doesn't render how you would expect (cuts off the right edge of the r in jr) */
+            padding-right:5px;
+        }
+        
+        .stroke-text {
+            -webkit-text-stroke: 1px rgb(50, 50, 50);
+        }
+
+        .autological-color :nth-child(1) { color: red; }
+        .autological-color :nth-child(2) { color: orange; }
+        .autological-color :nth-child(3) { color: yellow; }
+        .autological-color :nth-child(4) { color: green; }
+        .autological-color :nth-child(5) { color: blue; }
+        .autological-color :nth-child(6) { color: violet; }
+
+        .what-it-do {
+            text-decoration: underline;
+        }
+
+        .red { color:red; }
+        .green { color:green; }
+        .blue { color:blue; }
+
+        .explanation-in-media {
+            padding:10px;
+            border-radius: 15px;
+            border: 1px solid rgb(30, 30, 30);
+        }
+
+        .use-cases {
+            display: flex;
+            justify-content: space-between;
+            
+        }
+
+        .use-cases > * {
+            display: inline-block;
+            width: 200px;
+        }
+
+        .use-cases > * > .use-case-description {
+            text-align: center;
+        }
+
+        .use-cases > * > img {
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            border: 1px solid rgb(30, 30, 30);
+            overflow: hidden;
+        }
+
+        section {
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+        section h2 {
+            margin-top: 0;
+        }
+
+        .available-on {
+            width: 100%;
+            background: url(images/scribbles-green.svg);
+            background-size: cover;
+        }
+        .or-online {
+            width: 100%;
+            background: url(images/scribbles-blue.svg);
+            background-size: cover;
+        }
+        .developers {
+            width: 100%;
+            background: url(images/scribbles-red.svg);
+            background-size: cover;
+        }
+        footer {
+            width: 100%;
+            background: url(images/scribbles-black.svg);
+            background-size: cover;
+            color:white
+        }
+
+        .available-on > h2,
+        .or-online > h2,
+        .developers > h2 {
+            text-align: center;
+            color:white;
+            font-size:70px;
+            letter-spacing: 4px;
+            margin-bottom: 0;
+        }
+
+        .available-ons {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+        .available-on,
+        .or-online {
+            color:white;
+        }
+        .available-on a:visited {
+            color:white;
+        }
+        .platform {
+            width: 225px;
+        }
+        .platform img {
+            width: 100%;
+        }
+        .platform h3 {
+            text-align: center;
+            margin-bottom: 0;
+            font-size:25px;
+            white-space: nowrap;
+        }
+        .manual-install a {
+            display: block;
+            text-align: center;
+        }
+        .md5 {
+            font-size: 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .md5 > input {
+            flex-grow: 1;
+            background-color:rgb(103,204,149);
+            color:white;
+            border: 1px ridge white;
+        }
+        .steg-daddy-link h3 {
+            display: block;
+            font-size:15px;
+            text-align: center;
+            margin-bottom: 0;
+            text-decoration: underline;
+        }
+
+        .or-online form {
+            text-align: center;
+            margin-top: 25px;
+        }
+        .or-online form img {
+            width: 300px;
+            border: 1px solid rgb(30, 30, 30);
+        }
+        .or-online form table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
     <body>
-        <div class="jumbotron">
-            <h1 class="display-4">SteganographyJr</h1>
-            <p class="lead">Hide text or files inside an images colors.</p>
-            <hr class="my-4">
-            <img src="/images/default-carrier-image.png" class="img-fluid">
-            <hr class="my-4">
-            <a href="https://github.com/smchughinfo/steganographyjr">source</a>
-        </div>
+        <!-- maybe this shouldn't appear until you scroll down to available on! then it fades in.-->
+        <img src="images/thermometer.jpg" style="position:fixed;width:120px;top:100px;right:100px;"/>
+        <header>
+            <h1 class="clip-text sparkle-rainbow stroke-text">Steganography<sub>Jr</sub></h1>
+            <h2>
+                Hide your data in
+                <span class="autological-color stroke-text">
+                    <span>C</span><span>o</span><span>l</span><span>o</span><span>r</span><span>!</span>
+                </span>
+            </h2>
+            <h2 class="what-it-do">What it do?</h2>
+            <p>
+                Each pixel in an image contains a value for 
+                <span class="red ">red</span>,
+                <span class="green">green</span>, and
+                <span class="blue">blue</span>
+                between 0 and 255.
+                <span class="clip-text galaxy stroke-text">Steganography<sub>Jr</sub></span>
+                
+                just moves those values up or down by one to form a binary message.
+            </p>
+            <img class="explanation-in-media" src="images/step1.png" style="margin-left:25px;"/> <!-- REMOVE INLINE -->
+
+            <!-- 
+                NOTE!
+                THE POSTER FOR THIS VIDEO SHOULD BE ME IN THE PIP WITH THE MAIN PICTURE BEING OF SOME C# FILE IN VISUAL STUDIO
+                I THINK THAT WILL MAKE IT LOOK ...GOOD? LIKE COMPLIMENT THE AESTHETIC. NOT 100% SURE WHAT IM GOING FOR ACTUALLY.
+            -->
+            <iframe style="float:right;margin-right:25px;" class="explanation-in-media" width="342" height="275" src="https://www.youtube-nocookie.com/embed/nxAzP-OjSDk" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="use-cases">
+                <div>
+                    <div class="use-case-description">
+                        Protect Your Personal Data
+                    </div>
+                    <img src="images/use-case1.png" style="width: 100%;" /> <!-- REMOVE INLINE -->
+                </div>
+                <div>
+                    <div class="use-case-description">
+                        Evade Monitoring
+                    </div>
+                    <img src="images/use-case2.jpg" style="width: 100%;" /> <!-- REMOVE INLINE -->
+                </div>
+                <div>
+                    <div class="use-case-description">
+                        Store Encrypted Notes
+                    </div>
+                    <img src="images/use-case3.png" style="width: 100%;" /> <!-- REMOVE INLINE -->
+                </div>
+                <div>
+                    <div class="use-case-description">
+                        Bypass File Type Restrictions
+                    </div>
+                    <img src="images/use-case4.png" style="width: 100%;" /> <!-- REMOVE INLINE -->
+                </div>
+            </div>
+
+
+
+
+            <br>
+            <div style="display: inline-block; height:80px;width:80px;border-radius:80px;background-color:black;position:absolute;"></div>
+            <div style="display: inline-block; height:80px;width:80px;border-radius:80px;background-color:black;position:absolute;margin-left:100px;"></div>
+            <div style="display: inline-block; height:80px;width:80px;border-radius:80px;background-color:black;position:absolute;margin-left:200px;"></div>
+            <br>
+
+        </header>
+        <section class="available-on">
+            <h2>Available On!</h2>
+            <div class="available-ons">
+                <div class="platform">
+                    <h3>The App Store</h3>
+                    <img src="images/iphone.png" />
+                    <div class="manual-install">
+                        <a href="">.ipa</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="platform">
+                    <h3>Goolge Play</h3>
+                    <img src="images/android.png" />
+                    <div class="manual-install">
+                        <a href="">.apk</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="platform">
+                    <h3>The Microsoft Store</h3>
+                    <img src="images/uwp.png" />
+                    <div class="manual-install">
+                        <a href="">.exe</a>
+                        <div class="md5">
+                            <span>md5:&nbsp;</span>
+                            <input value="5EB63BBBE01EEED093CB22BB8F5ACDC3"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="steg-daddy-link" href="">
+                <h3>or for an even better experience try StegDaddy</h3>
+            </a>
+        </section>
+        <section class="or-online">
+            <h2>Or Online!</h2>
+            <!--
+                TODO: MAKE SURE THIS IS SAME AS THE OTHER SECTOINS. ~25PX
+            -->
+            <form>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <img src="images/magic-unicorn.png"/>              
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="mode">Mode</label>
+                            </td>
+                            <td>
+                                <div class="control">
+                                    <div class="select">
+                                        <select id="mode" name="mode">
+                                            <option>Encode</option>
+                                            <option>Decode</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="mode">Password&nbsp;</label>
+                            </td>
+                            <td>
+                                <div class="control">
+                                    <input class="input" type="text" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="mode">Message&nbsp;</label>
+                            </td>
+                            <td>
+                                <div class="control">
+                                    <textarea class="textarea" placeholder="Write your message here."></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-top:6px;"> <!-- TODO: MAKE SURE TO REMOVE ALL THESE STYLES -->
+                                <button class="button">Execute</button>
+                            </td>
+                            <td style="padding-top:6px;">
+                                <progress value=".5" style="height:35px;"></progress>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </section>
+        <section class="developers">
+            <h2>Developers</h2>
+                <style>
+                    /* TODO: a lot of these styles are no good or not in use. bulma is causing a lot of pain everywhere. */
+                    .developer-links {
+                        margin-left:auto;
+                        margin-right: auto;
+                        width: 80%;
+                        color:black;
+                    }
+                    .developer-links h3 {
+                        /* TODO: make sure all top items in each section have the same top margin (visually, not literally). also, reminder, bulma is screwing things up (adds styles to body)*/
+                        margin-top: 28px;
+                        margin-bottom: 28px;
+                    }
+                    .developer-links p {
+                        margin-top: 14px;
+                        margin-bottom: 14px;
+                    }
+                    .developer-links h3:not(:first-child) {
+                        margin-top: 1.5em;
+                    }
+                    .developer-links h3 {
+                        line-height: 10px;
+                    }
+                    .developer-links p {
+                        line-height: initial;
+                        font-family: Arial, Helvetica, sans-serif; /* TODO: get fonts situated. make one serious font for non-bangers. should be only like ...2 fonts + fonts used in images? */
+                        font-size:14px;
+                    }
+
+                    .developer-links textarea,
+                    .developer-links input {
+                        background-color:turquoise;
+                        width: 100%;
+                        padding-left:.25em;
+                    }
+
+                    .tab-container > * {
+                        display: none;
+                    }
+                    .tab-container > .selected-tab {
+                        display: block;
+                    }
+
+                    #nuget-encode  {
+                        font-size: initial;
+                    }
+                </style>
+                <div class="developer-links">
+                    <h3>Nuget</h3>
+                    <p>The steganography and cryptography packages used by Steganography<sub>Jr</sub> are available for use in your own applications. Code samples are available on GitHub.</p>
+                    <div class="control">
+                        <input class="input" type="text" value="PM> Install-Package NUnit -Version 3.10.1PM> Install-Package NUnit -Version 3.10.1" />
+                    </div>
+
+                    <h3>Github</h3>
+                    <p>Steganography<sub>Jr</sub>, StegDaddy, and the Steganography<sub>Jr</sub> steganography and cryptography packagages are located at
+                        <a href="https://github.com/smchughinfo/steganographyjr">this</a> repository.
+                    </p>
+                    <div class="control">
+                        <input class="input" type="text" value="git clone https://github.com/smchughinfo/steganographyjr.git" />
+                    </div>
+
+                    <h3>WebSocket API</h3>
+                    <p>
+                        You can use the WebSocket API to encode and decode images from a web page. Click <a href="">here</a> to get started.
+                        <br>
+                        *<small>Note - when using the WebSocket API you are limitted to 1000 requests per IP address per month.</small>
+                    </p>
+                </div>
+        </section>
+        <style>
+            footer {
+                /*font-family: Arial, Helvetica, sans-serif; TODO: footer doesn't look right*/
+                font-size:14px;
+
+                /* TODO: pretty much all these styles are temp! for example all these paddings will change when you switch the background image. */
+                /* TODO: these footer styles are no good. they need to be rewritten properly. */
+                padding-top:20px;
+                padding-bottom: 5px;
+            }
+            footer > * {
+                
+                display: inline-block;
+            }
+            footer > *:nth-child(1) {
+                padding-left: 25px;
+                width: calc(33.3333333% - 25px);
+            }
+            footer > *:nth-child(2) {
+                width: 33.3333333%;
+                text-align: center;
+            }
+            footer > *:nth-child(3) {
+                text-align: right;
+                padding-right: 25px;
+                width: calc(33.3333333%);
+            }
+        </style>
+        <footer>
+            <div>
+                Check out my math website
+                <br>
+                <br>
+                Donate
+            </div>
+            <div>
+                <br>
+                <br>
+                License
+            </div>
+            <div>
+                Contact
+                <br>
+                <br>
+                ❤️Special Thanks❤️
+            </div>
+
+        </footer>
     </body>
 </html>
  

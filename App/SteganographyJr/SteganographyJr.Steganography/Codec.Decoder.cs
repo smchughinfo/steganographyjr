@@ -42,9 +42,9 @@ namespace SteganographyJr.Steganography
                     var pixelBitsAsBools = DecodePixel(carrierImage, x, y);
                     messageBuilder.AddRange(pixelBitsAsBools);
                     
-                    if(eofStopwatch.ElapsedTicks > EOF_CHECK_RATE)
+                    if(eofStopwatch.ElapsedMilliseconds > EOF_CHECK_RATE)
                     {
-                        eofStopwatch.Reset();
+                        eofStopwatch.Restart();
                         foundEof = MessageBuilderHasEof(messageBuilder, eofMarker);
                     }
 

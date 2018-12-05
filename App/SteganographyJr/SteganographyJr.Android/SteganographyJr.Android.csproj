@@ -62,8 +62,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
+    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerActivity.cs" />
+    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerEventArgs.cs" />
     <Compile Include="Plugin.FilePicker\FilePickerActivity.cs" />
+    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerImplementation.cs" />
     <Compile Include="Plugin.FilePicker\FilePickerImplementation.cs" />
+    <Compile Include="Plugin.FilePicker\SavePicker\ISavePicker.cs" />
     <Compile Include="Plugin.FilePicker\IOUtil.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

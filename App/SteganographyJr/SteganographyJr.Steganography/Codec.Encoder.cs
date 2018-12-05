@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace SteganographyJr.Steganography
 {
+    // TODO: doesnt calculate messageFits correctly on android
+    // TODO: cant encode large files. just sits there.
     public partial class Codec
     {
         public static bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
@@ -40,14 +42,12 @@ namespace SteganographyJr.Steganography
                 IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
                     EncodePixel(carrierImage, message, ref bitsWritten, x, y);
 
-                    var percentComplete = (double)bitsWritten / carrierImage.BitCapacity;
+                    var percentComplete = ((double)bitsWritten / message.Length);
                     userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
 
                     bool encodeComplete = bitsWritten >= message.Length * 8;
                     return userCancelled || encodeComplete;
                 });
-
-                
             });
 
             return userCancelled ? null : carrierImage;
