@@ -71,16 +71,20 @@ namespace SteganographyJr.Droid.Services.DependencyService
                     return new FileSaveResult() { ErrorMessage = StaticVariables.SaveFailedBecauseOfPermissionsMessage };
                 }
 
-                if (string.IsNullOrEmpty(path))
-                {
+                //if (string.IsNullOrEmpty(path))
+                //{
                     Bitmap bitmap = new Bitmap();
                     bitmap.Set(image);
-                    path = MediaStore.Images.Media.InsertImage(MainActivity.Instance.ContentResolver, bitmap.platformBitmap, StaticVariables.DefaultCarrierImageSaveName, null);
-                }
-                else
-                {
-                    File.WriteAllBytes(path, image);
-                }
+                    // TODO: this works but it would be nice if it auto opened the photo gallery. as a user you have no clue where the image was saved to after the initial cryptic popup. i would uninstall this immediatly and hate it for hiding a file somewhere on my system.
+                    // would you like to open in the photo gallery?
+                    // the path has been saved to your clipboard. something, idk. 
+                    path = MediaStore.Images.Media.InsertImage(MainActivity.Instance.ContentResolver, bitmap.platformBitmap, null, null);
+                //}
+                //else
+                //{
+                //    this used to work but now it doesn't. for example, it can't access the downloads directory
+                //    File.WriteAllBytes(path, image);
+                //}
 
                 return new FileSaveResult() { SaveLocation = path };
             }
@@ -94,12 +98,12 @@ namespace SteganographyJr.Droid.Services.DependencyService
         {
             try
             {
-                var savePicker = new Plugin.FilePicker.SavePicker.SavePickerImplementation();
-                var errorMessage = await savePicker.SaveFile(fileName, fileBytes);
-                var hasError = string.IsNullOrEmpty(errorMessage) == false;
-                if(hasError)
+                var fileData = new FileData("", fileName, () => { return fileBytes.ConvertToStream(); });
+                var savePicker = new Plugin.FilePicker.FilePickerImplementation();
+                var success = await savePicker.SaveFile(fileData);
+                if(success == false)
                 {
-                    return new FileSaveResult() { ErrorMessage = errorMessage };
+                    return new FileSaveResult() { ErrorMessage = $"Unable to save file {fileName}." };
                 }
             }
             catch (Exception ex)
