@@ -141,7 +141,7 @@ namespace SteganographyJr.Forms.ViewModels
             }
             else
             {
-                var fileNameString = Path.GetFileName(FileMessage.Path);
+                var fileNameString = Path.GetFileName(FileMessage.FileName);
                 var fileNameBytes = fileNameString.ConvertToByteArray();
                 var fileSeperatorBytes = StaticVariables.FileSeperator.ConvertToByteArray();
 
@@ -213,7 +213,7 @@ namespace SteganographyJr.Forms.ViewModels
                 }
                 else
                 {
-                        CarrierImageBytes = carrierImage.ConvertToByteArray();
+                    CarrierImageBytes = carrierImage.ConvertToByteArray();
                 }
 
                 ExecutionProgress = 1;
@@ -232,20 +232,16 @@ namespace SteganographyJr.Forms.ViewModels
         private async Task RouteEncodedMessage()
         {
             // save the encode
-            var encodedCarrierImage = new BytesWithPath()
+            var encodedCarrierImage = new BytesWithFileName()
             {
                 Bytes = CarrierImageBytes,
-                Path = CarrierImagePath
+                FileName = CarrierImageFileName
             };
-            var imageSaveResult = await DependencyService.Get<IFileIO>().SaveImageAsync(CarrierImagePath, CarrierImageBytes, _carrierImageNative);
+            var imageSaveResult = await DependencyService.Get<IFileIO>().SaveFileAsync(CarrierImageFileName, CarrierImageBytes);
 
-            // notify the user
+            // notify the user if there was a failure
             var success = string.IsNullOrEmpty(imageSaveResult.ErrorMessage);
-            if (success)
-            {
-                SendEncodingSuccessMessage(imageSaveResult.SaveLocation);
-            }
-            else
+            if (success == false)
             {
                 SendEncodingErrorMessage(imageSaveResult.ErrorMessage);
             }

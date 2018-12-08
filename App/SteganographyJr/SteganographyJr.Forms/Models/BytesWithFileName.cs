@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SteganographyJr.Forms.Models
 {
-    class BytesWithPath
+    class BytesWithFileName
     {
-        public string Path { get; set; }
+        public string FileName { get; set; }
         public Byte[] Bytes { get; set; }
     }
 }

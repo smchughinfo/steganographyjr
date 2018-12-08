@@ -4,6 +4,7 @@ using SteganographyJr.Forms.Models;
 using SteganographyJr.Forms.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Xamarin.Forms;
 
@@ -14,7 +15,7 @@ namespace SteganographyJr.Forms.ViewModels
         List<MessageType> _messages;      // text or file
         MessageType _SelectedMessageType; // text or file, whichever is selected
         string _textMessage;              // if text is selected, the text the user entered
-        BytesWithPath _fileMessage;       // if file is selected, the file the user selected
+        BytesWithFileName _fileMessage;       // if file is selected, the file the user selected
 
         bool _changingMessageFile;
         public DelegateCommand ChangeMessageFileCommand { get; private set; }
@@ -51,10 +52,10 @@ namespace SteganographyJr.Forms.ViewModels
                 var success = String.IsNullOrEmpty(imageChooserResult.ErrorMessage);
                 if (success)
                 {
-                    FileMessage = new BytesWithPath()
+                    FileMessage = new BytesWithFileName()
                     {
                         Bytes = imageChooserResult.Stream.ConvertToByteArray(),
-                        Path = imageChooserResult.Path
+                        FileName = Path.GetFileName(imageChooserResult.FileName)
                     };
                     imageChooserResult.Stream.Dispose();
                 }
@@ -91,7 +92,7 @@ namespace SteganographyJr.Forms.ViewModels
             set { SetPropertyValue(ref _textMessage, value); }
         }
 
-        public BytesWithPath FileMessage
+        public BytesWithFileName FileMessage
         {
             get { return _fileMessage; }
             set { SetPropertyValue(ref _fileMessage, value); }

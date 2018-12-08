@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteganographyJr.Forms", "St
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteganographyJr.Core", "SteganographyJr\SteganographyJr.Core\SteganographyJr.Core.csproj", "{5FCE8557-C6CD-41EE-8E0D-EBDFB42EB7A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteganographyJr.Steganography", "SteganographyJr\SteganographyJr.Steganography\SteganographyJr.Steganography.csproj", "{D27750D2-8334-4C57-A9FC-214325EF4D29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteganographyJr.Steganography", "SteganographyJr\SteganographyJr.Steganography\SteganographyJr.Steganography.csproj", "{D27750D2-8334-4C57-A9FC-214325EF4D29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteganographyJr.Cryptography", "SteganographyJr\SteganographyJr.Cryptography\SteganographyJr.Cryptography.csproj", "{619A2FB1-D416-4923-89E1-784C85C9DCCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteganographyJr.Cryptography", "SteganographyJr\SteganographyJr.Cryptography\SteganographyJr.Cryptography.csproj", "{619A2FB1-D416-4923-89E1-784C85C9DCCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

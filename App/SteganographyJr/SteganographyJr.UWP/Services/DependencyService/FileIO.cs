@@ -22,7 +22,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
     public class FileIO : IFileIO
     {
         // https://docs.microsoft.com/en-us/xamarin/xamarin-forms/app-fundamentals/dependency-service/photo-picker
-        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false) // TODO: image chooser result?
+        public async Task<FileChooserResult> GetFileAsync(bool imagesOnly = false) // TODO: image chooser result?
         {
             try
             {
@@ -57,9 +57,9 @@ namespace SteganographyJr.UWP.Services.DependencyService
 
                 IRandomAccessStreamWithContentType raStream = await storageFile.OpenReadAsync();
 
-                return new ImageChooserResult()
+                return new FileChooserResult()
                 {
-                    Path = storageFile.Path,
+                    FileName = storageFile.Path,
                     Stream = raStream.AsStreamForRead(),
                     NativeRepresentation = storageFile,
                     CarrierImageFormat = new ImageFormat(storageFile.Path)
@@ -67,11 +67,11 @@ namespace SteganographyJr.UWP.Services.DependencyService
             }
             catch(Exception ex)
             {
-                return new ImageChooserResult() { ErrorMessage = ex.Message };
+                return new FileChooserResult() { ErrorMessage = ex.Message };
             }
         }
 
-        public async Task<FileSaveResult> SaveImageAsync(string path, byte[] image, object nativeRepresentation = null)
+        /*public async Task<FileSaveResult> SaveImageAsync(string path, byte[] image, object nativeRepresentation = null)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
             {
                 return new FileSaveResult() { ErrorMessage = ex.Message };
             }
-        }
+        }*/
 
         // https://docs.microsoft.com/en-us/windows/uwp/files/quickstart-save-a-file-with-a-picker
         public async Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
