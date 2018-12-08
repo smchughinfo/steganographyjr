@@ -13,6 +13,7 @@ namespace SteganographyJr.Forms.ViewModels
     {
         byte[] _carrierImageBytes;
         string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
+        string _carrierImageFileName = StaticVariables.DefaultCarrierImageSaveName;
         ImageFormat _carrierImageFormat;
         ImageSource _carrierImageSource;
         object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
@@ -59,7 +60,7 @@ namespace SteganographyJr.Forms.ViewModels
                 if (success)
                 {
                     CarrierImageBytes = imageChooserResult.Stream.ConvertToByteArray();
-                    CarrierImagePath = imageChooserResult.Path;
+                    CarrierImagePath = imageChooserResult.FileName;
                     _carrierImageNative = imageChooserResult.NativeRepresentation;
                     _carrierImageFormat = imageChooserResult.CarrierImageFormat;
 
@@ -93,10 +94,30 @@ namespace SteganographyJr.Forms.ViewModels
             }
         }
 
-        private string CarrierImagePath
+        public string CarrierImagePath
         {
             get { return _carrierImagePath; }
             set { SetPropertyValue(ref _carrierImagePath, value); }
+        }
+
+        public string CarrierImageFileName
+        {
+            get { return _carrierImageFileName; }
+            set
+            {
+                // this was originally setup to use the file name of the carrier image. but i think it makes it more clear what you are saving if you just call it "Encoded Image.png"
+                var fileName = "";
+                //if(CarrierImagePath == null)
+                //{
+                    fileName = StaticVariables.DefaultCarrierImageSaveName;
+                //}
+                //else
+                //{
+                //    var pathComponents = CarrierImagePath.Split(Path.PathSeparator);
+                //    fileName = pathComponents[pathComponents.Length - 1];
+                //}
+                SetPropertyValue(ref _carrierImageFileName, fileName);
+            }
         }
 
         private void UpdateCarrierImageSource()

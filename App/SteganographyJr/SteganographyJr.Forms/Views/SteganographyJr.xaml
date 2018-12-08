@@ -100,7 +100,7 @@
                         IsEnabled="{Binding NotExecuting}" />
                     <Label
                         Grid.Row="0" Grid.Column="1" 
-                        Text="{Binding FileMessage.Path}"/>
+                        Text="{Binding FileMessage.FileName}"/>
                 </Grid>
 
                 <BoxView 

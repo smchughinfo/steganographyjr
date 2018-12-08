@@ -8,12 +8,12 @@ using System.Text;
 
 namespace SteganographyJr.Forms.DTOs
 {
-    public class ImageChooserResult
+    public class FileChooserResult
     {
         public string ErrorMessage { get; set; }
-        public string Path { get; set; }
-        public ImageFormat CarrierImageFormat { get; set; }
+        public string FileName { get; set; }
+        public ImageFormat CarrierImageFormat { get; set; } // TODO: any way to get this out of here?
         public Stream Stream { get; set; }
-        public object NativeRepresentation { get; set; }
+        public object NativeRepresentation { get; set; } // TODO: this also makes no sense in a general context. 
     }
 }

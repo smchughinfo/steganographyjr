@@ -44,10 +44,6 @@
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BindingsLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\BindingsLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,25 +51,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SteganograpyJr.Plugin.FilePicker.Abstractions">
-      <Version>1.0.0</Version>
-    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.280555" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="25.4.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="25.4.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v4" Version="25.4.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="25.4.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="25.4.0.2" />
+    <PackageReference Include="Xamarin.Plugin.FilePicker">
+      <Version>2.0.135</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
-    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerActivity.cs" />
-    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerEventArgs.cs" />
-    <Compile Include="Plugin.FilePicker\FilePickerActivity.cs" />
-    <Compile Include="Plugin.FilePicker\SavePicker\SavePickerImplementation.cs" />
-    <Compile Include="Plugin.FilePicker\FilePickerImplementation.cs" />
-    <Compile Include="Plugin.FilePicker\SavePicker\ISavePicker.cs" />
-    <Compile Include="Plugin.FilePicker\IOUtil.cs" />
+    <Compile Include="SavePicker\SavePickerActivity.cs" />
+    <Compile Include="SavePicker\SavePickerEventArgs.cs" />
+    <Compile Include="SavePicker\SavePickerImplementation.cs" />
+    <Compile Include="SavePicker\ISavePicker.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DependencyService\Bitmap.cs" />
@@ -110,11 +103,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="lib\BindingsLibrary.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <Content Include="Plugin.FilePicker\note.txt" />
+    <Content Include="SavePicker\note..txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

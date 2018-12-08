@@ -2,7 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Runtime;
 using Java.IO;
-using Plugin.FilePicker.Abstractions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

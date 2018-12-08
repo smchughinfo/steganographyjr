@@ -21,6 +21,7 @@ namespace SteganographyJr.UWP.Services.DependencyService
         public override void Set(Stream stream)
         {
             platformBitmap = new Drawing.Bitmap(stream);
+            platformBitmap.GetPixel(0, 0); // TODO: this is magic line that prevents calls to GetPixel from crashing when doing the encode
         }
 
         public override int Height {

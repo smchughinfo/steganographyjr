@@ -9,7 +9,6 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Plugin.FilePicker.Abstractions;
 
 namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
 {

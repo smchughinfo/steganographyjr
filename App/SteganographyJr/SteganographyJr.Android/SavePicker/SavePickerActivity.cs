@@ -4,7 +4,6 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using System.Threading.Tasks;
-using Plugin.FilePicker.Abstractions;
 using Android.Provider;
 using System.Net;
 using Java.IO;
@@ -34,6 +33,13 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
             intent.AddCategory(Intent.CategoryOpenable);
             intent.SetType(mimeType);
             intent.PutExtra(Intent.ExtraTitle, fileNameWithExtension);
+
+            // https://stackoverflow.com/questions/9080109/android-image-picker-for-local-files-only
+            // https://stackoverflow.com/questions/50980397/when-using-intent-actionopendocumenttree-can-you-allow-the-user-to-save-in-a-loc/51011346?noredirect=1#comment89016456_51011346
+            // https://stackoverflow.com/questions/51012702/whats-the-correct-way-to-save-a-file-when-using-the-content-sheme/51013020?noredirect=1#comment89020123_51013020 // note that I said it worked here. i said it worked prematurely because i never got it to work completely (even after wasting too much time trying to write a MCW). 
+            // when saving remotely it saves the file with 0 bytes. so only let it save locally.
+            intent.PutExtra(Intent.ExtraLocalOnly, true);
+
             StartActivityForResult(Intent.CreateChooser(intent, "Select Save Location"), 43);
         }
 

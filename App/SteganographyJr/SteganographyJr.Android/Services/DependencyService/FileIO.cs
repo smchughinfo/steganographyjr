@@ -22,74 +22,45 @@ using Plugin.FilePicker.Abstractions;
 using SteganographyJr.Forms.DTOs;
 using SteganographyJr.Forms;
 using SteganographyJr.Forms.Interfaces;
+using Plugin.FilePicker;
 
 [assembly: Xamarin.Forms.DependencyAttribute(typeof(SteganographyJr.Droid.Services.DependencyService.FileIO))]
 namespace SteganographyJr.Droid.Services.DependencyService
 {
     class FileIO : IFileIO
     {
-        public async Task<ImageChooserResult> GetFileAsync(bool imagesOnly = false)
+        public async Task<FileChooserResult> GetFileAsync(bool imagesOnly = false)
         {
             try
             {
                 var havePermissions = await EnsurePermissions();
                 if(havePermissions == false)
                 {
-                    return new ImageChooserResult() { ErrorMessage = StaticVariables.ReadFailedBecauseOfPermissionsMessage };
+                    return new FileChooserResult() { ErrorMessage = StaticVariables.ReadFailedBecauseOfPermissionsMessage };
                 }
-                var filePicker = new Plugin.FilePicker.FilePickerImplementation();
 
-                string[] mimeTypes = new string[] { imagesOnly ? "image/*" : "*/*" };
-                var result = await filePicker.PickFile(mimeTypes);
+                var mimeTypesToInclude = imagesOnly ? new string[] { "image/png", "image/jpeg", "image/gif" } : null;
+                var result = await CrossFilePicker.Current.PickFile(mimeTypesToInclude);
+                
                 if(result == null)
                 {
                     return null;
                 }
                 else
                 {
-                    return new ImageChooserResult()
+                    return new FileChooserResult()
                     {
                         Stream = result.DataArray.ConvertToStream(),
-                        Path = result.FilePath
+                        FileName = result.FileName
                     };
                 }
             }
             catch(Exception ex)
             {
-                return new ImageChooserResult() { ErrorMessage = ex.Message };
+                return new FileChooserResult() { ErrorMessage = ex.Message };
             }
         }
 
-        // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/permissions?tabs=vswin
-        public async Task<FileSaveResult> SaveImageAsync(string path, byte[] image, object nativeRepresentation = null)
-        {
-            try
-            {
-                var havePermissions = await EnsurePermissions();
-                if(havePermissions == false)
-                {
-                    return new FileSaveResult() { ErrorMessage = StaticVariables.SaveFailedBecauseOfPermissionsMessage };
-                }
-
-                if (string.IsNullOrEmpty(path))
-                {
-                    Bitmap bitmap = new Bitmap();
-                    bitmap.Set(image);
-                    path = MediaStore.Images.Media.InsertImage(MainActivity.Instance.ContentResolver, bitmap.platformBitmap, StaticVariables.DefaultCarrierImageSaveName, null);
-                }
-                else
-                {
-                    File.WriteAllBytes(path, image);
-                }
-
-                return new FileSaveResult() { SaveLocation = path };
-            }
-            catch (Exception ex)
-            {
-                return new FileSaveResult() { ErrorMessage = ex.Message };
-            }
-        }
-        
         public async Task<FileSaveResult> SaveFileAsync(string fileName, byte[] fileBytes)
         {
             try
