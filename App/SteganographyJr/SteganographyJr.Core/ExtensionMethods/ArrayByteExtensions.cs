@@ -9,6 +9,17 @@ namespace SteganographyJr.Core.ExtensionMethods
 {
     public static class ArrayByteExtensions
     {
+        public static (byte[] left, byte[] right) Shift(this byte[] bytes, int size)
+        {
+            var left = new byte[size];
+            var right = new byte[bytes.Length - size];
+
+            Array.Copy(bytes, 0, left, 0, left.Length);
+            Array.Copy(bytes, left.Length, right, 0, right.Length);
+
+            return (left, right);
+        }
+
         public static (byte[] left, byte[] right) Pop(this byte[] bytes, int size)
         {
             var left = new byte[bytes.Length - size];

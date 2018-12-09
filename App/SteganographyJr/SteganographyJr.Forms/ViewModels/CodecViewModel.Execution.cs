@@ -187,24 +187,32 @@ namespace SteganographyJr.Forms.ViewModels
         {
             try
             {
-                // get encoding variables
-                var password = SHA2.GetHash(GetSteganographyPassword());
-                var message = AES.Encrypt(GetSteganographyMessage(), password);
+                // get the carrier image bitmap
                 var carrierImage = GetSteganographyBitmap();
 
+                // get the password and encrypt the message
+                var password = GetSteganographyPassword();
+                var encryptedMessage = AES.Encrypt(GetSteganographyMessage(), password);
+
+                // TODO: this needs to be moved into getsteganograpjhymessage
+                // add a 56 byte preamble to the message. the preamble contains the length of the message. ...this is so when Decoding you know exactly how far to read.
+                Int64 encrypedMessageLength = encryptedMessage.LongLength;
+                var encryptedLength = AES.Encrypt(encrypedMessageLength, password);
+                encryptedMessage = encryptedMessage.Prepend(encryptedLength);
+                
                 // make sure we can encode
-                var messageFits = Codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
+                var messageFits = Codec.MessageFits(carrierImage, encryptedMessage);
                 if (messageFits == false)
                 {
-                    SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
+                    // TODO: is this worded right after adding the encodable bits dropdown?
+                    SendEncodingErrorMessage("Message is too big. Use a bigger image, increase encodable bits, or write a smaller message.");
                     return;
                 }
 
                 // do the encode
-                carrierImage = await Codec.Encode(carrierImage, message, password, CheckCancel);
+                carrierImage = await Codec.Encode(carrierImage, encryptedMessage, password, CheckCancel);
 
                 // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
-                // TODO: on decode only check for eof every nth bit. prepending length seems like a vulnerability.
                 if (carrierImage == null)
                 {
                     // the user cancelled. cleanup and return.
@@ -249,10 +257,19 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task Decode()
         {
-            var password = SHA2.GetHash(GetSteganographyPassword());
+            var password = GetSteganographyPassword();
+
+            var passwordBytes = SHA2.GetHash(password);
             var carrierImage = GetSteganographyBitmap();
 
-            byte[] message = await Codec.Decode(carrierImage, password, CheckCancel);
+            // TODO: 56 -> CONSTANT
+            var encryptedMessageLengthBytesEncrypted = await Codec.Take(carrierImage, password, 56);
+            var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
+            var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
+
+            var message = await Codec.Take(carrierImage, password, 56, encryptedMessageLength);
+
+            //byte[] message = await Codec.Decode(carrierImage, passwordBytes, CheckCancel);
             if (message != null)
             {
                 message = AES.Decrypt(message, password);
@@ -260,7 +277,6 @@ namespace SteganographyJr.Forms.ViewModels
                 await Task.Delay(100);
 
                 await RouteDecodedMessage(message);
-
             }
 
             ExecutionProgress = 0;

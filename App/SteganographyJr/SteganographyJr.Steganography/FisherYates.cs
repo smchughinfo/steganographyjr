@@ -40,10 +40,10 @@ namespace SteganographyJr.Steganography
 
         // https://stackoverflow.com/questions/26870267/generate-integer-based-on-any-given-string-without-gethashcode
         // https://stackoverflow.com/questions/2351087/what-is-the-best-32bit-hash-function-for-short-strings-tag-names
-        public static int GetSeed(byte[] input)
+        public static int GetSeed(string input)
         {
             // use the first 4 bytes of the hashed input to create a pseudo-random number that is good enough to serve as a seed.
-            var hashed =  GetHash(input);
+            var hashed =  GetHash(input.ConvertToByteArray());
             var seed = BitConverter.ToInt32(hashed, 0);
             return seed;
         }

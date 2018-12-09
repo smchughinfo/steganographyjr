@@ -15,21 +15,20 @@ namespace SteganographyJr.Steganography
     // TODO: cant encode large files. just sits there.
     public partial class Codec
     {
-        public static bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
+        public static bool MessageFits(Bitmap carrierImage, byte[] message)
         {
-            return carrierImage.ByteCapacity >= message.Length + eofMarker.Length;
+            return carrierImage.ByteCapacity >= message.Length;
         }
 
         public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
         {
-            var eofMarker = _defaultEofMarker.ConvertToByteArray();
-            return await Encode(carrierImage, message, eofMarker, checkCancel);
+            return await Encode(carrierImage, message, _defaultPassword, checkCancel);
         }
 
-        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, string password, Func<double, bool> checkCancel)
         {
-            var shuffleSeed = FisherYates.GetSeed(eofMarker);
-            message = message.Append(eofMarker);
+            var shuffleSeed = FisherYates.GetSeed(password);
+            message = message.Append(password);
 
             var userCancelled = false;
 
