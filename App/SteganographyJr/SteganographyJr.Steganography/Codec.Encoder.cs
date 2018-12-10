@@ -15,21 +15,22 @@ namespace SteganographyJr.Steganography
     // TODO: cant encode large files. just sits there.
     public partial class Codec
     {
-        public static bool MessageFits(Bitmap carrierImage, byte[] message, byte[] eofMarker)
+        public static bool MessageFits(Bitmap carrierImage, byte[] message)
         {
-            return carrierImage.ByteCapacity >= message.Length + eofMarker.Length;
+            return carrierImage.ByteCapacity >= message.Length;
         }
 
-        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel = null)
         {
-            var eofMarker = _defaultEofMarker.ConvertToByteArray();
-            return await Encode(carrierImage, message, eofMarker, checkCancel);
+            return await Encode(carrierImage, message, _defaultPassword, checkCancel);
         }
 
-        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, byte[] eofMarker, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, string password, Func<double, bool> checkCancel = null)
         {
-            var shuffleSeed = FisherYates.GetSeed(eofMarker);
-            message = message.Append(eofMarker);
+            var shuffleSeed = FisherYates.GetSeed(password);
+            message = message.Append(password);
+
+            var messageAsBitArray = message.ConvertToBitArray();
 
             var userCancelled = false;
 
@@ -40,12 +41,12 @@ namespace SteganographyJr.Steganography
             {
                 var bitsWritten = 0;
                 IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
-                    EncodePixel(carrierImage, message, ref bitsWritten, x, y);
+                    EncodePixel(carrierImage, messageAsBitArray, ref bitsWritten, x, y);
 
-                    var percentComplete = ((double)bitsWritten / message.Length);
-                    userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
+                    var percentComplete = ((double)bitsWritten / messageAsBitArray.Length);
+                    userCancelled = checkCancel == null ? false : CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
 
-                    bool encodeComplete = bitsWritten >= message.Length * 8;
+                    bool encodeComplete = bitsWritten >= messageAsBitArray.Length;
                     return userCancelled || encodeComplete;
                 });
             });
@@ -53,16 +54,16 @@ namespace SteganographyJr.Steganography
             return userCancelled ? null : carrierImage;
         }
 
-        private static int GetValueToEncodeInChannel(Bitmap carrierImage, byte[] message, int channelValue, int messageIndex)
+        private static int GetValueToEncodeInChannel(Bitmap carrierImage, BitArray message, int channelValue, ref int messageIndex)
         {
-            if (messageIndex >= message.Length * 8)
+            if (messageIndex >= message.Length)
             {
                 return channelValue;
             }
             else
             {
                 var channelValueEven = channelValue % 2 == 0;
-                var messageValueEven = message.ConvertToBitArray()[messageIndex];
+                var messageValueEven = message[messageIndex++];
 
                 var valuesMatch = messageValueEven == channelValueEven;
                 channelValue = valuesMatch ? channelValue : channelValue + 1;
@@ -72,13 +73,13 @@ namespace SteganographyJr.Steganography
             }
         }
         
-        private static void EncodePixel(Bitmap carrierImage, byte[] message, ref int bitsWritten, int x, int y)
+        private static void EncodePixel(Bitmap carrierImage, BitArray message, ref int bitsWritten, int x, int y)
         {
             (int a, int r, int g, int b) = carrierImage.GetPixel(x, y);
 
-            r = GetValueToEncodeInChannel(carrierImage, message, r, bitsWritten++);
-            g = GetValueToEncodeInChannel(carrierImage, message, g, bitsWritten++);
-            b = GetValueToEncodeInChannel(carrierImage, message, b, bitsWritten++);
+            r = GetValueToEncodeInChannel(carrierImage, message, r, ref bitsWritten);
+            g = GetValueToEncodeInChannel(carrierImage, message, g, ref bitsWritten);
+            b = GetValueToEncodeInChannel(carrierImage, message, b, ref bitsWritten);
 
             carrierImage.SetPixel(x, y, a, r, g, b);
         }

@@ -1,5 +1,6 @@
 ﻿using SteganographyJr.Core;
 using SteganographyJr.Core.DomainObjects;
+using SteganographyJr.Core.ExtensionMethods;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,8 @@ namespace SteganographyJr.Steganography
 {
     public static partial class Codec
     {
-        private const string _defaultEofMarker = "EC951F51-B03B-4007-AAB7-746C16BE1535";
+        // TODO: casting down to int limits the size of the payload to??? same with the starting index argument? just test these on large images once you add the bit depth switcher please.
+        private const string _defaultPassword = "EC951F51-B03B-4007-AAB7-746C16BE1535";
         const int USER_UPDATE_RATE = 100;
 
         private static void IterateBitmap(Bitmap bitmap, int shuffleSeed, Func<int, int, bool> onPixel)
@@ -33,7 +35,7 @@ namespace SteganographyJr.Steganography
                 }
             }
         }
-
+        
         private static bool CheckCancelAndUpdate(Stopwatch stopwatch, double percentComplete, Func<double, bool> checkCancel)
         {
             if (stopwatch.ElapsedMilliseconds > USER_UPDATE_RATE) // the purpose of this is to avoid spamming the caller with updates

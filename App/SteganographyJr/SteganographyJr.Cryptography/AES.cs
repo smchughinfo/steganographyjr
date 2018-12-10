@@ -7,20 +7,35 @@ using System.Text;
 
 namespace SteganographyJr.Cryptography
 {
+    // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
+    // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
+    // https://codereview.stackexchange.com/questions/196088/encrypt-a-byte-array
+    // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
+
     public static class AES
     {
         static string eof = "2AA1EC93-063F-40FE-8C2A-D1023A84333E"; // TODO: prepend message length as first 8 bytes instead of checking for the position of this string.
 
-        // https://social.msdn.microsoft.com/Forums/vstudio/en-US/eab7d698-2340-4ba0-a91c-da6fae06963c/aes-encryption-encrypting-byte-array?forum=csharpgeneral
-        // https://crypto.stackexchange.com/questions/2280/why-is-the-iv-passed-in-the-clear-when-it-can-be-easily-encrypted
-        // https://codereview.stackexchange.com/questions/196088/encrypt-a-byte-array
-        // https://msdn.microsoft.com/en-us/library/zhe81fz4(v=vs.110).aspx
-        public static byte[] Encrypt(byte[] bytesToEncrypt, byte[] password)
+        /// <summary>
+        /// Takes in an 8 byte int. Returns 24 bytes (16 byte cypher, 8 byte iv seed)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static byte[] Encrypt(Int64 value, string password)
         {
+            var bytesToEncrypt = BitConverter.GetBytes(value);
+            return Encrypt(bytesToEncrypt, password);
+        }
+
+        public static byte[] Encrypt(byte[] bytesToEncrypt, string password)
+        {
+            byte[] passwordBytes = SHA2.GetHash(password);
+
             bytesToEncrypt = bytesToEncrypt.Append(eof);
 
             byte[] ivSeed = GetRandomNumber();
-            (byte[] key, byte[] iv) = GetKeyAndIv(password, ivSeed);
+            (byte[] key, byte[] iv) = GetKeyAndIv(passwordBytes, ivSeed);
 
             byte[] encrypted;
             using (MemoryStream mstream = new MemoryStream())
@@ -40,10 +55,12 @@ namespace SteganographyJr.Cryptography
             return encrypted;
         }
 
-        public static byte[] Decrypt(byte[] bytesToDecrypt, byte[] password)
+        public static byte[] Decrypt(byte[] bytesToDecrypt, string password)
         {
+            byte[] passwordBytes = SHA2.GetHash(password);
+
             (byte[] encrypted, byte[] ivSeed) = bytesToDecrypt.Pop(8);
-            (byte[] key, byte[] iv) = GetKeyAndIv(password, ivSeed);
+            (byte[] key, byte[] iv) = GetKeyAndIv(passwordBytes, ivSeed);
 
             byte[] decrypted = null;
 

@@ -13,23 +13,21 @@ namespace SteganographyJr.Steganography
 {
     public static partial class Codec
     {
-        const int  EOF_CHECK_RATE = 100;
-
-        public static async Task<byte[]> Decode(Bitmap carrierImage, Func<double, bool> checkCancel)
+        public static async Task<byte[]> Take(Bitmap carrierImage, string password, Int64 numberOfBitsToTake, Func<double, bool> checkCancel = null)
         {
-            var eofMarker = _defaultEofMarker.ConvertToByteArray();
-            return await Decode(carrierImage, eofMarker, checkCancel);
+            return await Take(carrierImage, password, 0, numberOfBitsToTake, checkCancel);
         }
 
-        public static async Task<byte[]> Decode(Bitmap carrierImage, byte[] eofMarker, Func<double, bool> checkCancel)
+        public static async Task<byte[]> Take(Bitmap carrierImage, string password, int startingByteIndex, Int64 bytesToTake, Func<double, bool> checkCancel = null)
         {
-            var shuffleSeed = FisherYates.GetSeed(eofMarker);
+            var shuffleSeed = FisherYates.GetSeed(password);
 
-            bool foundEof = false;
             bool userCancelled = false;
-
+            
             List<bool> messageBuilder = new List<bool>();
-            byte[] decodedMessage = null;
+
+            int startingIndexInBits = startingByteIndex * 8;
+            int bitsToTake = (int)bytesToTake * 8;
 
             var userUpdateStopwatch = new Stopwatch();
             var eofStopwatch = new Stopwatch();
@@ -38,35 +36,22 @@ namespace SteganographyJr.Steganography
 
             await Task.Run(() => // move away from the calling thread while working
             {
-                IterateBitmap(carrierImage, shuffleSeed, (x, y) => {
-                    var pixelBitsAsBools = DecodePixel(carrierImage, x, y);
-                    messageBuilder.AddRange(pixelBitsAsBools);
-                    
-                    if(eofStopwatch.ElapsedMilliseconds > EOF_CHECK_RATE)
-                    {
-                        eofStopwatch.Restart();
-                        foundEof = MessageBuilderHasEof(messageBuilder, eofMarker);
-                    }
-
-                    var percentComplete = (double)messageBuilder.Count / carrierImage.BitCapacity;
-                    userCancelled = CheckCancelAndUpdate(userUpdateStopwatch, percentComplete, checkCancel);
-
-                    return userCancelled || foundEof;
-                });
-
-                foundEof = MessageBuilderHasEof(messageBuilder, eofMarker); // check for eof again in case the IterateBitmap loop completed since the last time we checked.
-                if (foundEof)
+                IterateBitmap(carrierImage, shuffleSeed, (x, y) =>
                 {
-                    decodedMessage = GetMessageWithoutEof(messageBuilder, eofMarker);
-                }
-            });
-            
-            return userCancelled || !foundEof ? null : decodedMessage;
-        }
+                    var pixelBits = DecodePixel(carrierImage, x, y);
+                    messageBuilder.AddRange(pixelBits);
 
-        private static bool MessageBuilderHasEof(List<bool> messageBuilder, byte[] eofMarker)
-        {
-            return messageBuilder.ConvertToByteArray().Contains(eofMarker);
+                    var recoveredAllBits = messageBuilder.Count >= startingIndexInBits + bitsToTake;
+                    var percentComplete = (double)messageBuilder.Count / carrierImage.BitCapacity;
+                    userCancelled = checkCancel == null ? false : CheckCancelAndUpdate(userUpdateStopwatch, percentComplete, checkCancel);
+
+                    return recoveredAllBits || userCancelled;
+                });
+            });
+
+            messageBuilder.RemoveRange(0, startingIndexInBits);
+            messageBuilder = messageBuilder.Take(bitsToTake).ToList(); // TODO: does this ever blow up if the image is ..small? or something. ...on encode it can check. here we could get an error?
+            return messageBuilder.ConvertToByteArray();
         }
 
         private static bool[] DecodePixel(Bitmap carrierImage, int x, int y)
@@ -78,12 +63,6 @@ namespace SteganographyJr.Steganography
             var bBit = b % 2 == 0;
 
             return new bool[] { rBit, gBit, bBit };
-        }
-
-        private static byte[] GetMessageWithoutEof(List<bool> messageBuilder, byte[] eofBytes)
-        {
-            var messageBuilderBytes = messageBuilder.ConvertToByteArray();
-            return messageBuilderBytes.SplitOnce(eofBytes)[0];
         }
     }
 }

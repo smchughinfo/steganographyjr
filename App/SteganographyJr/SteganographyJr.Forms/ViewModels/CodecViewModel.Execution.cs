@@ -185,48 +185,50 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task Encode()
         {
-            try
+            _cancelling = false; // this has to be reset. if CheckCancel doesn't get called after the user clicked cancel (or maybe if they spam the button) it will auto cancel the next time they encode or decode
+
+            // get the carrier image bitmap
+            var carrierImage = GetSteganographyBitmap();
+
+            // get the password and encrypt the message
+            var password = GetSteganographyPassword();
+            var encryptedMessage = AES.Encrypt(GetSteganographyMessage(), password);
+
+            // add a 56 byte preamble to the message. the preamble contains the length of the message. ...this is so when Decoding you know exactly how far to read.
+            Int64 encrypedMessageLength = encryptedMessage.LongLength;
+            var encryptedLength = AES.Encrypt(encrypedMessageLength, password);
+            encryptedMessage = encryptedMessage.Prepend(encryptedLength);
+                
+            // make sure we can encode
+            var messageFits = Codec.MessageFits(carrierImage, encryptedMessage);
+            if (messageFits == false)
             {
-                // get encoding variables
-                var password = SHA2.GetHash(GetSteganographyPassword());
-                var message = AES.Encrypt(GetSteganographyMessage(), password);
-                var carrierImage = GetSteganographyBitmap();
+                // TODO: is this worded right after adding the encodable bits dropdown?
+                SendEncodingErrorMessage("Message is too big. Use a bigger image, increase encodable bits, or write a smaller message.");
+                return;
+            }
 
-                // make sure we can encode
-                var messageFits = Codec.MessageFits(carrierImage, message, password); // TODO: experiment with not providing an eof
-                if (messageFits == false)
-                {
-                    SendEncodingErrorMessage("Message is too big. Use a bigger image or write a smaller message.");
-                    return;
-                }
+            // do the encode
+            carrierImage = await Codec.Encode(carrierImage, encryptedMessage, password, CheckCancel);
 
-                // do the encode
-                carrierImage = await Codec.Encode(carrierImage, message, password, CheckCancel);
-
-                // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
-                // TODO: on decode only check for eof every nth bit. prepending length seems like a vulnerability.
-                if (carrierImage == null)
-                {
-                    // the user cancelled. cleanup and return.
-                    ExecutionProgress = 0;
-                    return;
-                }
-                else
-                {
-                    CarrierImageBytes = carrierImage.ConvertToByteArray();
-                }
-
-                ExecutionProgress = 1;
-                await Task.Delay(100);
-
-                await RouteEncodedMessage();
-
+            // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
+            if (carrierImage == null)
+            {
+                // the user cancelled. cleanup and return.
                 ExecutionProgress = 0;
+                return;
             }
-            catch (Exception ex)
+            else
             {
-                ;
+                CarrierImageBytes = carrierImage.ConvertToByteArray();
             }
+
+            ExecutionProgress = 1;
+            await Task.Delay(100);
+
+            await RouteEncodedMessage();
+
+            ExecutionProgress = 0;
         }
 
         private async Task RouteEncodedMessage()
@@ -249,10 +251,20 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task Decode()
         {
-            var password = SHA2.GetHash(GetSteganographyPassword());
-            var carrierImage = GetSteganographyBitmap();
+            _cancelling = false; // this has to be reset. if CheckCancel doesn't get called after the user clicked cancel (or maybe if they spam the button) it will auto cancel the next time they encode or decode
 
-            byte[] message = await Codec.Decode(carrierImage, password, CheckCancel);
+            var password = GetSteganographyPassword();
+
+            var passwordBytes = SHA2.GetHash(password);
+            var carrierImage = GetSteganographyBitmap();
+            
+            var encryptedMessageLengthBytesEncrypted = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_IN_BITS_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD);
+            var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
+            var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
+
+            var message = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_IN_BITS_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD, encryptedMessageLength, CheckCancel);
+
+            //byte[] message = await Codec.Decode(carrierImage, passwordBytes, CheckCancel);
             if (message != null)
             {
                 message = AES.Decrypt(message, password);
@@ -260,7 +272,6 @@ namespace SteganographyJr.Forms.ViewModels
                 await Task.Delay(100);
 
                 await RouteDecodedMessage(message);
-
             }
 
             ExecutionProgress = 0;
