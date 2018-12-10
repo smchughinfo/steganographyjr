@@ -187,6 +187,8 @@ namespace SteganographyJr.Forms.ViewModels
         {
             try
             {
+                _cancelling = false; // this has to be reset. if CheckCancel doesn't get called after the user clicked cancel (or maybe if they spam the button) it will auto cancel the next time they encode or decode
+
                 // get the carrier image bitmap
                 var carrierImage = GetSteganographyBitmap();
 
@@ -257,6 +259,8 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task Decode()
         {
+            _cancelling = false; // this has to be reset. if CheckCancel doesn't get called after the user clicked cancel (or maybe if they spam the button) it will auto cancel the next time they encode or decode
+
             var password = GetSteganographyPassword();
 
             var passwordBytes = SHA2.GetHash(password);
@@ -267,7 +271,7 @@ namespace SteganographyJr.Forms.ViewModels
             var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
             var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
 
-            var message = await Codec.Take(carrierImage, password, 56, encryptedMessageLength);
+            var message = await Codec.Take(carrierImage, password, 56, encryptedMessageLength, CheckCancel);
 
             //byte[] message = await Codec.Decode(carrierImage, passwordBytes, CheckCancel);
             if (message != null)

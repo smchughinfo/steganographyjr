@@ -20,12 +20,12 @@ namespace SteganographyJr.Steganography
             return carrierImage.ByteCapacity >= message.Length;
         }
 
-        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, Func<double, bool> checkCancel = null)
         {
             return await Encode(carrierImage, message, _defaultPassword, checkCancel);
         }
 
-        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, string password, Func<double, bool> checkCancel)
+        public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, string password, Func<double, bool> checkCancel = null)
         {
             var shuffleSeed = FisherYates.GetSeed(password);
             message = message.Append(password);
@@ -44,7 +44,7 @@ namespace SteganographyJr.Steganography
                     EncodePixel(carrierImage, messageAsBitArray, ref bitsWritten, x, y);
 
                     var percentComplete = ((double)bitsWritten / messageAsBitArray.Length);
-                    userCancelled = CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
+                    userCancelled = checkCancel == null ? false : CheckCancelAndUpdate(stopwatch, percentComplete, checkCancel);
 
                     bool encodeComplete = bitsWritten >= messageAsBitArray.Length;
                     return userCancelled || encodeComplete;
