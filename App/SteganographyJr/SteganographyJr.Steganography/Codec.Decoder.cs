@@ -69,9 +69,9 @@ namespace SteganographyJr.Steganography
             return await Take(bitmap, password, 0, numberOfBitsToTake);
         }
 
-        public static async Task<byte[]> Take(Bitmap bitmap, string password, int startingIndex, Int64 bytesToTake)
+        public static async Task<byte[]> Take(Bitmap bitmap, string password, int startingByteIndex, Int64 bytesToTake)
         {
-            int startingIndexInBits = startingIndex * 8;
+            int startingIndexInBits = startingByteIndex * 8;
             int bitsToTake = (int)bytesToTake * 8; // TODO: casting down to int here limits the size of the payload to??? same with the starting index argument? just test these on large images once you add the bit depth switcher please.
 
             // TODO: this needs all the stopwatch and user cancel stuff
