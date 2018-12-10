@@ -194,7 +194,6 @@ namespace SteganographyJr.Forms.ViewModels
             var password = GetSteganographyPassword();
             var encryptedMessage = AES.Encrypt(GetSteganographyMessage(), password);
 
-            // TODO: this needs to be moved into getsteganograpjhymessage
             // add a 56 byte preamble to the message. the preamble contains the length of the message. ...this is so when Decoding you know exactly how far to read.
             Int64 encrypedMessageLength = encryptedMessage.LongLength;
             var encryptedLength = AES.Encrypt(encrypedMessageLength, password);
