@@ -18,7 +18,8 @@ namespace SteganographyJr.Forms
 
         public const string DefaultPassword = "0785AFAB-52E8-4356-A8F4-31CACB590B88";
         public const string FileSeperator = "30CAD34D-6E4D-4207-BC31-AE94D68FD44D";
-        
+        public const string SteganographyIdentifier = "D0420DAE-6905-43A1-B8BC-2FF55193808A";
+
         public const string DisplayAlertMessageId = "DisplayAlertMessage";
         public const string AlertCompleteMessageId = "AlertCompleteMessage";
 

@@ -28,7 +28,6 @@ namespace SteganographyJr.Steganography
         public static async Task<Bitmap> Encode(Bitmap carrierImage, byte[] message, string password, Func<double, bool> checkCancel = null)
         {
             var shuffleSeed = FisherYates.GetSeed(password);
-            message = message.Append(password);
 
             var messageAsBitArray = message.ConvertToBitArray();
 
