@@ -13,7 +13,6 @@ namespace SteganographyJr.Forms.ViewModels
     {
         byte[] _carrierImageBytes;
         string _carrierImagePath;   // TODO: android + ios + uwp ....does it make sense to keep track of the path? just keep track of the extension? how difficult to read that from the stream?
-        string _carrierImageFileName = StaticVariables.DefaultCarrierImageSaveName;
         ImageFormat _carrierImageFormat;
         ImageSource _carrierImageSource;
         object _carrierImageNative; // a native representation of the carrier image file, if needed, for the platform to resave.
@@ -97,26 +96,24 @@ namespace SteganographyJr.Forms.ViewModels
         public string CarrierImagePath
         {
             get { return _carrierImagePath; }
-            set { SetPropertyValue(ref _carrierImagePath, value); }
+            set
+            {
+                SetPropertyValue(ref _carrierImagePath, value);
+            }
         }
 
         public string CarrierImageFileName
         {
-            get { return _carrierImageFileName; }
-            set
+            get
             {
-                // this was originally setup to use the file name of the carrier image. but i think it makes it more clear what you are saving if you just call it "Encoded Image.png"
-                var fileName = "";
-                //if(CarrierImagePath == null)
-                //{
-                    fileName = StaticVariables.DefaultCarrierImageSaveName;
-                //}
-                //else
-                //{
-                //    var pathComponents = CarrierImagePath.Split(Path.PathSeparator);
-                //    fileName = pathComponents[pathComponents.Length - 1];
-                //}
-                SetPropertyValue(ref _carrierImageFileName, fileName);
+                if (CarrierImagePath == null)
+                {
+                    return $"{StaticVariables.DefaultCarrierImageSaveName}.{StaticVariables.DefaultCarrierImageType}";
+                }
+                else
+                {
+                    return $"{StaticVariables.DefaultCarrierImageSaveName}{Path.GetExtension(CarrierImagePath)}";
+                }
             }
         }
 

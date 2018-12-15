@@ -43,7 +43,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
             StartActivityForResult(Intent.CreateChooser(intent, "Select Save Location"), 43);
         }
 
-        protected override void OnActivityResult (int requestCode, [GeneratedEnum] Result resultCode, Intent data)
+        protected async override void OnActivityResult (int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult (requestCode, resultCode, data);
 
@@ -60,7 +60,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
                     byte[] fileBytes = new byte[fileLength];
                     using (var inputStream = new FileInputStream(filePath))
                     {
-                        inputStream.ReadAsync(fileBytes, 0, fileLength);
+                        await inputStream.ReadAsync(fileBytes, 0, fileLength);
                     }
 
                     // write the file to the path chosen by the user

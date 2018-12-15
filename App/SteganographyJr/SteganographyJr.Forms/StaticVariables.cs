@@ -11,7 +11,8 @@ namespace SteganographyJr.Forms
     {
         public const string DefaultCarrierImageResource = "SteganographyJr.Forms.Images.default-carrier-image.png";
         public static readonly ImageFormat DefaultCarrierImageFormat = new ImageFormat(DefaultCarrierImageResource);
-        public const string DefaultCarrierImageSaveName = "Encoded Image.png";
+        public const string DefaultCarrierImageSaveName = "Encoded Image";
+        public const string DefaultCarrierImageType = "png";
         
         public enum Message { Text, File };
 

@@ -54,9 +54,6 @@ namespace SteganographyJr.Forms.ViewModels
                 .AlsoRaisePropertyChangedFor(() => UsingFileMessage)
                 .AlsoRaisePropertyChangedFor(() => ShowFileMessage);
 
-            WhenPropertyChanges(() => CarrierImagePath)
-                .AlsoRaisePropertyChangedFor(() => CarrierImageFileName);
-
             WhenPropertyChanges(() => Password)
                 .AlsoInvokeAction(ExecuteCommand.ChangeCanExecute);
 
