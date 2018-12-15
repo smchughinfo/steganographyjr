@@ -103,13 +103,13 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
         private async Task<string> WriteFileToCacheDirectory(string fileName, byte[] fileBytes)
         {
             File outputDir = this._context.CacheDir;
-            File imageFile = new File(outputDir, fileName);
+            File file = new File(outputDir, fileName);
 
-            FileOutputStream fos = new FileOutputStream(imageFile.AbsolutePath);
+            FileOutputStream fos = new FileOutputStream(file.AbsolutePath);
             await fos.WriteAsync(fileBytes);
             fos.Flush();
             fos.Close();
-            return imageFile.AbsolutePath;
+            return file.AbsolutePath;
         }
     }
 }
