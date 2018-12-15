@@ -17,7 +17,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
     public class SavePickerImplementation : ISavePicker
     {
         private readonly Context _context;
-        private int _requestId;
+        private int _requestId = 0;
         private TaskCompletionSource<string> _completionSource;
 
         public SavePickerImplementation ()
@@ -32,50 +32,58 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
             var ntcs = new TaskCompletionSource<string> (id);
 
             if (Interlocked.CompareExchange (ref _completionSource, ntcs, null) != null)
-                throw new InvalidOperationException ("Only one operation can be active at a time");
+                throw new InvalidOperationException("Only one operation can be active at a time");
 
-            try {
-                var pickerIntent = new Intent (this._context, typeof (SavePickerActivity));
-                pickerIntent.SetFlags (ActivityFlags.NewTask);
-                pickerIntent.PutExtra("fileName", fileName);
-                pickerIntent.PutExtra("fileBytes", fileBytes);
+            Task.Run(async () => {
+                try
+                {
+                    var pathToFile = await WriteFileToCacheDirectory(fileName, fileBytes);
 
-                this._context.StartActivity (pickerIntent);
+                    var pickerIntent = new Intent(this._context, typeof(SavePickerActivity));
+                    pickerIntent.SetFlags(ActivityFlags.NewTask);
+                    pickerIntent.PutExtra("fileName", fileName);
+                    pickerIntent.PutExtra("path", pathToFile);
 
-                EventHandler<SavePickerEventArgs> handler = null;
-                EventHandler<EventArgs> cancelledHandler = null;
-                EventHandler<string> errorHandler = null;
+                    this._context.StartActivity(pickerIntent);
 
-                handler = (s, e) => {
-                    var tcs = Interlocked.Exchange (ref _completionSource, null);
+                    EventHandler<SavePickerEventArgs> handler = null;
+                    EventHandler<EventArgs> cancelledHandler = null;
+                    EventHandler<string> errorHandler = null;
 
-                    SavePickerActivity.DirectoryPicked -= handler;
+                    handler = (s, e) => {
+                        var tcs = Interlocked.Exchange(ref _completionSource, null);
 
-                    tcs?.SetResult (null);
-                };
+                        SavePickerActivity.DirectoryPicked -= handler;
 
-                cancelledHandler = (s, e) => {
-                    var tcs = Interlocked.Exchange (ref _completionSource, null);
+                        tcs?.SetResult(null);
+                    };
 
-                    SavePickerActivity.DirectoryPickCancelled -= cancelledHandler;
+                    cancelledHandler = (s, e) => {
+                        var tcs = Interlocked.Exchange(ref _completionSource, null);
 
-                    tcs?.SetResult (null);
-                };
+                        SavePickerActivity.DirectoryPickCancelled -= cancelledHandler;
 
-                errorHandler = (s, errorMessage) => {
-                    var tcs = Interlocked.Exchange(ref _completionSource, null);
+                        tcs?.SetResult(null);
+                    };
 
-                    SavePickerActivity.DirectoryPickCancelled -= cancelledHandler;
+                    errorHandler = (s, errorMessage) => {
+                        var tcs = Interlocked.Exchange(ref _completionSource, null);
 
-                    tcs?.SetResult(errorMessage);
-                };
+                        SavePickerActivity.DirectoryPickCancelled -= cancelledHandler;
 
-                SavePickerActivity.DirectoryPickError += errorHandler;
-                SavePickerActivity.DirectoryPickCancelled += cancelledHandler;
-                SavePickerActivity.DirectoryPicked += handler;
-            } catch (Exception exAct) {
-                Debug.Write (exAct);
-            }
+                        tcs?.SetResult(errorMessage);
+                    };
+
+                    SavePickerActivity.DirectoryPickError += errorHandler;
+                    SavePickerActivity.DirectoryPickCancelled += cancelledHandler;
+                    SavePickerActivity.DirectoryPicked += handler;
+                }
+                catch (Exception exAct)
+                {
+                    // TODO: notify user 
+                    Debug.Write(exAct);
+                }
+            });
 
             return _completionSource.Task;
         }
@@ -90,6 +98,18 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
                 _requestId++;
 
             return id;
+        }
+
+        private async Task<string> WriteFileToCacheDirectory(string fileName, byte[] fileBytes)
+        {
+            File outputDir = this._context.CacheDir;
+            File imageFile = new File(outputDir, fileName);
+
+            FileOutputStream fos = new FileOutputStream(imageFile.AbsolutePath);
+            await fos.WriteAsync(fileBytes);
+            fos.Flush();
+            fos.Close();
+            return imageFile.AbsolutePath;
         }
     }
 }

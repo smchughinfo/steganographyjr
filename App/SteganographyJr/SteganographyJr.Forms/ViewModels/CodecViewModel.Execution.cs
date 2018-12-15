@@ -210,7 +210,7 @@ namespace SteganographyJr.Forms.ViewModels
 
             // do the encode
             carrierImage = await Codec.Encode(carrierImage, encryptedMessage, password, CheckCancel);
-
+            
             // TODO: the closing operations here can take a really long time making the progress bar appear to just hang at 100%.
             if (carrierImage == null)
             {
@@ -258,11 +258,11 @@ namespace SteganographyJr.Forms.ViewModels
             var passwordBytes = SHA2.GetHash(password);
             var carrierImage = GetSteganographyBitmap();
             
-            var encryptedMessageLengthBytesEncrypted = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_IN_BITS_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD);
+            var encryptedMessageLengthBytesEncrypted = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD_IN_BITS);
             var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
             var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
 
-            var message = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_IN_BITS_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD, encryptedMessageLength, CheckCancel);
+            var message = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD_IN_BITS, encryptedMessageLength, CheckCancel);
 
             //byte[] message = await Codec.Decode(carrierImage, passwordBytes, CheckCancel);
             if (message != null)

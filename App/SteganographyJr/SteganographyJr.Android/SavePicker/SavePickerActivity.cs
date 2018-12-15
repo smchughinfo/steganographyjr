@@ -16,7 +16,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
     public class SavePickerActivity : Activity
     {
         string fileName;
-        byte[] fileBytes;
+        string filePath;
 
         protected override void OnCreate (Bundle savedInstanceState)
         {
@@ -27,7 +27,7 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
             var mimeType = Android.Webkit.MimeTypeMap.Singleton.GetMimeTypeFromExtension(fileExtension.Substring(1));
 
             fileName = fileNameWithExtension.Replace(fileExtension, "");
-            fileBytes = Intent.GetByteArrayExtra("fileBytes");
+            filePath = Intent.GetStringExtra("path");
 
             var intent = new Intent(Intent.ActionCreateDocument);
             intent.AddCategory(Intent.CategoryOpenable);
@@ -54,6 +54,16 @@ namespace SteganographyJr.Droid.Plugin.FilePicker.SavePicker
             } else {
                 System.Diagnostics.Debug.Write (data.Data);
                 try {
+                    // read the file out of the cache dir
+                    var file = new Java.IO.File(filePath);
+                    var fileLength = (int)file.Length();
+                    byte[] fileBytes = new byte[fileLength];
+                    using (var inputStream = new FileInputStream(filePath))
+                    {
+                        inputStream.ReadAsync(fileBytes, 0, fileLength);
+                    }
+
+                    // write the file to the path chosen by the user
                     using (var pFD = ContentResolver.OpenFileDescriptor(data.Data, "w"))
                     using (var outputSteam = new FileOutputStream(pFD.FileDescriptor))
                     {
