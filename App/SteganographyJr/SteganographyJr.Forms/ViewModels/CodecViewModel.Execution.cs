@@ -134,6 +134,7 @@ namespace SteganographyJr.Forms.ViewModels
         private byte[] GetSteganographyMessage()
         {
             var bytes = new List<byte>();
+            bytes.AddRange(StaticVariables.SteganographyIdentifier.ConvertToByteArray()); // so when we read bytes out of the image we know if it anything has been encoded.
             if (UsingTextMessage)
             {
                 var textMessageBytes = TextMessage.ConvertToByteArray();
@@ -257,21 +258,60 @@ namespace SteganographyJr.Forms.ViewModels
 
             var passwordBytes = SHA2.GetHash(password);
             var carrierImage = GetSteganographyBitmap();
-            
+
+            // TODO: minimum size limit of image. ...like it has to have an area of x otherwise we can't even get message length (even though there wouldn't be a message)
             var encryptedMessageLengthBytesEncrypted = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD_IN_BITS);
-            var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
-            var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
 
-            var message = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD_IN_BITS, encryptedMessageLength, CheckCancel);
-
-            //byte[] message = await Codec.Decode(carrierImage, passwordBytes, CheckCancel);
-            if (message != null)
+            byte[] message = null;
+            try
             {
-                message = AES.Decrypt(message, password);
+                var encryptedMessageLengthBytes = AES.Decrypt(encryptedMessageLengthBytesEncrypted, password);
+                var encryptedMessageLength = BitConverter.ToInt64(encryptedMessageLengthBytes, 0);
+                message = await Codec.Take(carrierImage, password, StaticVariables.LENGTH_OF_THE_MESSAGE_THAT_CONTAINS_THE_LENGTH_OF_THE_PAYLOAD_IN_BITS, encryptedMessageLength, CheckCancel);
+            }
+            catch
+            {
+                // one possible reason it failed is because the image was never encoded
+                // which would cause the message length preamble to be random
+                // which would likely cause an out of range error when trying to read bytes out of the image
+                message = null;
+            }
+
+            if(message != null)
+            {
+                try
+                {
+                    message = AES.Decrypt(message, password);
+
+                    // seperate the candidate bytes from the message (if there is one)
+                    var steganographyIdentifierBytes = StaticVariables.SteganographyIdentifier.ConvertToByteArray();
+                    (byte[] candidateBytes,  byte[] tmp) =  message.Shift(steganographyIdentifierBytes.Length);
+                    message = tmp;
+
+                    if (steganographyIdentifierBytes.SequenceEqual(candidateBytes) == false)
+                    {
+                        message = null; // no message was found.
+                    }
+                }
+                catch
+                {
+                    // again, we could have made it this far by luck. 
+                    // if there are not enough bytes in the message or if for some reason AES.Decrypt throws an error 
+                    // consider it to not contain message since that's probably what went wrong.
+                    message = null;
+                }
+            }
+
+            if(message != null)
+            {
                 ExecutionProgress = 1;
                 await Task.Delay(100);
-
                 await RouteDecodedMessage(message);
+            }
+            else
+            {
+                SendErrorMessage("No message found. Are you using the right password?");
+                return;
             }
 
             ExecutionProgress = 0;
@@ -279,12 +319,6 @@ namespace SteganographyJr.Forms.ViewModels
 
         private async Task RouteDecodedMessage(byte[] message)
         {
-            if (message == null)
-            {
-                SendErrorMessage("No message found. Are you using the right password?");
-                return;
-            }
-
             (StaticVariables.Message messageType, object messageObj) result = ParseSteganographyMessage(message);
             if (result.messageType == StaticVariables.Message.Text)
             {
