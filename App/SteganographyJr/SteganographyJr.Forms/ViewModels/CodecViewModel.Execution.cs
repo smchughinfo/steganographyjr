@@ -161,7 +161,7 @@ namespace SteganographyJr.Forms.ViewModels
             Bitmap bitmap = DependencyService.Get<Bitmap>(DependencyFetchTarget.NewInstance);
             using (var carrierImageStream = CarrierImageBytes.ConvertToStream())
             {
-                bitmap.Set(carrierImageStream);
+                bitmap.Set(CarrierImageFileName, carrierImageStream);
             }
             return bitmap;
         }
@@ -285,7 +285,7 @@ namespace SteganographyJr.Forms.ViewModels
 
                     // seperate the candidate bytes from the message (if there is one)
                     var steganographyIdentifierBytes = StaticVariables.SteganographyIdentifier.ConvertToByteArray();
-                    (byte[] candidateBytes,  byte[] tmp) =  message.Shift(steganographyIdentifierBytes.Length);
+                    (byte[] candidateBytes,  byte[] tmp) = message.Shift(steganographyIdentifierBytes.Length);
                     message = tmp;
 
                     if (steganographyIdentifierBytes.SequenceEqual(candidateBytes) == false)

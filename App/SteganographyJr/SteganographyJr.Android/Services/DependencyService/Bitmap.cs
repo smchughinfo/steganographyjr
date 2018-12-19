@@ -19,16 +19,11 @@ namespace SteganographyJr.Droid.Services.DependencyService
     class Bitmap : Core.DomainObjects.Bitmap
     {
         public Android.Graphics.Bitmap platformBitmap;
-
-        public void Set(byte[] imageBytes)
+        
+        public override void Set(string fileName, Stream stream)
         {
-            var outPadding = new Rect();
-            var options = new BitmapFactory.Options() { InMutable = true };
-            platformBitmap = BitmapFactory.DecodeByteArray(imageBytes, 0, imageBytes.Length);
-        }
+            OriginalFormat = GetImageFormat(fileName);
 
-        public override void Set(Stream stream)
-        {
             var outPadding = new Rect();
             var options = new BitmapFactory.Options() { InMutable = true };
             platformBitmap = BitmapFactory.DecodeStream(stream, outPadding, options);
@@ -44,10 +39,31 @@ namespace SteganographyJr.Droid.Services.DependencyService
         public override Stream ConvertToStream()
         {
             MemoryStream memoryStream = new MemoryStream();
-            platformBitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Png, 100, memoryStream);
+
+            var platformFormat = GetPlatformFormat();
+            platformBitmap.Compress(platformFormat, 100, memoryStream);
             memoryStream.Position = 0;
 
             return memoryStream;
+        }
+
+        private Android.Graphics.Bitmap.CompressFormat GetPlatformFormat()
+        {
+            if (OriginalFormat == Core.DomainObjects.ImageFormat.ImageFormatType.png)
+            {
+                return Android.Graphics.Bitmap.CompressFormat.Png;
+            }
+            else if (OriginalFormat == Core.DomainObjects.ImageFormat.ImageFormatType.jpg)
+            {
+                return Android.Graphics.Bitmap.CompressFormat.Jpeg;
+            }
+            else if (OriginalFormat == Core.DomainObjects.ImageFormat.ImageFormatType.gif)
+            {
+                // https://stackoverflow.com/questions/12100314/assigning-gif-data-to-bitmap-object
+                // https://stackoverflow.com/questions/24428263/how-to-convert-png-image-to-gif-in-android-programatically
+            }
+
+            throw new NotImplementedException($"SteganographyJr.UWP.Services.DependencyService.Bitmap.GetPlatformImageFormat does not recognize the original image format '{OriginalFormat.ToString()}'.");
         }
 
         public override void ChangeFormat(Core.DomainObjects.ImageFormat.ImageFormatType imageFormat)
