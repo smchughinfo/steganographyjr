@@ -15,6 +15,7 @@ namespace FormatTester
         {
             var inPath = Path.Combine(Directory.GetCurrentDirectory(), @"Images\jpg.jpg");
             var outPath = Path.Combine(Directory.GetCurrentDirectory(), @"Images\out.jpg.jpg");
+            var outPath2 = Path.Combine(Directory.GetCurrentDirectory(), @"Images\out.jpg.png");
 
             // Image.Load(string path) is a shortcut for our default type. 
             // Other pixel formats use Image.Load<TPixel>(string path))
@@ -42,12 +43,14 @@ namespace FormatTester
 
                 image.Save(outPath);
 
-                //var tmpStream = new MemoryStream();
-                //var gifEncoder = new GifEncoder();
-                //image.SaveAsGif(tmpStream, gifEncoder);
-                //File.WriteAllBytes(outPath, tmpStream.ConvertToByteArray());
+                var tmpStream = new MemoryStream();
+                image.SaveAsPng(tmpStream);
 
-                //image.Save(outPath); // Automatic encoder selected based on extension.
+                tmpStream.Position = 0;
+                var tmpBytes = tmpStream.ConvertToByteArray();
+
+                var image2 = Image.Load(tmpBytes);
+                image2.Save(outPath2);
             }
         }
     }
